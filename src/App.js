@@ -5,8 +5,8 @@ function App() {
   const recipeBookData = [
     {
       id: '34651',
-      name: 'Name',
-      imageUrl: 'https://www.animalzoo.ro/wp-content/uploads/2016/06/iguANA-verde.jpg',
+      name: 'Baker soup',
+      imageUrl: 'https://pbs.twimg.com/media/Cs30RK-UkAAvl3V.jpg',
       ingredients: [
       'potato',
       'tomato',
@@ -18,8 +18,8 @@ function App() {
     },
     {
       id: '345652',
-      name: 'Name',
-      imageUrl: 'https://www.animalzoo.ro/wp-content/uploads/2016/06/iguANA-verde.jpg',
+      name: 'Bolognese pasta',
+      imageUrl: 'https://www.francescakookt.nl/wp-content/uploads/2020/10/mijn-versie-van-spaghetti-bolognese-1.jpg',
       ingredients: [
       'potato',
       'tomato',
@@ -31,8 +31,8 @@ function App() {
     },
     {
       id: '345653',
-      name: 'Name',
-      imageUrl: 'https://www.animalzoo.ro/wp-content/uploads/2016/06/iguANA-verde.jpg',
+      name: 'French fries',
+      imageUrl: 'https://www.thespruceeats.com/thmb/IHKuXcx3uUI1IWkM_cnnQdFH-zQ=/3485x2323/filters:fill(auto,1)/how-to-make-homemade-french-fries-2215971-hero-01-02f62a016f3e4aa4b41d0c27539885c3.jpg',
       ingredients: [
       'potato',
       'tomato',
@@ -44,8 +44,8 @@ function App() {
     },
     {
       id: '345654',
-      name: 'Name',
-      imageUrl: 'https://www.animalzoo.ro/wp-content/uploads/2016/06/iguANA-verde.jpg',
+      name: 'Home burger',
+      imageUrl: 'https://live.staticflickr.com/5058/5519067595_6fe442ee19_b.jpg',
       ingredients: [
       'potato',
       'tomato',
