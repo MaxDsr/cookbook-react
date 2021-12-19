@@ -1,0 +1,17 @@
+.RecipeCardsLayout {
+  width: 1024px;
+  margin: 0 auto;
+
+  &.loaded {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    grid-gap: 25px;
+  }
+
+  &.isLoading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+}
