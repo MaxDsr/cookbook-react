@@ -17,11 +17,15 @@ function setErrorAlert(message) {
 function deleteRecipe(id) {
   ApiService.deleteRecipeAPI(id).then(
     (elementToDelete) => {
-      recipes.splice(recipes.indexOf(elementToDelete), 1);
+      recipes.data.splice(recipes.data.indexOf(elementToDelete), 1);
       fetchRecipes();
     },
     (reason) => setErrorAlert(reason)
   )
+}
+
+function createRecipe(data) {
+  return ApiService.createRecipeAPI(data).then(() => fetchRecipes());
 }
 
 function reduceFunction(state = { recipes: { hasChanges: false }, errorAlert: { hasChanges: false } }, action) {
@@ -50,4 +54,5 @@ export const StoreService = {
   fetchRecipes: fetchRecipes,
   setErrorAlert: setErrorAlert,
   deleteRecipe: deleteRecipe,
+  createRecipe: createRecipe,
 };

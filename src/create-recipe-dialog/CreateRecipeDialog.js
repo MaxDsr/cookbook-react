@@ -8,9 +8,10 @@ import { AddImage } from '../add-file/AddImage';
 import './CreateRecipeDialog.scss';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
-import 'react-list-editable/lib/react-list-editable.css';
 import { useFormik } from "formik";
 import * as yup from 'yup';
+import {StoreService} from "../services/StoreService";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const validationSchema = yup.object({
   name: yup.string().required('Recipe name is required'),
@@ -20,35 +21,37 @@ const validationSchema = yup.object({
   steps: yup.string().required('Please describe your cook steps')
 });
 
+const defaultImage = `https://st3.depositphotos.com/13324256/17303/i/1600/depositphotos_173034766-stock-photo-woman-writing-down-recipe.jpg`;
+
 export const CreateRecipeDialog2 = (props) => {
   const [selectedImage, setSelectedImage] = useState(null);
-  const ingredientsFromProps = ['Tomato', 'Potato', 'Onion'];
-  // const ingredientsFromProps = [];
-  const [ingredientsList, setIngredientsList] = useState([...ingredientsFromProps]);
+  const [submitInProgress, setSubmitInProgress] = useState(false);
   const handleClose = () => {
-    console.log('onClose from dialog parent component');
     props.onClose();
   };
   const onNewImageSelect = (newImage) => setSelectedImage(newImage);
-  const onListChange = (newList) => {
-    setIngredientsList(newList);
-  };
-  //const imageUrl = 'https://lh3.googleusercontent.com/proxy/hqzahEujHdyMIkt13cJFyfTaVNyWvMVQIjZXawCvu0aR4EIbs7m0yqH4Aei066C_9VQj7pcybDZN8felUfy0IEDf58kOk3KAszKXtYwrmo7O-ffwpTkHyA7cOV7Xn42GxS75LCGgfDWsXI-0mnw';
   const imageUrl = null;
   const formik = useFormik({
     initialValues: {name: '', servings: '', time: '', steps: '', ingredients: ''},
     validationSchema: validationSchema,
     onSubmit: (values) => {
-      console.log('submit happens');
-      console.log('vals: ', values);
-      console.log('selectedImage: ', selectedImage);
+      StoreService.createRecipe({
+        ...values,
+        imageUrl: selectedImage || defaultImage,
+        ingredients: values.ingredients.split('\n')
+      }).then(() => {
+        setSubmitInProgress(false);
+        handleClose();
+      });
+      setSubmitInProgress(true);
     }
   });
 
-  // setInterval(() => console.log('ingredientsFromProps: ', ingredientsFromProps), 4000);
-
   return (
-    <Dialog className="CreateRecipeDialog" maxWidth={'lg'} onClose={handleClose} open={props.open}>
+    <Dialog className="CreateRecipeDialog"
+            maxWidth={'lg'}
+            onClose={props.onClose}
+            open={props.open}>
       <DialogTitle>Add new recipe</DialogTitle>
       <DialogContent>
         <form className="content-wrap" onSubmit={formik.handleSubmit}>
@@ -107,8 +110,9 @@ export const CreateRecipeDialog2 = (props) => {
         </form>
       </DialogContent>
       <DialogActions>
-        <Button>Disagree</Button>
-        <Button autoFocus onClick={() => formik.submitForm()}>Agree</Button>
+        {submitInProgress ? <CircularProgress/> : ''}
+        <Button disabled={submitInProgress} onClick={handleClose}>Cancel</Button>
+        <Button disabled={submitInProgress} autoFocus onClick={() => formik.submitForm()}>Create recipe</Button>
       </DialogActions>
     </Dialog>
   );
