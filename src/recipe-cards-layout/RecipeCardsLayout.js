@@ -1,4 +1,4 @@
-import {ApiService} from "../api-service/ApiService";
+import {StoreService} from "../services/StoreService";
 import {useEffect, useState} from "react";
 import {RecipeCard} from "../recipe-card/RecipeCard";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -8,17 +8,15 @@ export function RecipeCardsLayout() {
   const [recipesLoading, setRecipesLoading] = useState(true);
   const [recipes, setRecipes] = useState(null);
 
-  const store = ApiService.getStore;
-
   useEffect(() => {
-    const unsubscribeFromStore = store.subscribe(() => {
-      const recipes = store.getState()?.recipes;
-      if (recipes) {
-        setRecipes(recipes);
+    const unsubscribeFromStore = StoreService.storeSubscribe(() => {
+      const recipes = StoreService.getStoreState()?.recipes;
+      if (recipes.hasChanges) {
+        setRecipes(recipes.data);
         setRecipesLoading(false);
       }
     });
-    ApiService.fetchRecipesFromAPI();
+    StoreService.fetchRecipes();
     return () => {
       unsubscribeFromStore();
     }
