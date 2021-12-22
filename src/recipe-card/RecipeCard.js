@@ -6,21 +6,6 @@ import './RecipeCard.scss';
 export class RecipeCard extends React.Component {
 
   ingredientsToShow = 4;
-
-  recipeCardData = {
-    id: '345654',
-    name: 'Name',
-    imageUrl: 'https://www.animalzoo.ro/wp-content/uploads/2016/06/iguANA-verde.jpg',
-    ingredients: [
-      'potato',
-      'tomato',
-      'bachato',
-      'brocoli',
-      'onion'
-    ],
-    cookTime: '1h 30min',
-  };
-
   componentDidMount() {}
 
   render() {
@@ -42,7 +27,7 @@ export class RecipeCard extends React.Component {
               {this.ingredientsToShow < this.props.cardData.ingredients.length ? <li>and more...</li>: ''}
             </ul>
             <div className="cook-time">
-              <span className="label">Cook Time:</span> {this.props.cardData.cookTime}
+              <span className="label">Cook Time:</span> {this.props.cardData.time}
             </div>
           </CardContent>
         </CardActionArea>
