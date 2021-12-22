@@ -21,9 +21,7 @@ export class RecipeCard extends React.Component {
     cookTime: '1h 30min',
   };
 
-  componentDidMount() {
-    console.log('props: ', this.props);
-  }
+  componentDidMount() {}
 
   render() {
     return(
