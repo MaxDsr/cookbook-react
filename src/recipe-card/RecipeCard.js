@@ -9,7 +9,9 @@ const ingredientsToShow = 4;
 
 export function RecipeCard(props) {
 
-  const deleteRecipe = () => StoreService.deleteRecipe(props.id);
+  const deleteRecipe = () => {
+    StoreService.deleteRecipe(props.cardData.id);
+  };
 
   return (
     <Card className="RecipeCard">

@@ -8,7 +8,7 @@ function getRecipesAPI() {
       if (willReject !== 3) {
         resolve(recipes.data);
       } else {
-        reject('Error. Please refresh the page');
+        reject('Error. Please try again');
       }
     }, 1000);
   });
