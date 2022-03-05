@@ -2,14 +2,9 @@ import { v4 as uuidv4 } from 'uuid';
 import {recipes} from "./recipes";
 
 function getRecipesAPI() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     setTimeout(() => {
-      const willReject = Math.floor(Math.random() * 5) + 1; // rand number between 1 and 5
-      if (willReject !== 3) {
-        resolve(recipes.data);
-      } else {
-        reject('Error. Please try again');
-      }
+      resolve(recipes.data);
     }, 1000);
   });
 }
