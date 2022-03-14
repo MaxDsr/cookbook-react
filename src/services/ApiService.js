@@ -13,12 +13,15 @@ function getRecipesAPI() {
 function deleteRecipeAPI(id) {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
+      const willRejectNumber = Math.floor(Math.random() * 5) + 1; // rand number between 1 and 5
       const elementToDelete = recipes.data.find(recipe => recipe.id === id);
-      if (elementToDelete) {
-        resolve(true);
-      } else {
-        reject('Id not found');
+      if (willRejectNumber === 3) {
+        return reject('Assume that API call has failed and this is the error');
       }
+      if (elementToDelete) {
+        return resolve(true);
+      }
+      reject('Id of element to be deleted has not been found');
     }, 1500);
   });
 }

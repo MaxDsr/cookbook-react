@@ -11,13 +11,10 @@ export function RecipeCardsLayout() {
   const [recipesLoading, setRecipesLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const dispatch = useDispatch();
-  const recipes = useSelector((state) => {
-    return state.recipes.value;
-  });
-  setRecipes(setRecipesLoading);
+  const recipes = useSelector((state) => state.recipes.value);
 
   useEffect(() => {
-    dispatch(setRecipes(setRecipesLoading));
+    dispatch(setRecipes(() => setRecipesLoading(false)));
   }, []);
 
   const getRecipesView = (recipes) =>
