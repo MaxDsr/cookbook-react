@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import {recipes} from "./recipes";
+import { recipes } from "./recipes";
 
 function getRecipesAPI() {
   return new Promise((resolve) => {
@@ -15,7 +15,7 @@ function deleteRecipeAPI(id) {
     setTimeout(() => {
       const elementToDelete = recipes.data.find(recipe => recipe.id === id);
       if (elementToDelete) {
-        resolve(elementToDelete);
+        resolve(true);
       } else {
         reject('Id not found');
       }
@@ -27,9 +27,10 @@ function deleteRecipeAPI(id) {
 function createRecipeAPI(data) {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      recipes.data.push({...data, id: recipes.nextId});
+      const newRecipe = { ...data, id: recipes.nextId };
+      recipes.data = [...recipes.data, newRecipe];
       recipes.nextId = uuidv4();
-      resolve(true);
+      resolve(recipes.nextId);
     }, 1500);
   });
 }
