@@ -1,28 +1,23 @@
-import {StoreService} from "../services/StoreService";
 import {useEffect, useState} from "react";
 import {RecipeCard} from "../recipe-card/RecipeCard";
 import CircularProgress from "@mui/material/CircularProgress";
 import './RecipeCardsLayout.scss';
 import {CreateRecipeDialog2} from "../create-recipe-dialog/CreateRecipeDialog";
 import Button from "@mui/material/Button";
+import { useDispatch, useSelector } from "react-redux";
+import { setRecipes } from "../services/store/RecipesSlice";
 
 export function RecipeCardsLayout() {
   const [recipesLoading, setRecipesLoading] = useState(true);
-  const [recipes, setRecipes] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const dispatch = useDispatch();
+  const recipes = useSelector((state) => {
+    return state.recipes.value;
+  });
+  setRecipes(setRecipesLoading);
 
   useEffect(() => {
-    const unsubscribeFromStore = StoreService.storeSubscribe(() => {
-      const recipes = StoreService.getStoreState()?.recipes;
-      if (recipes.hasChanges) {
-        setRecipes(recipes.data);
-        setRecipesLoading(false);
-      }
-    });
-    StoreService.fetchRecipes();
-    return () => {
-      unsubscribeFromStore();
-    }
+    dispatch(setRecipes(setRecipesLoading));
   }, []);
 
   const getRecipesView = (recipes) =>

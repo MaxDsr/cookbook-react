@@ -1,16 +1,17 @@
-import React from 'react';
 import { Card, CardActionArea, CardActions, CardContent, CardMedia, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 import './RecipeCard.scss';
-import {StoreService} from "../services/StoreService";
+import { useDispatch } from "react-redux";
+import { deleteRecipe } from "../services/store/RecipesSlice";
 
 
 const ingredientsToShow = 4;
 
 export function RecipeCard(props) {
+  const dispatch = useDispatch();
 
-  const deleteRecipe = () => {
-    StoreService.deleteRecipe(props.cardData.id);
+  const onDeleteRecipe = () => {
+    dispatch(deleteRecipe(props.cardData.id));
   };
 
   return (
@@ -37,7 +38,7 @@ export function RecipeCard(props) {
       </CardActionArea>
       <CardActions>
         <Button size="small" color="primary">View more</Button>
-        <Button size="small" color="warning" onClick={deleteRecipe}>Delete recipe</Button>
+        <Button size="small" color="warning" onClick={onDeleteRecipe}>Delete recipe</Button>
       </CardActions>
     </Card>
   );

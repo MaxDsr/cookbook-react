@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import { useState } from 'react';
 import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
@@ -10,8 +10,9 @@ import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import { useFormik } from "formik";
 import * as yup from 'yup';
-import {StoreService} from "../services/StoreService";
 import CircularProgress from "@mui/material/CircularProgress";
+import { createRecipe } from "../services/store/RecipesSlice";
+import { useDispatch } from "react-redux";
 
 const validationSchema = yup.object({
   name: yup.string().required('Recipe name is required'),
@@ -26,6 +27,7 @@ const defaultImage = `https://st3.depositphotos.com/13324256/17303/i/1600/deposi
 export const CreateRecipeDialog2 = (props) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [submitInProgress, setSubmitInProgress] = useState(false);
+  const dispatch = useDispatch();
   const handleClose = () => {
     props.onClose();
   };
@@ -35,15 +37,17 @@ export const CreateRecipeDialog2 = (props) => {
     initialValues: {name: '', servings: '', time: '', steps: '', ingredients: ''},
     validationSchema: validationSchema,
     onSubmit: (values) => {
-      StoreService.createRecipe({
+      const recipeData = {
         ...values,
         imageUrl: selectedImage || defaultImage,
         ingredients: values.ingredients.split('\n')
-      }).then(() => {
+      };
+      const submitDoneCallback = () => {
         setSubmitInProgress(false);
         handleClose();
-      });
+      };
       setSubmitInProgress(true);
+      dispatch(createRecipe(recipeData, submitDoneCallback));
     }
   });
 
