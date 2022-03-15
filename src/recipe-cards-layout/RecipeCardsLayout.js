@@ -1,15 +1,18 @@
-import {useEffect, useState} from "react";
-import {RecipeCard} from "../recipe-card/RecipeCard";
+import { useEffect, useState } from "react";
+import { RecipeCard } from "../recipe-card/RecipeCard";
 import CircularProgress from "@mui/material/CircularProgress";
 import './RecipeCardsLayout.scss';
-import {CreateRecipeDialog2} from "../create-recipe-dialog/CreateRecipeDialog";
+import { CreateRecipeDialog } from "../create-recipe-dialog/CreateRecipeDialog";
 import Button from "@mui/material/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { setRecipes } from "../services/store/RecipesSlice";
+import { DeleteRecipeDialog } from "../recipe-card/DeleteRecipeDialog";
 
 export function RecipeCardsLayout() {
   const [recipesLoading, setRecipesLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteRecipeId, setDeleteRecipeId] = useState(null);
   const dispatch = useDispatch();
   const recipes = useSelector((state) => state.recipes.value);
 
@@ -17,23 +20,34 @@ export function RecipeCardsLayout() {
     dispatch(setRecipes(() => setRecipesLoading(false)));
   }, []);
 
+  const deleteRecipe = (recipeId) => {
+    setDeleteRecipeId(recipeId);
+    setDeleteDialogOpen(true);
+  };
+
+  const deleteRecipeClose = () => {
+    setDeleteRecipeId(null);
+    setDeleteDialogOpen(false);
+  };
+
   const getRecipesView = (recipes) =>
     recipes.map((recipeCardData) =>
-      <RecipeCard key={'RecipeCard' + recipeCardData.id} cardData={recipeCardData}/>);
+      <RecipeCard key={'RecipeCard' + recipeCardData.id} cardData={recipeCardData} onDeleteRecipe={() => deleteRecipe(recipeCardData.id)}/>);
 
   return (
     <div className="RecipeCardsLayout">
       <div className="button-wrap">
         <Button variant="contained"
                 disabled={recipesLoading}
-                onClick={() => setDialogOpen(true)}>
+                onClick={() => setCreateDialogOpen(true)}>
           Create new recipe
         </Button>
       </div>
       <div className={`cards ${recipes && !recipesLoading ? 'loaded' : 'isLoading'}`}>
         {recipes && !recipesLoading ? getRecipesView(recipes) : <CircularProgress/>}
       </div>
-      <CreateRecipeDialog2 open={dialogOpen} onClose={() => setDialogOpen(false)}/>
+      <CreateRecipeDialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)}/>
+      <DeleteRecipeDialog open={deleteDialogOpen} onClose={deleteRecipeClose} itemId={deleteRecipeId}/>
     </div>
   );
 }

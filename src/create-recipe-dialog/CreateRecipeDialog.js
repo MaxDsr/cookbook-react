@@ -24,7 +24,7 @@ const validationSchema = yup.object({
 
 const defaultImage = `https://st3.depositphotos.com/13324256/17303/i/1600/depositphotos_173034766-stock-photo-woman-writing-down-recipe.jpg`;
 
-export const CreateRecipeDialog2 = (props) => {
+export const CreateRecipeDialog = (props) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [submitInProgress, setSubmitInProgress] = useState(false);
   const dispatch = useDispatch();

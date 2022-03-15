@@ -4,7 +4,7 @@ import { recipes } from "./recipes";
 function getRecipesAPI() {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(recipes.data);
+      resolve([...recipes.data]);
     }, 1000);
   });
 }
@@ -19,6 +19,8 @@ function deleteRecipeAPI(id) {
         return reject('Assume that API call has failed and this is the error');
       }
       if (elementToDelete) {
+        const indexOfElementToRemove = recipes.data.indexOf(elementToDelete);
+        recipes.data.splice(indexOfElementToRemove, 1);
         return resolve(true);
       }
       reject('Id of element to be deleted has not been found');
@@ -33,7 +35,7 @@ function createRecipeAPI(data) {
       const newRecipe = { ...data, id: recipes.nextId };
       recipes.data = [...recipes.data, newRecipe];
       recipes.nextId = uuidv4();
-      resolve(recipes.nextId);
+      resolve();
     }, 1500);
   });
 }

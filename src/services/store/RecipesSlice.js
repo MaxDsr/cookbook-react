@@ -10,48 +10,40 @@ export const recipesSlice = createSlice({
   reducers: {
     setRecipesRd: (state, action) => {
       state.value = action.payload;
-    },
-    createRecipeRd: (state, action) => {
-      state.value.push(action.payload);
-    },
-    deleteRecipeRd: (state, action) => {
-      state.value.splice(action.payload, 1);
     }
   }
 });
 
-const { setRecipesRd, createRecipeRd, deleteRecipeRd } = recipesSlice.actions;
+const { setRecipesRd } = recipesSlice.actions;
 
 export const setRecipes = (dispatchDoneCallback) => {
-  return (dispatch, getState) => {
+  return (dispatch) => {
     ApiService.getRecipesAPI().then((recipes) => {
       dispatch(setRecipesRd(recipes));
-      dispatchDoneCallback();
+      dispatchDoneCallback && dispatchDoneCallback();
     });
   }
 };
 
 export const createRecipe = (recipe, dispatchDoneCallback) => {
   return (dispatch) => {
-    ApiService.createRecipeAPI(recipe).then((newRecipeId) => {
-      dispatch(createRecipeRd({ ...recipe, id: newRecipeId }));
-      dispatchDoneCallback && dispatchDoneCallback();
+    ApiService.createRecipeAPI(recipe).then(() => {
+      setRecipes(dispatchDoneCallback)(dispatch);
     });
   };
 };
 
-export const deleteRecipe = (recipeId) => {
-  return (dispatch, getState) => {
+export const deleteRecipe = (recipeId, dispatchDoneCallback) => {
+  return (dispatch) => {
     ApiService.deleteRecipeAPI(recipeId).then(
       (isDeleted) => {
         if (isDeleted) {
-          const deletedRecipe = getState().recipes.value.find((recipe) => recipe.id === recipeId);
-          //TODO if deletedRecipe === undefined do smth..
-          dispatch(deleteRecipeRd(deletedRecipe));
+          setRecipes(dispatchDoneCallback)(dispatch);
         }
       },
       (errorMessage) => {
         dispatch(setErrorAlert(errorMessage));
+        dispatchDoneCallback && dispatchDoneCallback();
       }
     );
   };
