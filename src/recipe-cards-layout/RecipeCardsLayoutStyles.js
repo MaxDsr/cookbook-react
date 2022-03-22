@@ -1,4 +1,7 @@
-.RecipeCardsLayout {
+import styled from "@mui/material/styles/styled";
+
+
+export const RecipeCardsLayoutWrap = styled('div')`
   width: 1024px;
   margin: 0 auto;
 
@@ -22,4 +25,4 @@
     display: flex;
     justify-content: center;
   }
-}
+`;

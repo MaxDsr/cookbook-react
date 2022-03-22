@@ -5,7 +5,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import { AddImage } from '../add-file/AddImage';
-import './CreateRecipeDialog.scss';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import { useFormik } from "formik";
@@ -13,6 +12,7 @@ import * as yup from 'yup';
 import CircularProgress from "@mui/material/CircularProgress";
 import { createRecipe } from "../services/store/RecipesSlice";
 import { useDispatch } from "react-redux";
+import { DialogForm } from "./CreateRecipeDialogStyles";
 
 const validationSchema = yup.object({
   name: yup.string().required('Recipe name is required'),
@@ -52,13 +52,12 @@ export const CreateRecipeDialog = (props) => {
   });
 
   return (
-    <Dialog className="CreateRecipeDialog"
-            maxWidth={'lg'}
+    <Dialog maxWidth={'lg'}
             onClose={props.onClose}
             open={props.open}>
       <DialogTitle>Add new recipe</DialogTitle>
       <DialogContent>
-        <form className="content-wrap" onSubmit={formik.handleSubmit}>
+        <DialogForm onSubmit={formik.handleSubmit}>
           <Typography variant={'h6'}>Add Image</Typography>
           <AddImage imageUrl={imageUrl} onImageLoaded={onNewImageSelect}/>
           <div className="short-inputs">
@@ -111,7 +110,7 @@ export const CreateRecipeDialog = (props) => {
               value={formik.values.steps}
               error={formik.touched.steps && Boolean(formik.errors.steps)}
               helperText={formik.touched.steps && formik.errors.steps}/>
-        </form>
+        </DialogForm>
       </DialogContent>
       <DialogActions>
         {submitInProgress ? <CircularProgress/> : ''}
