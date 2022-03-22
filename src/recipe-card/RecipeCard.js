@@ -1,7 +1,6 @@
 import { Card, CardActionArea, CardActions, CardContent, CardMedia, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
-import { CookTime, Label, ListHeader, RecipeCardWrap, List } from "./RecipeCardStyles";
-import ListItem from "@mui/material/ListItem";
+import { CookTime, Label, ListHeader, RecipeCardWrap, List, ListItem } from "./RecipeCardStyles";
 
 const ingredientsToShow = 4;
 

@@ -1,4 +1,6 @@
-.AddFile {
+import styled from "@mui/material/styles/styled";
+
+export const AddFileWrap = styled('div')`
   width: 100%;
   height: 150px;
   border-radius: 2px;
@@ -10,7 +12,7 @@
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
-
+  
   .icon {
     position: absolute;
     width: 24px;
@@ -40,8 +42,8 @@
       z-index: 2;
     }
   }
-
+  
   input[type=file] {
     display: none;
   }
-}
+`;
