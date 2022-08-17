@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
@@ -28,13 +28,11 @@ export const CreateRecipeDialog = (props) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [submitInProgress, setSubmitInProgress] = useState(false);
   const dispatch = useDispatch();
-  const handleClose = () => {
-    props.onClose();
-  };
+  const handleClose = () => props.onClose();
   const onNewImageSelect = (newImage) => setSelectedImage(newImage);
-  const imageUrl = null;
+  const [imageUrl, setImageUrl] = useState(null);
   const formik = useFormik({
-    initialValues: {name: '', servings: '', time: '', steps: '', ingredients: ''},
+    initialValues: { name: '', servings: '', time: '', steps: '', ingredients: '' },
     validationSchema: validationSchema,
     onSubmit: (values) => {
       const recipeData = {
@@ -50,6 +48,14 @@ export const CreateRecipeDialog = (props) => {
       dispatch(createRecipe(recipeData, submitDoneCallback));
     }
   });
+
+  useEffect(() => {
+    if (!props.open) {
+      console.log('props! :', props);
+      formik.resetForm({values: { name: '', servings: '', time: '', steps: '', ingredients: '' } });
+      setImageUrl(null);
+    }
+  }, [props.open]);
 
   return (
     <Dialog maxWidth={'lg'}

@@ -1,6 +1,6 @@
 import styled from "@mui/material/styles/styled";
 
-export const AddFileWrap = styled('div')`
+export const AddImageWrap = styled('div')`
   width: 100%;
   height: 150px;
   border-radius: 2px;

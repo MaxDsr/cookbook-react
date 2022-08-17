@@ -30,9 +30,8 @@ export function RecipeCard(props) {
         </CardActionArea>
         <CardActions>
           <Button size="small" color="primary">View more</Button>
-          <Button size="small" color="warning" onClick={() => props.onDeleteRecipe(props.cardData.id)}>
-            Delete recipe
-          </Button>
+          <Button size="small" color="primary" onClick={() => props.onEditClick(props.cardData.id)}>Edit</Button>
+          <Button size="small" color="warning" onClick={() => props.onDeleteRecipe(props.cardData.id)}>Delete</Button>
         </CardActions>
       </Card>
     </RecipeCardWrap>

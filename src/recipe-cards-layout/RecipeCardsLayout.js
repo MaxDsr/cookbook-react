@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { RecipeCard } from "../recipe-card/RecipeCard";
 import CircularProgress from "@mui/material/CircularProgress";
 import { CreateRecipeDialog } from "../create-recipe-dialog/CreateRecipeDialog";
@@ -13,6 +13,7 @@ export function RecipeCardsLayout() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteRecipeId, setDeleteRecipeId] = useState(null);
+  const [editRecipeData, setEditRecipeData] = useState(null);
   const dispatch = useDispatch();
   const recipes = useSelector((state) => state.recipes.value);
 
@@ -30,9 +31,17 @@ export function RecipeCardsLayout() {
     setDeleteDialogOpen(false);
   };
 
+
+  const onEditClick = useCallback((recipeId) => {
+    let recipe = recipes.find(item => item.id === recipeId);
+    recipe = recipe && JSON.parse(JSON.stringify(recipe));
+    recipe && setEditRecipeData(recipe);
+    setCreateDialogOpen(true);
+  }, [recipes]);
+
   const getRecipesView = (recipes) =>
     recipes.map((recipeCardData) =>
-      <RecipeCard key={'RecipeCard' + recipeCardData.id} cardData={recipeCardData} onDeleteRecipe={() => deleteRecipe(recipeCardData.id)}/>);
+      <RecipeCard key={'RecipeCard' + recipeCardData.id} cardData={recipeCardData} onEditClick={onEditClick} onDeleteRecipe={() => deleteRecipe(recipeCardData.id)}/>);
 
   return (
     <RecipeCardsLayoutWrap>
@@ -46,7 +55,7 @@ export function RecipeCardsLayout() {
       <div className={`cards ${recipes && !recipesLoading ? 'loaded' : 'isLoading'}`}>
         {recipes && !recipesLoading ? getRecipesView(recipes) : <CircularProgress/>}
       </div>
-      <CreateRecipeDialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)}/>
+      <CreateRecipeDialog open={createDialogOpen} recipeData={editRecipeData} onClose={() => setCreateDialogOpen(false)}/>
       <DeleteRecipeDialog open={deleteDialogOpen} onClose={deleteRecipeClose} itemId={deleteRecipeId}/>
     </RecipeCardsLayoutWrap>
   );
