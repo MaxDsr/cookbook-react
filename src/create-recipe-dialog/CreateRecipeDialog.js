@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
@@ -10,7 +10,7 @@ import TextField from '@mui/material/TextField';
 import { useFormik } from "formik";
 import * as yup from 'yup';
 import CircularProgress from "@mui/material/CircularProgress";
-import { createRecipe } from "../services/store/RecipesSlice";
+import { createRecipe, editRecipe } from "../services/store/RecipesSlice";
 import { useDispatch } from "react-redux";
 import { DialogForm } from "./CreateRecipeDialogStyles";
 
@@ -24,12 +24,23 @@ const validationSchema = yup.object({
 
 const defaultImage = `https://st3.depositphotos.com/13324256/17303/i/1600/depositphotos_173034766-stock-photo-woman-writing-down-recipe.jpg`;
 
+function fillFormWithData(recipeData, formik, setImageUrl) {
+  formik.resetForm({ values: {
+      name: recipeData.name,
+      time: recipeData.time,
+      ingredients: recipeData.ingredients.reduce((previousValue, currentItem) => previousValue + '\n' + currentItem),
+      servings: recipeData.servings,
+      steps: recipeData.steps,
+    }});
+  setImageUrl(recipeData.imageUrl);
+}
+
 export const CreateRecipeDialog = (props) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [submitInProgress, setSubmitInProgress] = useState(false);
   const dispatch = useDispatch();
-  const handleClose = () => props.onClose();
-  const onNewImageSelect = (newImage) => setSelectedImage(newImage);
+  const handleClose = useCallback(() => props.onClose(), [props.onClose]);
+  const onNewImageSelect = useCallback((newImage) => setSelectedImage(newImage), []);
   const [imageUrl, setImageUrl] = useState(null);
   const formik = useFormik({
     initialValues: { name: '', servings: '', time: '', steps: '', ingredients: '' },
@@ -37,7 +48,7 @@ export const CreateRecipeDialog = (props) => {
     onSubmit: (values) => {
       const recipeData = {
         ...values,
-        imageUrl: selectedImage || defaultImage,
+        imageUrl: selectedImage || props.recipeData?.imageUrl || defaultImage,
         ingredients: values.ingredients.split('\n')
       };
       const submitDoneCallback = () => {
@@ -45,15 +56,23 @@ export const CreateRecipeDialog = (props) => {
         handleClose();
       };
       setSubmitInProgress(true);
-      dispatch(createRecipe(recipeData, submitDoneCallback));
+      if (props.recipeData?.id) {
+        recipeData.id = props.recipeData?.id;
+        dispatch(editRecipe(recipeData, submitDoneCallback));
+      } else {
+        dispatch(createRecipe(recipeData, submitDoneCallback));
+      }
     }
   });
 
   useEffect(() => {
     if (!props.open) {
-      console.log('props! :', props);
       formik.resetForm({values: { name: '', servings: '', time: '', steps: '', ingredients: '' } });
       setImageUrl(null);
+    }
+
+    if (props.open && props.recipeData?.id) {
+      fillFormWithData(props.recipeData, formik, setImageUrl);
     }
   }, [props.open]);
 
@@ -121,7 +140,9 @@ export const CreateRecipeDialog = (props) => {
       <DialogActions>
         {submitInProgress ? <CircularProgress/> : ''}
         <Button disabled={submitInProgress} onClick={handleClose}>Cancel</Button>
-        <Button disabled={submitInProgress} autoFocus onClick={() => formik.submitForm()}>Create recipe</Button>
+        <Button disabled={submitInProgress} autoFocus onClick={() => formik.submitForm()}>
+          {props.recipeData?.id ? 'Edit recipe' : 'Create recipe'}
+        </Button>
       </DialogActions>
     </Dialog>
   );

@@ -26,10 +26,15 @@ export function RecipeCardsLayout() {
     setDeleteDialogOpen(true);
   };
 
-  const deleteRecipeClose = () => {
+  const deleteRecipeClose = useCallback(() => {
     setDeleteRecipeId(null);
     setDeleteDialogOpen(false);
-  };
+  }, []);
+
+  const closeCreateEditDialog = useCallback(() => {
+    setCreateDialogOpen(false);
+    setEditRecipeData(null);
+  }, []);
 
 
   const onEditClick = useCallback((recipeId) => {
@@ -55,7 +60,7 @@ export function RecipeCardsLayout() {
       <div className={`cards ${recipes && !recipesLoading ? 'loaded' : 'isLoading'}`}>
         {recipes && !recipesLoading ? getRecipesView(recipes) : <CircularProgress/>}
       </div>
-      <CreateRecipeDialog open={createDialogOpen} recipeData={editRecipeData} onClose={() => setCreateDialogOpen(false)}/>
+      <CreateRecipeDialog open={createDialogOpen} recipeData={editRecipeData} onClose={closeCreateEditDialog}/>
       <DeleteRecipeDialog open={deleteDialogOpen} onClose={deleteRecipeClose} itemId={deleteRecipeId}/>
     </RecipeCardsLayoutWrap>
   );
