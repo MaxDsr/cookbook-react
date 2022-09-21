@@ -14,11 +14,13 @@ export const recipes = {
         'onion'
       ],
       time: '1h 30min',
+      servings: 2,
+      steps: 'Maecenas culpa elit rhoncus sagittis hymenaeos consequatur facere ipsum dignissimos! Sollicitudin, suspendisse, asperiores inventore quos, commodo repellat veniam! Alias dictum! Curabitur taciti ipsa! Nostrud.'
     },
     {
       id: uuidv4(),
       name: 'Bolognese pasta',
-      imageUrl: 'https://www.francescakookt.nl/wp-content/uploads/2020/10/mijn-versie-van-spaghetti-bolognese-1.jpg',
+      imageUrl: 'https://tmbidigitalassetsazure.blob.core.windows.net/rms3-prod/attachments/37/1200x1200/Beef-Bolognese-with-Linguine_EXPS_FT21_130403_F_0423_1.jpg',
       ingredients: [
         'potato',
         'tomato',
@@ -27,6 +29,8 @@ export const recipes = {
         'onion'
       ],
       time: '1h 30min',
+      servings: 4,
+      steps: 'Maecenas culpa elit rhoncus sagittis hymenaeos consequatur facere ipsum dignissimos! Sollicitudin, suspendisse, asperiores inventore quos, commodo repellat veniam! Alias dictum! Curabitur taciti ipsa! Nostrud.'
     },
     {
       id: uuidv4(),
@@ -40,6 +44,8 @@ export const recipes = {
         'onion'
       ],
       time: '1h 30min',
+      servings: 4,
+      steps: 'Maecenas culpa elit rhoncus sagittis hymenaeos consequatur facere ipsum dignissimos! Sollicitudin, suspendisse, asperiores inventore quos, commodo repellat veniam! Alias dictum! Curabitur taciti ipsa! Nostrud.'
     },
     {
       id: uuidv4(),
@@ -53,6 +59,8 @@ export const recipes = {
         'onion'
       ],
       time: '1h 30min',
+      servings: 2,
+      steps: 'Maecenas culpa elit rhoncus sagittis hymenaeos consequatur facere ipsum dignissimos! Sollicitudin, suspendisse, asperiores inventore quos, commodo repellat veniam! Alias dictum! Curabitur taciti ipsa! Nostrud.'
     }
   ],
   nextId: uuidv4(),

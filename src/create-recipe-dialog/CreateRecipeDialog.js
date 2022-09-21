@@ -1,16 +1,16 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
-import { AddImage } from '../add-file/AddImage';
+import AddImage from "../add-file/AddImage";
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import { useFormik } from "formik";
 import * as yup from 'yup';
 import CircularProgress from "@mui/material/CircularProgress";
-import { createRecipe } from "../services/store/RecipesSlice";
+import { createRecipe, editRecipe } from "../services/store/RecipesSlice";
 import { useDispatch } from "react-redux";
 import { DialogForm } from "./CreateRecipeDialogStyles";
 
@@ -24,17 +24,25 @@ const validationSchema = yup.object({
 
 const defaultImage = `https://st3.depositphotos.com/13324256/17303/i/1600/depositphotos_173034766-stock-photo-woman-writing-down-recipe.jpg`;
 
+function fillFormWithData(recipeData, formik, setSelectedImage) {
+  formik.resetForm({ values: {
+      name: recipeData.name,
+      time: recipeData.time,
+      ingredients: recipeData.ingredients.reduce((previousValue, currentItem) => previousValue + '\n' + currentItem),
+      servings: recipeData.servings,
+      steps: recipeData.steps,
+    }});
+  setSelectedImage(recipeData.imageUrl);
+}
+
 export const CreateRecipeDialog = (props) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [submitInProgress, setSubmitInProgress] = useState(false);
   const dispatch = useDispatch();
-  const handleClose = () => {
-    props.onClose();
-  };
-  const onNewImageSelect = (newImage) => setSelectedImage(newImage);
-  const imageUrl = null;
+  const handleClose = useCallback(() => props.onClose(), [props.onClose]);
+  const onNewImageSelect = useCallback((newImage) => setSelectedImage(newImage), []);
   const formik = useFormik({
-    initialValues: {name: '', servings: '', time: '', steps: '', ingredients: ''},
+    initialValues: { name: '', servings: '', time: '', steps: '', ingredients: '' },
     validationSchema: validationSchema,
     onSubmit: (values) => {
       const recipeData = {
@@ -47,9 +55,25 @@ export const CreateRecipeDialog = (props) => {
         handleClose();
       };
       setSubmitInProgress(true);
-      dispatch(createRecipe(recipeData, submitDoneCallback));
+      if (props.recipeData?.id) {
+        recipeData.id = props.recipeData?.id;
+        dispatch(editRecipe(recipeData, submitDoneCallback));
+      } else {
+        dispatch(createRecipe(recipeData, submitDoneCallback));
+      }
     }
   });
+
+  useEffect(() => {
+    if (!props.open) {
+      formik.resetForm({values: { name: '', servings: '', time: '', steps: '', ingredients: '' } });
+      setSelectedImage(null);
+    }
+
+    if (props.open && props.recipeData?.id) {
+      fillFormWithData(props.recipeData, formik, setSelectedImage);
+    }
+  }, [props.open, props.recipeData?.id, props.recipeData]);
 
   return (
     <Dialog maxWidth={'lg'}
@@ -59,7 +83,7 @@ export const CreateRecipeDialog = (props) => {
       <DialogContent>
         <DialogForm onSubmit={formik.handleSubmit}>
           <Typography variant={'h6'}>Add Image</Typography>
-          <AddImage imageUrl={imageUrl} onImageLoaded={onNewImageSelect}/>
+          <AddImage imageUrl={selectedImage} onImageLoaded={onNewImageSelect}/>
           <div className="short-inputs">
             <TextField label="Recipe name"
                        id="name"
@@ -115,7 +139,9 @@ export const CreateRecipeDialog = (props) => {
       <DialogActions>
         {submitInProgress ? <CircularProgress/> : ''}
         <Button disabled={submitInProgress} onClick={handleClose}>Cancel</Button>
-        <Button disabled={submitInProgress} autoFocus onClick={() => formik.submitForm()}>Create recipe</Button>
+        <Button disabled={submitInProgress} autoFocus onClick={() => formik.submitForm()}>
+          {props.recipeData?.id ? 'Edit recipe' : 'Create recipe'}
+        </Button>
       </DialogActions>
     </Dialog>
   );

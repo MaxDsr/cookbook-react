@@ -33,6 +33,15 @@ export const createRecipe = (recipe, dispatchDoneCallback) => {
   };
 };
 
+export const editRecipe = (recipe, dispatchDoneCallback) => {
+  return (dispatch) => {
+    ApiService.editRecipeAPI(recipe).then(
+        () => setRecipes(dispatchDoneCallback)(dispatch),
+        (error) => dispatch(setErrorAlert(error))
+    );
+  }
+};
+
 export const deleteRecipe = (recipeId, dispatchDoneCallback) => {
   return (dispatch) => {
     ApiService.deleteRecipeAPI(recipeId).then(

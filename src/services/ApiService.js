@@ -40,9 +40,26 @@ function createRecipeAPI(data) {
   });
 }
 
+function editRecipeAPI(data) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const editedRecipe = JSON.parse(JSON.stringify(data));
+      const recipeToReplace = recipes.data.find(recipe => recipe.id === editedRecipe.id);
+      if (!recipeToReplace) {
+        reject('Something went wrong. Please try again');
+        return;
+      }
+      const index = recipes.data.indexOf(recipeToReplace);
+      recipes.data[index] = editedRecipe;
+      resolve(true);
+    }, 1500);
+  })
+}
+
 
 export const ApiService = {
   getRecipesAPI: getRecipesAPI,
   deleteRecipeAPI: deleteRecipeAPI,
   createRecipeAPI: createRecipeAPI,
+  editRecipeAPI: editRecipeAPI,
 };
