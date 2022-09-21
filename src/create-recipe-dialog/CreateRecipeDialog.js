@@ -4,7 +4,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
-import { AddImage } from '../add-file/AddImage';
+import AddImage from "../add-file/AddImage";
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import { useFormik } from "formik";
@@ -24,7 +24,7 @@ const validationSchema = yup.object({
 
 const defaultImage = `https://st3.depositphotos.com/13324256/17303/i/1600/depositphotos_173034766-stock-photo-woman-writing-down-recipe.jpg`;
 
-function fillFormWithData(recipeData, formik, setImageUrl) {
+function fillFormWithData(recipeData, formik, setSelectedImage) {
   formik.resetForm({ values: {
       name: recipeData.name,
       time: recipeData.time,
@@ -32,7 +32,7 @@ function fillFormWithData(recipeData, formik, setImageUrl) {
       servings: recipeData.servings,
       steps: recipeData.steps,
     }});
-  setImageUrl(recipeData.imageUrl);
+  setSelectedImage(recipeData.imageUrl);
 }
 
 export const CreateRecipeDialog = (props) => {
@@ -41,14 +41,13 @@ export const CreateRecipeDialog = (props) => {
   const dispatch = useDispatch();
   const handleClose = useCallback(() => props.onClose(), [props.onClose]);
   const onNewImageSelect = useCallback((newImage) => setSelectedImage(newImage), []);
-  const [imageUrl, setImageUrl] = useState(null);
   const formik = useFormik({
     initialValues: { name: '', servings: '', time: '', steps: '', ingredients: '' },
     validationSchema: validationSchema,
     onSubmit: (values) => {
       const recipeData = {
         ...values,
-        imageUrl: selectedImage || props.recipeData?.imageUrl || defaultImage,
+        imageUrl: selectedImage || defaultImage,
         ingredients: values.ingredients.split('\n')
       };
       const submitDoneCallback = () => {
@@ -68,13 +67,13 @@ export const CreateRecipeDialog = (props) => {
   useEffect(() => {
     if (!props.open) {
       formik.resetForm({values: { name: '', servings: '', time: '', steps: '', ingredients: '' } });
-      setImageUrl(null);
+      setSelectedImage(null);
     }
 
     if (props.open && props.recipeData?.id) {
-      fillFormWithData(props.recipeData, formik, setImageUrl);
+      fillFormWithData(props.recipeData, formik, setSelectedImage);
     }
-  }, [props.open]);
+  }, [props.open, props.recipeData?.id, props.recipeData]);
 
   return (
     <Dialog maxWidth={'lg'}
@@ -84,7 +83,7 @@ export const CreateRecipeDialog = (props) => {
       <DialogContent>
         <DialogForm onSubmit={formik.handleSubmit}>
           <Typography variant={'h6'}>Add Image</Typography>
-          <AddImage imageUrl={imageUrl} onImageLoaded={onNewImageSelect}/>
+          <AddImage imageUrl={selectedImage} onImageLoaded={onNewImageSelect}/>
           <div className="short-inputs">
             <TextField label="Recipe name"
                        id="name"

@@ -4,7 +4,7 @@ import Typography from '@mui/material/Typography';
 import { AddImageWrap } from "./AddImageStyles";
 import { useRef, useState } from "react";
 
-export function AddImage(props) {
+function AddImage(props) {
   const [newImage, setNewImage] = useState(null);
   const fileSelectInputRef = useRef();
 
@@ -30,3 +30,5 @@ export function AddImage(props) {
       </AddImageWrap>
   );
 }
+
+export default React.memo(AddImage);
