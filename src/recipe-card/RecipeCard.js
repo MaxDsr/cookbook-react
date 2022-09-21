@@ -1,6 +1,6 @@
 import { Card, CardActionArea, CardActions, CardContent, CardMedia, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
-import { CookTime, Label, ListHeader, RecipeCardWrap, List, ListItem } from "./RecipeCardStyles";
+import { RecipeCardWrap } from "./RecipeCardStyles";
 
 const ingredientsToShow = 4;
 
@@ -17,15 +17,15 @@ export function RecipeCard(props) {
           />
           <CardContent>
             <Typography gutterBottom variant="h5" component="div" align={'left'}>{props.cardData.name}</Typography>
-            <ListHeader>Ingredients</ListHeader>
-            <List>
+            <div className="list-header">Ingredients</div>
+            <div className="list">
               {props.cardData.ingredients?.slice(0, ingredientsToShow)
-                .map(item => <ListItem key={'ingred'+item}>{item}</ListItem>)}
+                .map(item => <div className="list-item" key={'ingred'+item}>{item}</div>)}
               {ingredientsToShow < props.cardData.ingredients.length ? <li>and more...</li>: ''}
-            </List>
-            <CookTime>
-              <Label>Cook Time:</Label> {props.cardData.time}
-            </CookTime>
+            </div>
+            <div className="cook-time">
+              <div className="label">Cook Time:</div> {props.cardData.time}
+            </div>
           </CardContent>
         </CardActionArea>
         <CardActions>
