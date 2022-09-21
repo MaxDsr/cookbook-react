@@ -25,19 +25,26 @@ export const setRecipes = (dispatchDoneCallback) => {
   }
 };
 
-export const createRecipe = (recipe, dispatchDoneCallback) => {
+export const createRecipe = (recipe, dispatchDoneCallback, dispatchFailedCallback) => {
   return (dispatch) => {
-    ApiService.createRecipeAPI(recipe).then(() => {
-      setRecipes(dispatchDoneCallback)(dispatch);
-    });
+    ApiService.createRecipeAPI(recipe).then(
+        () => setRecipes(dispatchDoneCallback)(dispatch),
+        (error) => {
+          dispatch(setErrorAlert(error));
+          dispatchFailedCallback();
+        }
+    );
   };
 };
 
-export const editRecipe = (recipe, dispatchDoneCallback) => {
+export const editRecipe = (recipe, dispatchDoneCallback, dispatchFailedCallback) => {
   return (dispatch) => {
     ApiService.editRecipeAPI(recipe).then(
         () => setRecipes(dispatchDoneCallback)(dispatch),
-        (error) => dispatch(setErrorAlert(error))
+        (error) => {
+          dispatch(setErrorAlert(error));
+          dispatchFailedCallback();
+        }
     );
   }
 };

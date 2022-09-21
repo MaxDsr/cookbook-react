@@ -54,12 +54,14 @@ export const CreateRecipeDialog = (props) => {
         setSubmitInProgress(false);
         handleClose();
       };
+      const submitFailedCallback = () => setSubmitInProgress(false);
+
       setSubmitInProgress(true);
       if (props.recipeData?.id) {
         recipeData.id = props.recipeData?.id;
-        dispatch(editRecipe(recipeData, submitDoneCallback));
+        dispatch(editRecipe(recipeData, submitDoneCallback, submitFailedCallback));
       } else {
-        dispatch(createRecipe(recipeData, submitDoneCallback));
+        dispatch(createRecipe(recipeData, submitDoneCallback, submitFailedCallback));
       }
     }
   });
@@ -77,7 +79,7 @@ export const CreateRecipeDialog = (props) => {
 
   return (
     <Dialog maxWidth={'lg'}
-            onClose={props.onClose}
+            onClose={() => !submitInProgress && props.onClose()}
             open={props.open}>
       <DialogTitle>Add new recipe</DialogTitle>
       <DialogContent>
