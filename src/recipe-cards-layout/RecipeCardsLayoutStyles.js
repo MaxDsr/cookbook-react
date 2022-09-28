@@ -52,11 +52,9 @@ export const RecipeCardsLayoutWrap = styled('div')`
   }
 
   @media (min-width: 1024px) {
-    
   }
 
   @media (min-width: 1536px) {
-    
   }
 `;
 
