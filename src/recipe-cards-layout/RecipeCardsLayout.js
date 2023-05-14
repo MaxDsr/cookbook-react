@@ -7,6 +7,7 @@ import { setRecipes } from "../services/store/RecipesSlice";
 import { DeleteRecipeDialog } from "../recipe-card/DeleteRecipeDialog";
 import { RecipeCardsLayoutWrap } from "./RecipeCardsLayoutStyles";
 import CreateRecipeDialog from "../CreateRecipeDialog";
+import ViewRecipe from "../ViewRecipe";
 
 export function RecipeCardsLayout() {
   const [recipesLoading, setRecipesLoading] = useState(true);
@@ -31,10 +32,10 @@ export function RecipeCardsLayout() {
     setDeleteDialogOpen(false);
   }, []);
 
-  const closeCreateEditDialog = useCallback(() => {
+  const closeCreateEditDialog = () => {
     setCreateDialogOpen(false);
     setEditRecipeData(null);
-  }, []);
+  };
 
 
   const onEditClick = useCallback((recipeId) => {
@@ -62,6 +63,7 @@ export function RecipeCardsLayout() {
       </div>
       <CreateRecipeDialog open={createDialogOpen} recipeData={editRecipeData} onClose={closeCreateEditDialog}/>
       <DeleteRecipeDialog open={deleteDialogOpen} onClose={deleteRecipeClose} itemId={deleteRecipeId}/>
+      <ViewRecipe/>
     </RecipeCardsLayoutWrap>
   );
 }

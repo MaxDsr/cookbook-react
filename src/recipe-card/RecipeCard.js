@@ -1,6 +1,7 @@
 import { Card, CardActionArea, CardActions, CardContent, CardMedia, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 import { RecipeCardWrap } from "./RecipeCardStyles";
+import Image from "mui-image";
 
 const ingredientsToShow = 4;
 
@@ -10,11 +11,22 @@ export function RecipeCard(props) {
       <Card>
         <CardActionArea>
           <CardMedia
-            component="img"
-            height="240"
-            image={props.cardData.imageUrl}
+            component="div"
             alt="cookbook recipe"
-          />
+          >
+            <Image
+              src={props.cardData.imageUrl}
+              width="100%"
+              height="240px"
+              duration={700}
+              shift="top"
+              distance="20px"
+              shiftDuration={400}
+              easing={"ease-in"}
+              fit="cover"
+              bgColor={"inherit"}
+            />
+          </CardMedia>
           <CardContent>
             <Typography gutterBottom variant="h5" component="div" align={'left'}>{props.cardData.name}</Typography>
             <div className="list-header">Ingredients</div>
