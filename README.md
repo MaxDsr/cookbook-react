@@ -24,3 +24,8 @@ For this purpose was created a pseudo BE with a pseudo API service which imitate
   
 This app doesn't use any storage service. Images uploaded in the create new recipe form are stored in the memory.  
 Please, take in mind that file input doesn't have any validations by type. So don't try to upload big size files. It may result in browser crash.  
+
+
+# Live Demo
+
+https://maxdsr.github.io/cookbook-app/

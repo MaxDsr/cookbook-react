@@ -21,6 +21,7 @@ export function RecipeCard(props) {
               duration={700}
               shift="top"
               distance="20px"
+              showLoading
               shiftDuration={400}
               easing={"ease-in"}
               fit="cover"
