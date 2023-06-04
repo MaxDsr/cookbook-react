@@ -1,13 +1,13 @@
 import { Card, CardActionArea, CardActions, CardContent, CardMedia, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
-import { RecipeCardWrap } from "./RecipeCardStyles";
+import StyledDiv from "./styles";
 import Image from "mui-image";
 
 const ingredientsToShow = 4;
 
-export function RecipeCard(props) {
+function RecipeCard(props) {
   return (
-    <RecipeCardWrap>
+    <StyledDiv>
       <Card>
         <CardActionArea>
           <CardMedia
@@ -47,6 +47,8 @@ export function RecipeCard(props) {
           <Button size="small" color="warning" onClick={() => props.onDeleteRecipe(props.cardData.id)}>Delete</Button>
         </CardActions>
       </Card>
-    </RecipeCardWrap>
+    </StyledDiv>
   );
 }
+
+export default RecipeCard;

@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { RecipeCard } from "../recipe-card/RecipeCard";
+import RecipeCard from "../RecipeCard";
 import CircularProgress from "@mui/material/CircularProgress";
 import Button from "@mui/material/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { setRecipes } from "../services/store/RecipesSlice";
-import { DeleteRecipeDialog } from "../recipe-card/DeleteRecipeDialog";
-import { RecipeCardsLayoutWrap } from "./RecipeCardsLayoutStyles";
+import DeleteRecipeDialog from "./DeleteRecipeDialog"
+import StyledDiv from "./styles";
 import CreateRecipeDialog from "../CreateRecipeDialog";
 import ViewRecipe from "../ViewRecipe";
 
@@ -50,7 +50,7 @@ export function RecipeCardsLayout() {
       <RecipeCard key={'RecipeCard' + recipeCardData.id} cardData={recipeCardData} onEditClick={onEditClick} onDeleteRecipe={() => deleteRecipe(recipeCardData.id)}/>);
 
   return (
-    <RecipeCardsLayoutWrap>
+    <StyledDiv>
       <div className="button-wrap">
         <Button variant="contained"
                 disabled={recipesLoading}
@@ -64,6 +64,6 @@ export function RecipeCardsLayout() {
       <CreateRecipeDialog open={createDialogOpen} recipeData={editRecipeData} onClose={closeCreateEditDialog}/>
       <DeleteRecipeDialog open={deleteDialogOpen} onClose={deleteRecipeClose} itemId={deleteRecipeId}/>
       <ViewRecipe/>
-    </RecipeCardsLayoutWrap>
+    </StyledDiv>
   );
 }

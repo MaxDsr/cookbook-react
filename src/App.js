@@ -1,8 +1,8 @@
-import { RecipeCardsLayout } from "./recipe-cards-layout/RecipeCardsLayout";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { useDispatch, useSelector } from "react-redux";
 import { setErrorAlert } from "./services/store/errorAlertSlice";
+import {RecipeCardsLayout} from "./RecipeCardsLayout";
 
 function App() {
   const alertText = useSelector((state) => state.errorAlert.value);

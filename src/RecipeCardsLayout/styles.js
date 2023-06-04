@@ -1,12 +1,12 @@
 import styled from "@mui/material/styles/styled";
 
 
-export const RecipeCardsLayoutWrap = styled('div')`
+export default styled('div')`
   margin: 0 auto;
 
   .cards {
     width: 100%;
-    
+
     &.loaded {
       display: flex;
       flex-direction: column;
@@ -21,7 +21,7 @@ export const RecipeCardsLayoutWrap = styled('div')`
       justify-content: center;
       height: 100vh;
     }
-    
+
     & > div {
       width: 300px;
     }
