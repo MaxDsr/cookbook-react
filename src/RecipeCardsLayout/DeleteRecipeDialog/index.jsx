@@ -1,14 +1,15 @@
+import {useState} from "react";
+import {useDispatch} from "react-redux";
+import {deleteRecipe} from "../../services/store/RecipesSlice";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
-import { deleteRecipe } from "../services/store/RecipesSlice";
-import { useDispatch } from "react-redux";
-import { useState } from "react";
+import DialogActions from "@mui/material/DialogActions";
 import CircularProgress from "@mui/material/CircularProgress";
+import Button from "@mui/material/Button";
 
-export const DeleteRecipeDialog = (props) => {
+
+function DeleteRecipeDialog(props) {
   const [actionInProgress, setActionInProgress] = useState(false);
   const dispatch = useDispatch();
 
@@ -38,3 +39,5 @@ export const DeleteRecipeDialog = (props) => {
     </Dialog>
   );
 };
+
+export default DeleteRecipeDialog;

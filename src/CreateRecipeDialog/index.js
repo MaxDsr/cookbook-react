@@ -11,7 +11,7 @@ import { createRecipe, editRecipe } from "../services/store/RecipesSlice";
 import { useDispatch } from "react-redux";
 import { useForm, Controller, useFormState, useFieldArray } from "react-hook-form";
 import AddImage from "../add-file/AddImage";
-import {DEFAULT_IMAGE, INGREDIENT_NAME, INGREDIENTS, INPUT_VALIDATION_RULES} from "./consts";
+import {DEFAULT_IMAGE, INGREDIENT_NAME, INGREDIENTS, STEPS_VALIDATION_RULES} from "./consts";
 import IngredientFields from "./IngredientFields";
 import FormField from "./FormField";
 import StyledForm from "./styles";
@@ -87,7 +87,7 @@ function CreateRecipeDialog ({onClose, recipeData, open}) {
 
           <Controller name="steps"
                       control={control}
-                      rules={INPUT_VALIDATION_RULES}
+                      rules={STEPS_VALIDATION_RULES}
                       render={({ field }) =>
                         <TextField
                           label="Preparation steps"
