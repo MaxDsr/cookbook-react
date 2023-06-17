@@ -23,7 +23,7 @@ function IngredientFields({fields, control, errors, remove}) {
                     {...field}
                     error={Boolean(errors[INGREDIENTS]?.[index]?.[INGREDIENT_NAME])}
                     helperText={errors[INGREDIENTS]?.[index]?.[INGREDIENT_NAME]?.message}/>
-                  <img src={closeIcon} onClick={() => remove(index)}/>
+                  <img src={closeIcon} alt="remove" onClick={() => remove(index)}/>
                 </div>
               )
             }}/>

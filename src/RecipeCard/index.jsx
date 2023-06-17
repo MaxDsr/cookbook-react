@@ -5,17 +5,17 @@ import Image from "mui-image";
 
 const ingredientsToShow = 4;
 
-function RecipeCard(props) {
+function RecipeCard({cardData, onViewClick, onDeleteRecipe, onEditClick}) {
   return (
     <StyledDiv>
       <Card>
-        <CardActionArea>
+        <CardActionArea onClick={onViewClick}>
           <CardMedia
             component="div"
             alt="cookbook recipe"
           >
             <Image
-              src={props.cardData.imageUrl}
+              src={cardData.imageUrl}
               width="100%"
               height="240px"
               duration={700}
@@ -29,22 +29,22 @@ function RecipeCard(props) {
             />
           </CardMedia>
           <CardContent>
-            <Typography gutterBottom variant="h5" component="div" align={'left'}>{props.cardData.name}</Typography>
+            <Typography gutterBottom variant="h5" component="div" align={'left'}>{cardData.name}</Typography>
             <div className="list-header">Ingredients</div>
             <div className="list">
-              {props.cardData.ingredients?.slice(0, ingredientsToShow)
+              {cardData.ingredients?.slice(0, ingredientsToShow)
                 .map(item => <div className="list-item" key={'ingred'+item}>{item}</div>)}
-              {ingredientsToShow < props.cardData.ingredients.length ? <li>and more...</li>: ''}
+              {ingredientsToShow < cardData.ingredients.length ? <li>and more...</li>: ''}
             </div>
             <div className="cook-time">
-              <div className="label">Cook Time:</div> {props.cardData.time}
+              <div className="label">Cook Time:</div> {cardData.time}
             </div>
           </CardContent>
         </CardActionArea>
         <CardActions>
-          <Button size="small" color="primary">View more</Button>
-          <Button size="small" color="primary" onClick={() => props.onEditClick(props.cardData.id)}>Edit</Button>
-          <Button size="small" color="warning" onClick={() => props.onDeleteRecipe(props.cardData.id)}>Delete</Button>
+          <Button size="small" color="primary" onClick={onViewClick}>View more</Button>
+          <Button size="small" color="primary" onClick={onEditClick}>Edit</Button>
+          <Button size="small" color="warning" onClick={onDeleteRecipe}>Delete</Button>
         </CardActions>
       </Card>
     </StyledDiv>

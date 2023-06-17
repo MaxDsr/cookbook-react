@@ -7,14 +7,16 @@ import { setRecipes } from "../services/store/RecipesSlice";
 import DeleteRecipeDialog from "./DeleteRecipeDialog"
 import StyledDiv from "./styles";
 import CreateRecipeDialog from "../CreateRecipeDialog";
-import ViewRecipe from "../ViewRecipe";
+import ViewRecipeDialog from "../ViewRecipeDialog";
+import {getRecipeById} from "./helpers";
 
 export function RecipeCardsLayout() {
   const [recipesLoading, setRecipesLoading] = useState(true);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteRecipeId, setDeleteRecipeId] = useState(null);
-  const [editRecipeData, setEditRecipeData] = useState(null);
+  const [recipeData, setRecipeData] = useState(null);
   const dispatch = useDispatch();
   const recipes = useSelector((state) => state.recipes.value);
 
@@ -34,20 +36,39 @@ export function RecipeCardsLayout() {
 
   const closeCreateEditDialog = () => {
     setCreateDialogOpen(false);
-    setEditRecipeData(null);
+    !viewDialogOpen && setRecipeData(null);
   };
 
+  const closeViewDialog = (clearData) => {
+    setViewDialogOpen(false);
+    if (clearData) {
+      setRecipeData(null);
+    }
+  }
 
-  const onEditClick = useCallback((recipeId) => {
-    let recipe = recipes.find(item => item.id === recipeId);
-    recipe = recipe && JSON.parse(JSON.stringify(recipe));
-    recipe && setEditRecipeData(recipe);
+  //TODO should be refactored..
+  const editRecipe = (recipeId) => {
+    const recipe = getRecipeById(recipes, recipeId);
+    recipe && setRecipeData(recipe);
     setCreateDialogOpen(true);
-  }, [recipes]);
+  };
+
+  //TODO should be refactored..
+  const viewRecipe = (recipeCardDataId) => {
+    const recipe = getRecipeById(recipes, recipeCardDataId);
+    recipe && setRecipeData(recipe);
+    setViewDialogOpen(true);
+  };
 
   const getRecipesView = (recipes) =>
     recipes.map((recipeCardData) =>
-      <RecipeCard key={'RecipeCard' + recipeCardData.id} cardData={recipeCardData} onEditClick={onEditClick} onDeleteRecipe={() => deleteRecipe(recipeCardData.id)}/>);
+      <RecipeCard
+        key={'RecipeCard' + recipeCardData.id}
+        cardData={recipeCardData}
+        onViewClick={() => viewRecipe(recipeCardData.id)}
+        onEditClick={() => editRecipe(recipeCardData.id)}
+        onDeleteRecipe={() => deleteRecipe(recipeCardData.id)}/>
+    );
 
   return (
     <StyledDiv>
@@ -61,9 +82,20 @@ export function RecipeCardsLayout() {
       <div className={`cards ${recipes && !recipesLoading ? 'loaded' : 'isLoading'}`}>
         {recipes && !recipesLoading ? getRecipesView(recipes) : <CircularProgress/>}
       </div>
-      <CreateRecipeDialog open={createDialogOpen} recipeData={editRecipeData} onClose={closeCreateEditDialog}/>
-      <DeleteRecipeDialog open={deleteDialogOpen} onClose={deleteRecipeClose} itemId={deleteRecipeId}/>
-      <ViewRecipe/>
+      <ViewRecipeDialog
+        open={viewDialogOpen}
+        recipeId={recipeData?.id}
+        onEdit={() => editRecipe(recipeData?.id)}
+        onDelete={() => deleteRecipe(recipeData?.id)}
+        onClose={closeViewDialog}/>
+      <CreateRecipeDialog
+        open={createDialogOpen}
+        recipeData={recipeData}
+        onClose={closeCreateEditDialog}/>
+      <DeleteRecipeDialog
+        open={deleteDialogOpen}
+        onClose={deleteRecipeClose}
+        itemId={deleteRecipeId}/>
     </StyledDiv>
   );
 }
