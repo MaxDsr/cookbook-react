@@ -1,0 +1,30 @@
+
+
+services:
+  mongoDB:
+    image: mongo
+    restart: always
+    ports:
+      - "127.0.0.1:3001:27017"
+    networks:
+      - cookbook-app
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./docker/Dockerfile
+    volumes:
+      - ./frontend/src:/frontend/src/
+      - ./frontend/public:/frontend/public/
+      - ./frontend/package.json:/frontend/package.json
+      - ./frontend/package-lock.json:/frontend/package-lock.json
+    container_name: "cookbook-frontend"
+    expose:
+      - 3000
+    ports:
+      - "127.0.0.1:3000:3000"
+    networks:
+      - cookbook-app
+    command: npm run start
+networks:
+  cookbook-app:
+    driver: bridge
