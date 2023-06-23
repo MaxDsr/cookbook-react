@@ -2,6 +2,7 @@
   "version": "1.0.3",
   "description": "A boilerplate for Node.js apps / Rest API / Authentication from scratch - express, mongodb (mongoose).",
   "main": "./src",
+  "nodeVersion": "18.16.0",
   "bugs": "https://github.com/watscho/express-mongodb-rest-api-boilerplate/issues",
   "keywords": [
     "express",

@@ -19,3 +19,5 @@
 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"level":"error","port":6379,"syscall":"connect","timestamp":"2023-06-19 21:09:07"}
 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"level":"error","port":6379,"syscall":"connect","timestamp":"2023-06-19 21:09:17"}
 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"level":"error","port":6379,"syscall":"connect","timestamp":"2023-06-19 21:09:35"}
+{"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"level":"error","port":6379,"syscall":"connect","timestamp":"2023-06-20 20:28:29"}
+{"level":"error","message":"connect ECONNREFUSED 127.0.0.1:3001","reason":{"commonWireVersion":0,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"logicalSessionTimeoutMinutes":null,"maxElectionId":null,"maxSetVersion":null,"servers":{},"setName":null,"stale":false,"type":"Unknown"},"timestamp":"2023-06-20 20:28:59"}
