@@ -13,18 +13,19 @@ services:
       context: ./frontend
       dockerfile: ./docker/Dockerfile
     volumes:
-      - ./frontend/src:/frontend/src/
-      - ./frontend/public:/frontend/public/
-      - ./frontend/package.json:/frontend/package.json
-      - ./frontend/package-lock.json:/frontend/package-lock.json
+      - ./frontend:/frontend/:ro
+      - node_modules:/frontend
     container_name: "cookbook-frontend"
     expose:
       - 3000
     ports:
-      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:5173:3000"
     networks:
       - cookbook-app
-    command: npm run start
+    command: npm run dev
+volumes:
+  node_modules:
+    driver: local
 networks:
   cookbook-app:
     driver: bridge
