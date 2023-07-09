@@ -1,31 +1,31 @@
-
-
 services:
   mongoDB:
     image: mongo
     restart: always
     ports:
-      - "127.0.0.1:3001:27017"
+      - "127.0.0.1:3002:27017"
     networks:
       - cookbook-app
   frontend:
     build:
       context: ./frontend
       dockerfile: ./docker/Dockerfile
-    volumes:
-      - ./frontend:/frontend/:ro
-      - node_modules:/frontend
     container_name: "cookbook-frontend"
-    expose:
-      - 3000
+    volumes:
+      - ./frontend/public:/frontend/public:ro
+      - ./frontend/src:/frontend/src:ro
+      - ./frontend/.dockerignore:/frontend/.dockerignore:ro
+      - ./frontend/.eslintrc.cjs:/frontend/.eslintrc.cjs:ro
+      - ./frontend/.gitignore:/frontend/.gitignore:ro
+      - ./frontend/index.html:/frontend/index.html:ro
+      - ./frontend/package.json:/frontend/package.json:ro
+      - ./frontend/package-lock.json:/frontend/package-lock.json:ro
+      - ./frontend/vite.config.js:/frontend/vite.config.js:ro
     ports:
-      - "127.0.0.1:5173:3000"
+      - "127.0.0.1:3000:3000"
     networks:
       - cookbook-app
     command: npm run dev
-volumes:
-  node_modules:
-    driver: local
 networks:
   cookbook-app:
     driver: bridge
