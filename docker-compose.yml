@@ -4,6 +4,7 @@ services:
     restart: always
     ports:
       - "127.0.0.1:3002:27017"
+    container_name: "cookbook-mongo"
     networks:
       - cookbook-app
   frontend:
@@ -26,6 +27,41 @@ services:
     networks:
       - cookbook-app
     command: npm run dev
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./docker/Dockerfile
+      args:
+        uid: 501
+        user: worker
+    container_name: "cookbook-backend"
+    volumes:
+      - ./backend/src:/backend/src
+      - ./backend/.dockerignore:/backend/.dockerignore
+      - ./backend/.env:/backend/.env
+      - ./backend/.env.example:/backend/.env.example
+      - ./backend/.eslintrc:/backend/.eslintrc
+      - ./backend/.nvmrc:/backend/.nvmrc
+      - ./backend/.prettierrc:/backend/.prettierrc
+      - ./backend/api-logs.log:/backend/api-logs.log
+      - ./backend/package.json:/backend/package.json
+      - ./backend/package-lock.json:/backend/package-lock.json
+      - ./backend/tsconfig.json:/backend/tsconfig.json
+    ports:
+      - "127.0.0.1:3001:3001"
+    networks:
+      - cookbook-app
+    command: npm run watch
+  docker-test:
+    build:
+      context: ./docker-test
+      dockerfile: ./Dockerfile
+    container_name: "cookbook-docker-test"
+    ports:
+      - "127.0.0.1:3003:3003"
+    networks:
+      - cookbook-app
+    command: node index.js
 networks:
   cookbook-app:
     driver: bridge
