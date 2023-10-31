@@ -1,0 +1,57 @@
+services:
+  mongoDB:
+    image: mongo
+    restart: always
+    ports:
+      - "127.0.0.1:3002:27017"
+    container_name: "cookbook-mongo"
+    networks:
+      - cookbook-app
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./docker/Dockerfile
+    container_name: "cookbook-frontend"
+    volumes:
+      - ./frontend/public:/frontend/public:ro
+      - ./frontend/src:/frontend/src:ro
+      - ./frontend/.dockerignore:/frontend/.dockerignore:ro
+      - ./frontend/.eslintrc.cjs:/frontend/.eslintrc.cjs:ro
+      - ./frontend/.gitignore:/frontend/.gitignore:ro
+      - ./frontend/index.html:/frontend/index.html:ro
+      - ./frontend/package.json:/frontend/package.json:ro
+      - ./frontend/package-lock.json:/frontend/package-lock.json:ro
+      - ./frontend/vite.config.js:/frontend/vite.config.js:ro
+    ports:
+      - "127.0.0.1:3000:3000"
+    networks:
+      - cookbook-app
+    command: npm run dev
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./docker/Dockerfile
+      args:
+        uid: 501
+        user: worker
+    container_name: "cookbook-backend"
+    volumes:
+      - ./backend/src:/backend/src
+      - ./backend/.dockerignore:/backend/.dockerignore
+      - ./backend/.env:/backend/.env
+      - ./backend/.env.example:/backend/.env.example
+      - ./backend/.eslintrc:/backend/.eslintrc
+      - ./backend/.nvmrc:/backend/.nvmrc
+      - ./backend/.prettierrc:/backend/.prettierrc
+      - ./backend/api-logs.log:/backend/api-logs.log
+      - ./backend/package.json:/backend/package.json
+      - ./backend/package-lock.json:/backend/package-lock.json
+      - ./backend/tsconfig.json:/backend/tsconfig.json
+    ports:
+      - "127.0.0.1:3001:3001"
+    networks:
+      - cookbook-app
+    command: npm run watch
+networks:
+  cookbook-app:
+    driver: bridge
