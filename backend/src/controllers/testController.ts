@@ -1,16 +1,7 @@
-import {IBodyRequest, ICombinedRequest, IContextRequest, IUserRequest} from "@/contracts/request";
-import {NewPasswordPayload, ResetPasswordPayload, SignInPayload, SignUpPayload} from "@/contracts/auth";
 import {Response} from "express";
-import {resetPasswordService, userService, verificationService} from "@/services";
 import {ReasonPhrases, StatusCodes} from "http-status-codes";
-import {jwtSign} from "@/utils/jwt";
 import winston from "winston";
-import mongoose, {startSession} from "mongoose";
-import {createHash} from "@/utils/hash";
-import {createCryptoString} from "@/utils/cryptoString";
-import {createDateAddDaysFromNow} from "@/utils/dates";
-import {ExpiresInDays} from "@/constants";
-import {UserMail} from "@/mailer";
+import {Recipe} from "@/models";
 
 export const testController = {
   test: async (
@@ -18,9 +9,17 @@ export const testController = {
     res: Response
   ) => {
     try {
-      console.log('12313')
+      const recipe = new Recipe({
+        name: "Super soup",
+        imageUrl: "superhttps://",
+        ingredients: ["hello", "mellow", "yellow"],
+        time: "the time",
+        servings: 10,
+        steps: "Make this. Do that"
+      });
+      recipe.save();
       return res.status(StatusCodes.OK).json({
-        data: { jora: "uiiiii" },
+        data: { tester: "alll" },
         message: ReasonPhrases.OK,
         status: StatusCodes.OK
       });
