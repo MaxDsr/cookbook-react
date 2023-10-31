@@ -52,16 +52,6 @@ services:
     networks:
       - cookbook-app
     command: npm run watch
-  docker-test:
-    build:
-      context: ./docker-test
-      dockerfile: ./Dockerfile
-    container_name: "cookbook-docker-test"
-    ports:
-      - "127.0.0.1:3003:3003"
-    networks:
-      - cookbook-app
-    command: node index.js
 networks:
   cookbook-app:
     driver: bridge
