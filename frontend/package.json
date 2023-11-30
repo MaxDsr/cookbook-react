@@ -10,15 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "@emotion/react": "^11.5.0",
     "@emotion/styled": "^11.3.0",
     "@mui/icons-material": "^5.2.0",
     "@mui/material": "^5.0.6",
     "@reduxjs/toolkit": "^1.8.0",
+    "axios": "^1.6.0",
     "lodash": "^4.17.21",
     "mui-image": "^1.0.7",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-hook-form": "^7.39.4",
     "react-redux": "^7.2.6",
     "redux": "^4.1.2",

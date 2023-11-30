@@ -22,6 +22,7 @@ services:
       - ./frontend/package.json:/frontend/package.json:ro
       - ./frontend/package-lock.json:/frontend/package-lock.json:ro
       - ./frontend/vite.config.js:/frontend/vite.config.js:ro
+      - ./frontend/.env:/frontend/.env:ro
     ports:
       - "127.0.0.1:3000:3000"
     networks:
