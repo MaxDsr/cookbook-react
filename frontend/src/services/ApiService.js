@@ -14,7 +14,7 @@ function deleteRecipeAPI(id) {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       const willRejectNumber = Math.floor(Math.random() * 5) + 1; // rand number between 1 and 5
-      const elementToDelete = recipes.data.find(recipe => recipe.id === id);
+      const elementToDelete = recipes.data.find(recipe => recipe._id === id);
       if (willRejectNumber === 3) {
         return reject('Assume that API call has failed and this is the error');
       }
@@ -44,7 +44,7 @@ function editRecipeAPI(data) {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       const editedRecipe = JSON.parse(JSON.stringify(data));
-      const recipeToReplace = recipes.data.find(recipe => recipe.id === editedRecipe.id);
+      const recipeToReplace = recipes.data.find(recipe => recipe._id === editedRecipe._id);
       if (!recipeToReplace) {
         reject('Something went wrong. Please try again');
         return;
@@ -60,6 +60,6 @@ function editRecipeAPI(data) {
 export const ApiService = {
   getRecipesAPI: getRecipesAPI,
   deleteRecipeAPI: deleteRecipeAPI,
-  createRecipeAPI: createRecipeAPI,
+  createRecipeAPI,
   editRecipeAPI: editRecipeAPI,
 };

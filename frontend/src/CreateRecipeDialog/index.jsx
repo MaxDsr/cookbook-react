@@ -40,8 +40,8 @@ function CreateRecipeDialog ({onClose, recipeData, open}) {
     const submitFailedCallback = () => setSubmitInProgress(false);
 
     setSubmitInProgress(true);
-    if (recipeData?.id) {
-      recipeDataToSubmit.id = recipeData?.id;
+    if (recipeData?._id) {
+      recipeDataToSubmit._id = recipeData?._id;
       dispatch(editRecipe(recipeDataToSubmit, submitDoneCallback, submitFailedCallback));
     } else {
       dispatch(createRecipe(recipeDataToSubmit, submitDoneCallback, submitFailedCallback));
@@ -55,14 +55,14 @@ function CreateRecipeDialog ({onClose, recipeData, open}) {
       setSelectedImage(null);
     }
 
-    if (open && recipeData?.id) {
+    if (open && recipeData?._id) {
       const { name, servings, time, steps, [INGREDIENTS]: ingredients, imageUrl } = recipeData;
       reset({ name, servings, time, steps,
         [INGREDIENTS]: ingredients.map((ingredientName) => ({ [INGREDIENT_NAME]: ingredientName }))
       });
       setSelectedImage(imageUrl);
     }
-  }, [open, recipeData?.id, recipeData]);
+  }, [open, recipeData?._id, recipeData]);
 
   return (
     <Dialog maxWidth={'lg'}
@@ -106,7 +106,7 @@ function CreateRecipeDialog ({onClose, recipeData, open}) {
         {submitInProgress ? <CircularProgress/> : ''}
         <Button disabled={submitInProgress} onClick={handleClose}>Cancel</Button>
         <Button disabled={submitInProgress} autoFocus onClick={() => handleSubmit(submitData)()}>
-          {recipeData?.id ? 'Edit recipe' : 'Create recipe'}
+          {recipeData?._id ? 'Edit recipe' : 'Create recipe'}
         </Button>
       </DialogActions>
     </Dialog>

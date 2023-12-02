@@ -12,7 +12,7 @@ function ViewRecipeDialog({recipeId, open, onClose, onEdit, onDelete}) {
 
   const theme = useTheme();
   const matchesSmMediaQuery = useMediaQuery(theme.breakpoints.up('md'));
-  const recipeData = useSelector(state => state.recipes.value.find((recipe) => recipe.id === recipeId)) || null;
+  const recipeData = useSelector(state => state.recipes.value.find((recipe) => recipe._id === recipeId)) || null;
 
   if (recipeData === null) {
     return null;
@@ -20,7 +20,7 @@ function ViewRecipeDialog({recipeId, open, onClose, onEdit, onDelete}) {
 
   return (
     <Dialog maxWidth='sm'
-            onClose={onClose}
+            onClose={() => onClose(true)}
             open={open}>
         <DialogContent>
           <Styled>
@@ -93,8 +93,8 @@ function ViewRecipeDialog({recipeId, open, onClose, onEdit, onDelete}) {
           </Styled>
         </DialogContent>
       <DialogActions>
-        <Button size="small" color="primary" onClick={onEdit}>Edit</Button>
-        <Button size="small" color="warning" onClick={onDelete}>Delete</Button>
+        <Button size="small" color="primary" onClick={() => onEdit(recipeId)}>Edit</Button>
+        <Button size="small" color="warning" onClick={() => onDelete(recipeId)}>Delete</Button>
       </DialogActions>
     </Dialog>
   )

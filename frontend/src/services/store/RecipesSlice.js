@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { ApiService } from "../ApiService";
 import { setErrorAlert } from "./errorAlertSlice";
+import ApiAxiosService from "../ApiAxiosService.js";
 
 export const recipesSlice = createSlice({
   name: 'recipes',
@@ -18,8 +19,8 @@ const { setRecipesRd } = recipesSlice.actions;
 
 export const setRecipes = (dispatchDoneCallback) => {
   return (dispatch) => {
-    ApiService.getRecipesAPI().then((recipes) => {
-      dispatch(setRecipesRd(recipes));
+    ApiAxiosService.get('recipes').then((recipesResponse) => {
+      dispatch(setRecipesRd(recipesResponse.data));
       dispatchDoneCallback && dispatchDoneCallback();
     });
   }

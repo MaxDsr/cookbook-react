@@ -63,11 +63,11 @@ export function RecipeCardsLayout() {
   const getRecipesView = (recipes) =>
     recipes.map((recipeCardData) =>
       <RecipeCard
-        key={'RecipeCard' + recipeCardData.id}
+        key={'RecipeCard' + recipeCardData._id}
         cardData={recipeCardData}
-        onViewClick={() => viewRecipe(recipeCardData.id)}
-        onEditClick={() => editRecipe(recipeCardData.id)}
-        onDeleteRecipe={() => deleteRecipe(recipeCardData.id)}/>
+        onViewClick={() => viewRecipe(recipeCardData._id)}
+        onEditClick={() => editRecipe(recipeCardData._id)}
+        onDeleteRecipe={() => deleteRecipe(recipeCardData._id)}/>
     );
 
   return (
@@ -84,9 +84,9 @@ export function RecipeCardsLayout() {
       </div>
       <ViewRecipeDialog
         open={viewDialogOpen}
-        recipeId={recipeData?.id}
-        onEdit={() => editRecipe(recipeData?.id)}
-        onDelete={() => deleteRecipe(recipeData?.id)}
+        recipeId={recipeData?._id}
+        onEdit={(id) => editRecipe(id)}
+        onDelete={(id) => deleteRecipe(id)}
         onClose={closeViewDialog}/>
       <CreateRecipeDialog
         open={createDialogOpen}
