@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setRecipes } from "../services/store/RecipesSlice";
 import DeleteRecipeDialog from "./DeleteRecipeDialog"
 import StyledDiv from "./styles";
-import CreateRecipeDialog from "../CreateRecipeDialog";
+import CreateEditRecipeDialog from "../CreateEditRecipeDialog";
 import ViewRecipeDialog from "../ViewRecipeDialog";
 import {getRecipeById} from "./helpers";
 
@@ -88,7 +88,7 @@ export function RecipeCardsLayout() {
         onEdit={(id) => editRecipe(id)}
         onDelete={(id) => deleteRecipe(id)}
         onClose={closeViewDialog}/>
-      <CreateRecipeDialog
+      <CreateEditRecipeDialog
         open={createDialogOpen}
         recipeData={recipeData}
         onClose={closeCreateEditDialog}/>

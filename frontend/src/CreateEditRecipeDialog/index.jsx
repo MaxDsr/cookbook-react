@@ -16,7 +16,7 @@ import IngredientFields from "./IngredientFields";
 import FormField from "./FormField";
 import StyledForm from "./styles";
 
-function CreateRecipeDialog ({onClose, recipeData, open}) {
+function CreateEditRecipeDialog ({onClose, recipeData, open}) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [submitInProgress, setSubmitInProgress] = useState(false);
   const dispatch = useDispatch();
@@ -113,4 +113,4 @@ function CreateRecipeDialog ({onClose, recipeData, open}) {
   );
 }
 
-export default CreateRecipeDialog;
+export default CreateEditRecipeDialog;
