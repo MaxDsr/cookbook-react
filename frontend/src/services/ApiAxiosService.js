@@ -5,10 +5,10 @@ const AXIOS_DEFAULT_CONFIG = {
   timeout: 30000
 };
 
-const apiClient = axios.create(AXIOS_DEFAULT_CONFIG);
+const ApiAxiosService = axios.create(AXIOS_DEFAULT_CONFIG);
 
 
-apiClient.interceptors.response.use(
+ApiAxiosService.interceptors.response.use(
   (axiosResponse) => {
     return axiosResponse.data;
   },
@@ -21,4 +21,4 @@ apiClient.interceptors.response.use(
   }
 )
 
-export default apiClient;
+export default ApiAxiosService;

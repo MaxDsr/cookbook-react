@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { ApiService } from "../ApiService";
 import { setErrorAlert } from "./errorAlertSlice";
 import ApiAxiosService from "../ApiAxiosService.js";
 
@@ -19,19 +18,24 @@ const { setRecipesRd } = recipesSlice.actions;
 
 export const setRecipes = (dispatchDoneCallback) => {
   return (dispatch) => {
-    ApiAxiosService.get('recipes').then((recipesResponse) => {
-      dispatch(setRecipesRd(recipesResponse.data));
-      dispatchDoneCallback && dispatchDoneCallback();
-    });
+    ApiAxiosService.get('recipes').then(
+      (recipesResponse) => {
+        dispatch(setRecipesRd(recipesResponse.data));
+        dispatchDoneCallback && dispatchDoneCallback();
+      },
+      (error) => {
+        dispatch(setErrorAlert(error.message));
+      }
+    );
   }
 };
 
 export const createRecipe = (recipe, dispatchDoneCallback, dispatchFailedCallback) => {
   return (dispatch) => {
-    ApiService.createRecipeAPI(recipe).then(
+    ApiAxiosService.post('/recipes/create').then(
         () => setRecipes(dispatchDoneCallback)(dispatch),
         (error) => {
-          dispatch(setErrorAlert(error));
+          dispatch(setErrorAlert(error.message));
           dispatchFailedCallback();
         }
     );
@@ -40,26 +44,22 @@ export const createRecipe = (recipe, dispatchDoneCallback, dispatchFailedCallbac
 
 export const editRecipe = (recipe, dispatchDoneCallback, dispatchFailedCallback) => {
   return (dispatch) => {
-    ApiService.editRecipeAPI(recipe).then(
-        () => setRecipes(dispatchDoneCallback)(dispatch),
-        (error) => {
-          dispatch(setErrorAlert(error));
-          dispatchFailedCallback();
-        }
-    );
+    ApiAxiosService.put(`/recipes/edit/${recipe._id}`, {...recipe}).then(
+      () => setRecipes(dispatchDoneCallback)(dispatch),
+      (error) => {
+        dispatch(setErrorAlert(error));
+        dispatchFailedCallback();
+      }
+    )
   }
 };
 
 export const deleteRecipe = (recipeId, dispatchDoneCallback) => {
   return (dispatch) => {
-    ApiService.deleteRecipeAPI(recipeId).then(
-      (isDeleted) => {
-        if (isDeleted) {
-          setRecipes(dispatchDoneCallback)(dispatch);
-        }
-      },
-      (errorMessage) => {
-        dispatch(setErrorAlert(errorMessage));
+    ApiAxiosService.delete(`/recipes/delete/${recipeId}`).then(
+      () => setRecipes(dispatchDoneCallback)(dispatch),
+      (error) => {
+        dispatch(setErrorAlert(error.message));
         dispatchDoneCallback && dispatchDoneCallback();
       }
     );
