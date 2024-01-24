@@ -1,7 +1,7 @@
-import {Model, ObjectId} from "mongoose";
+import {Model} from "mongoose";
+import {Entity} from "@/contracts/entity";
 
-export interface IRecipe {
-  _id: ObjectId
+export interface IRecipe extends Entity {
   name: string
   imageUrl: string
   ingredients: Array<string>

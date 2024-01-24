@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose'
-import {IRecipe, IRecipeMethods, RecipeModel} from "@/contracts/recipes";
+import {IRecipe, IRecipeMethods, RecipeModel} from "@/contracts/recipe";
 
 
 const schema = new Schema<IRecipe, RecipeModel, IRecipeMethods>(
