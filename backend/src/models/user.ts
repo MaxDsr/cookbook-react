@@ -1,36 +1,13 @@
-import { Schema, model } from 'mongoose'
-import { compareSync } from 'bcrypt'
+import {model, Schema} from "mongoose";
+import {IUser, UserModel} from "@/contracts/user";
 
-import { IUser, IUserMethods, UserModel } from '@/contracts/user'
 
-const schema = new Schema<IUser, UserModel, IUserMethods>(
+const schema = new Schema<IUser, UserModel>(
   {
-    email: String,
+    username: String,
     password: String,
-    firstName: String,
-    lastName: String,
-    verified: {
-      type: Boolean,
-      default: false
-    },
-    verifications: [{ type: Schema.Types.ObjectId, ref: 'Verification' }],
-    resetPasswords: [{ type: Schema.Types.ObjectId, ref: 'ResetPassword' }]
-  },
-  { timestamps: true }
-)
+    tokens: [{type: String}],
+  }
+);
 
-schema.methods.comparePassword = function (password: string) {
-  return compareSync(password, this.password)
-}
-
-schema.methods.toJSON = function () {
-  const obj = this.toObject()
-
-  delete obj.password
-  delete obj.verifications
-  delete obj.resetPasswords
-
-  return obj
-}
-
-export const User = model<IUser, UserModel>('User', schema)
+export const User = model<IUser, UserModel>('users', schema);

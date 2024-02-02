@@ -6,8 +6,6 @@ import '@/infrastructure/logger'
 import { mongoose, redis } from '@/dataSources'
 import {
   corsMiddleware,
-  authMiddleware,
-  notFoundMiddleware
 } from '@/middlewares'
 import { router } from '@/routes'
 import { i18next, i18nextHttpMiddleware } from '@/i18n'
@@ -27,9 +25,7 @@ app.use(
   express.urlencoded({ limit: '10mb', extended: true }),
   corsMiddleware,
   i18nextHttpMiddleware.handle(i18next),
-  authMiddleware,
   router,
-  notFoundMiddleware
 )
 
 app.listen(process.env.APP_PORT)
