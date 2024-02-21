@@ -1,23 +1,26 @@
 import {Router} from "express";
 import {recipeController} from "@/controllers";
-import {checkJwt} from "@/middlewares/auth0CheckJWT";
+import {checkJwtAuth} from "@/middlewares/checkJwtAuth";
 
 export const recipes = (router: Router): void => {
   router.get(
     '/recipes',
-    checkJwt,
+    checkJwtAuth,
     recipeController.getAll
   ),
   router.post(
     '/recipes/create',
+    checkJwtAuth,
     recipeController.create
   ),
   router.put(
     '/recipes/edit/:id',
+    checkJwtAuth,
     recipeController.edit
   ),
   router.delete(
     '/recipes/delete/:id',
+    checkJwtAuth,
     recipeController.delete
   )
 }
