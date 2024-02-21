@@ -1,9 +1,11 @@
 import {Router} from "express";
 import {recipeController} from "@/controllers";
+import {checkJwt} from "@/middlewares/auth0CheckJWT";
 
 export const recipes = (router: Router): void => {
   router.get(
     '/recipes',
+    checkJwt,
     recipeController.getAll
   ),
   router.post(

@@ -4,11 +4,9 @@ import 'dotenv/config'
 
 import '@/infrastructure/logger'
 import { mongoose, redis } from '@/dataSources'
-import {
-  corsMiddleware,
-} from '@/middlewares'
 import { router } from '@/routes'
 import { i18next, i18nextHttpMiddleware } from '@/i18n'
+import {corsMiddleware} from "@/middlewares/corsMiddleware";
 
 mongoose.run()
 redis.run()
