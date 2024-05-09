@@ -9,6 +9,9 @@ import StyledDiv from "./styles";
 import CreateEditRecipeDialog from "../CreateEditRecipeDialog";
 import ViewRecipeDialog from "../ViewRecipeDialog";
 import {getRecipeById} from "./helpers";
+import {Box, Grid} from "@mui/material";
+import ProfileMenu from "../ProfileMenu/index.jsx";
+import TopBar from "../TopBar/index.jsx";
 
 export function RecipeCardsLayout() {
   const [recipesLoading, setRecipesLoading] = useState(true);
@@ -70,15 +73,21 @@ export function RecipeCardsLayout() {
         onDeleteRecipe={() => deleteRecipe(recipeCardData._id)}/>
     );
 
+
+
   return (
     <StyledDiv>
-      <div className="button-wrap">
-        <Button variant="contained"
-                disabled={recipesLoading}
-                onClick={() => setCreateDialogOpen(true)}>
-          Create new recipe
-        </Button>
-      </div>
+      <TopBar
+        createRecipeButton={
+          <Button variant="contained"
+                  disabled={recipesLoading}
+                  onClick={() => setCreateDialogOpen(true)}>
+            Create new recipe
+          </Button>
+        }
+      />
+
+
       <div className={`cards ${recipes && !recipesLoading ? 'loaded' : 'isLoading'}`}>
         {recipes && !recipesLoading ? getRecipesView(recipes) : <CircularProgress/>}
       </div>

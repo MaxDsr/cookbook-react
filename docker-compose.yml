@@ -13,16 +13,8 @@ services:
       dockerfile: ./docker/Dockerfile
     container_name: "cookbook-frontend"
     volumes:
-      - ./frontend/public:/frontend/public:ro
-      - ./frontend/src:/frontend/src:ro
-      - ./frontend/.dockerignore:/frontend/.dockerignore:ro
-      - ./frontend/.eslintrc.cjs:/frontend/.eslintrc.cjs:ro
-      - ./frontend/.gitignore:/frontend/.gitignore:ro
-      - ./frontend/index.html:/frontend/index.html:ro
-      - ./frontend/package.json:/frontend/package.json:ro
-      - ./frontend/package-lock.json:/frontend/package-lock.json:ro
-      - ./frontend/vite.config.js:/frontend/vite.config.js:ro
-      - ./frontend/.env:/frontend/.env:ro
+      - ./frontend:/frontend
+      - /frontend/node_modules
     ports:
       - "127.0.0.1:3000:3000"
     networks:

@@ -27,12 +27,6 @@ export default styled('div')`
     }
   }
 
-  .button-wrap {
-    margin: 24px 0;
-    display: flex;
-    justify-content: center;
-  }
-
   @media (min-width: 640px) {
     .cards.loaded {
       gap: 2.5rem;
