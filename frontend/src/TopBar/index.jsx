@@ -1,6 +1,8 @@
 import {Grid} from "@mui/material";
 import ProfileMenu from "../ProfileMenu/index.jsx";
 import {useAuth0} from "@auth0/auth0-react";
+import Button from "@mui/material/Button";
+
 
 function TopBar({createRecipeButton}) {
   const {isLoading, user, loginWithRedirect} = useAuth0();

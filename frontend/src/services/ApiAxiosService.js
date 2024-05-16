@@ -21,4 +21,8 @@ ApiAxiosService.interceptors.response.use(
   }
 )
 
+ApiAxiosService.setTokenCustom = (token) => {
+  ApiAxiosService.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+}
+
 export default ApiAxiosService;

@@ -10,17 +10,14 @@ export const recipes = (router: Router): void => {
   ),
   router.post(
     '/recipes/create',
-    checkJwtAuth,
     recipeController.create
   ),
   router.put(
     '/recipes/edit/:id',
-    checkJwtAuth,
     recipeController.edit
   ),
   router.delete(
     '/recipes/delete/:id',
-    checkJwtAuth,
     recipeController.delete
   )
 }

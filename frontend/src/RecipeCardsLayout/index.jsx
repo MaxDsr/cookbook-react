@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import RecipeCard from "../RecipeCard";
 import CircularProgress from "@mui/material/CircularProgress";
-import Button from "@mui/material/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { setRecipes } from "../services/store/RecipesSlice";
 import DeleteRecipeDialog from "./DeleteRecipeDialog"
@@ -9,14 +8,10 @@ import StyledDiv from "./styles";
 import CreateEditRecipeDialog from "../CreateEditRecipeDialog";
 import ViewRecipeDialog from "../ViewRecipeDialog";
 import {getRecipeById} from "./helpers";
-import {Box, Grid} from "@mui/material";
-import ProfileMenu from "../ProfileMenu/index.jsx";
-import TopBar from "../TopBar/index.jsx";
 
-export function RecipeCardsLayout() {
+export function RecipeCardsLayout({createDialogOpen, setCreateDialogOpen}) {
   const [recipesLoading, setRecipesLoading] = useState(true);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteRecipeId, setDeleteRecipeId] = useState(null);
   const [recipeData, setRecipeData] = useState(null);
@@ -77,17 +72,6 @@ export function RecipeCardsLayout() {
 
   return (
     <StyledDiv>
-      <TopBar
-        createRecipeButton={
-          <Button variant="contained"
-                  disabled={recipesLoading}
-                  onClick={() => setCreateDialogOpen(true)}>
-            Create new recipe
-          </Button>
-        }
-      />
-
-
       <div className={`cards ${recipes && !recipesLoading ? 'loaded' : 'isLoading'}`}>
         {recipes && !recipesLoading ? getRecipesView(recipes) : <CircularProgress/>}
       </div>
