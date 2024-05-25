@@ -33,7 +33,8 @@ function Root() {
 
       const recordUser = async () => {
         try {
-          await ApiAxiosService.post("/recordUser", data);
+          const response = await ApiAxiosService.post("/recordUser", data);
+          return response?.data?.userId
         } catch (error) {
           dispatch(setErrorAlert(error?.message));
         }
@@ -42,7 +43,8 @@ function Root() {
       const recordUserToken = async () => {
         const token = await getAccessTokenSilently();
         ApiAxiosService.setTokenCustom(token);
-        await recordUser();
+        const userId = await recordUser();
+        ApiAxiosService.setUserIdHeader(userId);
         setTokenIsSet(true);
       }
 

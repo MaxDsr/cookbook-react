@@ -8,23 +8,23 @@ export const recordUserController = {
     const {email, name, nickname, picture, auth0Id} = req.body;
     let user;
 
+    const sendOkResponse = (userId: string) => res.status(StatusCodes.OK).json({
+      message: "Ok",
+      status: StatusCodes.OK,
+      data: { userId }
+    });
+
     try {
       const findResult = await User.findOne({auth0Id});
 
       if (!!findResult) {
-        return res.status(StatusCodes.OK).json({
-          message: "Ok",
-          status: StatusCodes.OK
-        });
+        return sendOkResponse(findResult.id);
       }
 
       user = new User({email, name, nickname, picture, auth0Id});
       await user.save();
 
-      return res.status(StatusCodes.OK).json({
-        message: "Ok",
-        status: StatusCodes.OK
-      });
+      return sendOkResponse(user.id);
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: error,

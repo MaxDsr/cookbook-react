@@ -25,4 +25,8 @@ ApiAxiosService.setTokenCustom = (token) => {
   ApiAxiosService.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 }
 
+ApiAxiosService.setUserIdHeader = (userId) => {
+  ApiAxiosService.defaults.headers.common['user-id'] = userId;
+}
+
 export default ApiAxiosService;

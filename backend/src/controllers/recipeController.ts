@@ -2,6 +2,7 @@ import {Request, Response} from "express";
 import {StatusCodes} from "http-status-codes";
 import {Recipe} from "@/models";
 import {IRecipe} from "@/contracts/recipe";
+import {Types} from "mongoose";
 
 
 export const recipeController = {
@@ -31,8 +32,15 @@ export const recipeController = {
     res: Response
   ) => {
     try {
-      const allRecipes = await Recipe.find();
+      if (!req.userId) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          message: "User not found",
+          status: StatusCodes.NOT_FOUND
+        });
+      }
 
+      const userId = new Types.ObjectId(req.userId);
+      const allRecipes = await Recipe.find({userId});
       return res.status(StatusCodes.OK).json({
         data: allRecipes,
         status: StatusCodes.OK

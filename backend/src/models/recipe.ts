@@ -1,5 +1,6 @@
-import { Schema, model } from 'mongoose'
+import {Schema, model, Types} from 'mongoose'
 import {IRecipe, IRecipeMethods, RecipeModel} from "@/contracts/recipe";
+import ObjectId = Types.ObjectId;
 
 
 const schema = new Schema<IRecipe, RecipeModel, IRecipeMethods>(
@@ -9,7 +10,8 @@ const schema = new Schema<IRecipe, RecipeModel, IRecipeMethods>(
     ingredients: [{type: String}],
     time: String,
     servings: Number,
-    steps: String
+    steps: String,
+    userId: ObjectId
   }
 );
 

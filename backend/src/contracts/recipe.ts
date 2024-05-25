@@ -1,4 +1,4 @@
-import {Model} from "mongoose";
+import {Model, Types} from "mongoose";
 import {Entity} from "@/contracts/entity";
 
 export interface IRecipe extends Entity {
@@ -7,7 +7,8 @@ export interface IRecipe extends Entity {
   ingredients: Array<string>
   time: string,
   servings: number
-  steps: string
+  steps: string,
+  userId: Types.ObjectId
 }
 
 export interface IRecipeMethods {
