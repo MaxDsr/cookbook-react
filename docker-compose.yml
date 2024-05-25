@@ -29,17 +29,8 @@ services:
         user: worker
     container_name: "cookbook-backend"
     volumes:
-      - ./backend/src:/backend/src
-      - ./backend/.dockerignore:/backend/.dockerignore
-      - ./backend/.env:/backend/.env
-      - ./backend/.env.example:/backend/.env.example
-      - ./backend/.eslintrc:/backend/.eslintrc
-      - ./backend/.nvmrc:/backend/.nvmrc
-      - ./backend/.prettierrc:/backend/.prettierrc
-      - ./backend/api-logs.log:/backend/api-logs.log
-      - ./backend/package.json:/backend/package.json
-      - ./backend/package-lock.json:/backend/package-lock.json
-      - ./backend/tsconfig.json:/backend/tsconfig.json
+      - ./backend:/backend
+      - /backend/node_modules
     ports:
       - "127.0.0.1:3001:3001"
     networks:
