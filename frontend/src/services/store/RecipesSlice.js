@@ -32,7 +32,7 @@ export const setRecipes = (dispatchDoneCallback) => {
 
 export const createRecipe = (recipe, dispatchDoneCallback, dispatchFailedCallback) => {
   return (dispatch) => {
-    ApiAxiosService.post('/recipes/create').then(
+    ApiAxiosService.post('/recipes/create', recipe).then(
         () => setRecipes(dispatchDoneCallback)(dispatch),
         (error) => {
           dispatch(setErrorAlert(error.message));

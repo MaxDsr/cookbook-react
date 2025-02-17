@@ -1,5 +1,6 @@
 import {Model, Types} from "mongoose";
 import {Entity} from "@/contracts/entity";
+import {IUser} from "@/contracts/user";
 
 export interface IRecipe extends Entity {
   name: string
@@ -8,11 +9,7 @@ export interface IRecipe extends Entity {
   time: string,
   servings: number
   steps: string,
-  userId: Types.ObjectId
+  userId: IUser['_id']
 }
 
-export interface IRecipeMethods {
-  enoughIngredients: (time: string) => boolean
-}
-
-export type RecipeModel = Model<IRecipe, unknown, IRecipeMethods>;
+export type RecipeModel = Model<IRecipe>;

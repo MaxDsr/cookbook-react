@@ -10,8 +10,17 @@ export const recipeController = {
     req: Request,
     res: Response
   ) => {
-    const body: IRecipe = req.body;
+
+    if (!req.userId) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: "User not found",
+        status: StatusCodes.NOT_FOUND
+      });
+    }
+
+    const body: IRecipe = {...req.body, userId: req.userId};
     const recipe = new Recipe({...body});
+
 
     try {
       await recipe.save();
@@ -56,58 +65,93 @@ export const recipeController = {
     req: Request,
     res: Response,
   ) => {
-    const recipeId: IRecipe['_id'] = req.params.id;
-    const body: IRecipe = req.body;
-    delete body._id;
-
-    const result = await Recipe.updateOne({_id: recipeId}, {$set: body});
-
-    if (result.matchedCount === 0) {
+    if (!req.userId) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        message: "Recipe doesn't exists",
+        message: "User not found",
         status: StatusCodes.NOT_FOUND
       });
     }
 
-    if (result.modifiedCount === 0) {
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Couldn't update the recipe",
-        status: StatusCodes.INTERNAL_SERVER_ERROR
+    const recipeId: IRecipe['_id'] = req.params.id;
+    const body: IRecipe = req.body;
+    delete body._id;
+
+    // const result = await Recipe.updateOne({_id: recipeId}, {$set: body});
+    const recipeDoc = await Recipe.findById(recipeId);
+
+    if (!recipeDoc) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          message: "Recipe doesn't exists",
+          status: StatusCodes.NOT_FOUND
+        });
+    }
+
+    if (recipeDoc.userId?.toString() !== req.userId) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: "Can't update recipe",
+        status: StatusCodes.FORBIDDEN,
       });
     }
 
-    if (result.modifiedCount === 1 && result.matchedCount === 1) {
+    recipeDoc.name = body.name;
+    recipeDoc.imageUrl = body.imageUrl;
+    recipeDoc.ingredients = body.ingredients;
+    recipeDoc.time = body.time;
+    recipeDoc.servings = body.servings;
+    recipeDoc.steps = body.steps;
+
+    try {
+      await recipeDoc.save();
       return res.status(StatusCodes.OK).json({
         message: "Ok",
         status: StatusCodes.OK
       });
+    } catch (error: any) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Couldn't update the recipe",
+        status: StatusCodes.INTERNAL_SERVER_ERROR
+      })
     }
-
-
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Something went wrong",
-      status: StatusCodes.INTERNAL_SERVER_ERROR
-    });
   },
   delete: async (
     req: Request,
     res: Response
   ) => {
-    const recipeId: IRecipe['_id'] = req.params.id;
-    const result = await Recipe.deleteOne({_id: recipeId});
-
-    if (result.deletedCount === 1) {
-      return res.status(StatusCodes.OK).json({
-        message: "ok",
-        status: StatusCodes.OK
+    if (!req.userId) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: "User not found",
+        status: StatusCodes.NOT_FOUND
       });
     }
 
-    if (result.deletedCount === 0) {
+    const recipeId: IRecipe['_id'] = req.params.id;
+    const recipeDoc = await Recipe.findById(recipeId);
+
+    if (!recipeDoc) {
       return res.status(StatusCodes.NOT_FOUND).json({
         message: "Recipe doesn't exists",
         status: StatusCodes.NOT_FOUND
       });
+    }
+
+    if (recipeDoc.userId?.toString() !== req.userId) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: "Can't delete recipe",
+        status: StatusCodes.FORBIDDEN,
+      });
+    }
+
+    try {
+      await recipeDoc.deleteOne();
+      return res.status(StatusCodes.OK).json({
+        message: "Ok",
+        status: StatusCodes.OK
+      });
+    } catch {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Couldn't delete the recipe",
+        status: StatusCodes.INTERNAL_SERVER_ERROR
+      })
     }
 
     return res.status(StatusCodes.NOT_FOUND).json({

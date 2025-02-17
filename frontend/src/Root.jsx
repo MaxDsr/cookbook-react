@@ -63,7 +63,7 @@ function Root() {
           </Button>
         }
       />
-      {isAuthenticated && tokenIsSet && <RecipeCardsLayout createDialogOpen={createDialogOpen}/>}
+      {isAuthenticated && tokenIsSet && <RecipeCardsLayout createDialogOpen={createDialogOpen} setCreateDialogOpen={setCreateDialogOpen}/>}
       <Snackbar open={!!alertText} autoHideDuration={6000} onClose={clearAlert}>
         <Alert onClose={clearAlert} severity="error" sx={{width: '100%'}}>
           {alertText}
