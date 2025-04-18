@@ -1,12 +1,4 @@
 services:
-  mongoDB:
-    image: mongo
-    restart: always
-    ports:
-      - "127.0.0.1:3002:27017"
-    container_name: "cookbook-mongo"
-    networks:
-      - cookbook-app
   frontend:
     build:
       context: ./frontend
@@ -20,22 +12,48 @@ services:
     networks:
       - cookbook-app
     command: npm run dev
-  backend:
+
+  web:
     build:
-      context: ./backend
-      dockerfile: ./docker/Dockerfile
-      args:
-        uid: 501
-        user: worker
-    container_name: "cookbook-backend"
-    volumes:
-      - ./backend:/backend
-      - /backend/node_modules
+      context: ./backend-python
+      dockerfile: Dockerfile
+    container_name: "cookbook-python-backend"
     ports:
-      - "127.0.0.1:3001:3001"
+      - "127.0.0.1:3101:5000"
+    volumes:
+      - ./backend-python:/app
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - DB_USER=root
+      - DB_PASSWORD=rootpassword
+      - DB_HOST=db
+      - DB_NAME=cookbook_db
+      - AUTH0_DOMAIN=dev-42ovpq2mja2h0nqq.us.auth0.com
+      - AUTH0_CLIENT_ID=osfej91vbYVhyiJaI8bLqYSdwnBbAWvQ
+      - AUTH0_CLIENT_SECRET=your-client-secret
+      - AUTH0_API_AUDIENCE=https://dev-42ovpq2mja2h0nqq.us.auth0.com/api/v2/
+    depends_on:
+      - db
     networks:
       - cookbook-app
-    command: npm run watch
+
+  db:
+    image: mysql:8.0
+    container_name: "cookbook-mysql"
+    ports:
+      - "127.0.0.1:3102:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=cookbook_db
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - cookbook-app
+
 networks:
   cookbook-app:
     driver: bridge
+
+volumes:
+  mysql_data:

@@ -1,0 +1,204 @@
+{
+	"info": {
+		"_postman_id": "cookbook-api",
+		"name": "Cookbook API",
+		"description": "Collection for testing Cookbook API endpoints with Auth0 authentication",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Auth0 Token",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"client_id\": \"{{AUTH0_CLIENT_ID}}\",\n    \"client_secret\": \"{{AUTH0_CLIENT_SECRET}}\",\n    \"audience\": \"{{AUTH0_API_AUDIENCE}}\",\n    \"grant_type\": \"client_credentials\"\n}"
+				},
+				"url": {
+					"raw": "https://{{AUTH0_DOMAIN}}/oauth/token",
+					"protocol": "https",
+					"host": ["{{AUTH0_DOMAIN}}"],
+					"path": ["oauth", "token"]
+				}
+			},
+			"response": [
+				{
+					"name": "Store Token",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": ""
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [],
+					"cookie": [],
+					"body": "{\n    \"access_token\": \"{{access_token}}\",\n    \"token_type\": \"Bearer\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Get All Recipes",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3101/api/recipes",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "3101",
+					"path": ["api", "recipes"]
+				}
+			}
+		},
+		{
+			"name": "Get Recipe by ID",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3101/api/recipes/{{recipe_id}}",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "3101",
+					"path": ["api", "recipes", "{{recipe_id}}"],
+					"variable": [
+						{
+							"key": "recipe_id",
+							"value": "your-recipe-uuid-here",
+							"description": "UUID of the recipe to retrieve"
+						}
+					]
+				}
+			}
+		},
+		{
+			"name": "Create Recipe",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Spaghetti Carbonara\",\n    \"description\": \"Classic Italian pasta dish with eggs, cheese, and pancetta\",\n    \"ingredients\": [\n        \"400g spaghetti\",\n        \"4 large eggs\",\n        \"150g pancetta, diced\",\n        \"50g parmesan cheese, grated\",\n        \"Freshly ground black pepper\",\n        \"Salt to taste\"\n    ],\n    \"instructions\": \"1. Cook spaghetti al dente\\n2. Fry pancetta until crispy\\n3. Mix eggs with cheese\\n4. Combine everything and serve\",\n    \"prep_time\": 10,\n    \"cook_time\": 15,\n    \"servings\": 4\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3101/api/recipes",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "3101",
+					"path": ["api", "recipes"]
+				}
+			}
+		},
+		{
+			"name": "Update Recipe",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Updated Spaghetti Carbonara\",\n    \"description\": \"Updated description\",\n    \"ingredients\": [\n        \"500g spaghetti\",\n        \"5 large eggs\",\n        \"200g pancetta, diced\",\n        \"75g parmesan cheese, grated\",\n        \"Freshly ground black pepper\",\n        \"Salt to taste\"\n    ],\n    \"instructions\": \"Updated instructions\",\n    \"prep_time\": 15,\n    \"cook_time\": 20,\n    \"servings\": 6\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3101/api/recipes/{{recipe_id}}",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "3101",
+					"path": ["api", "recipes", "{{recipe_id}}"],
+					"variable": [
+						{
+							"key": "recipe_id",
+							"value": "your-recipe-uuid-here",
+							"description": "UUID of the recipe to update"
+						}
+					]
+				}
+			}
+		},
+		{
+			"name": "Delete Recipe",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3101/api/recipes/{{recipe_id}}",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "3101",
+					"path": ["api", "recipes", "{{recipe_id}}"],
+					"variable": [
+						{
+							"key": "recipe_id",
+							"value": "your-recipe-uuid-here",
+							"description": "UUID of the recipe to delete"
+						}
+					]
+				}
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "AUTH0_DOMAIN",
+			"value": "your-tenant.auth0.com"
+		},
+		{
+			"key": "AUTH0_CLIENT_ID",
+			"value": "your-client-id"
+		},
+		{
+			"key": "AUTH0_CLIENT_SECRET",
+			"value": "your-client-secret"
+		},
+		{
+			"key": "AUTH0_API_AUDIENCE",
+			"value": "your-api-identifier"
+		}
+	]
+} 

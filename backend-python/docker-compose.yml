@@ -1,0 +1,37 @@
+services:
+  web:
+    build: .
+    ports:
+      - "3101:5000"
+    volumes:
+      - .:/app
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - DB_USER=root
+      - DB_PASSWORD=rootpassword
+      - DB_HOST=db
+      - DB_NAME=cookbook_db
+    depends_on:
+      - db
+    networks:
+      - cookbook-network
+
+  db:
+    image: mysql:8.0
+    ports:
+      - "3102:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=cookbook_db
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - cookbook-network
+
+networks:
+  cookbook-network:
+    driver: bridge
+
+volumes:
+  mysql_data: 
