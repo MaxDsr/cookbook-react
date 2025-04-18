@@ -8,16 +8,16 @@ services:
       - ./frontend:/frontend
       - /frontend/node_modules
     ports:
-      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:3100:3000"
     networks:
       - cookbook-app
     command: npm run dev
 
-  web:
+  backend:
     build:
       context: ./backend-python
       dockerfile: Dockerfile
-    container_name: "cookbook-python-backend"
+    container_name: "cookbook-backend"
     ports:
       - "127.0.0.1:3101:5000"
     volumes:
