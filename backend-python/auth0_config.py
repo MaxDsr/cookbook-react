@@ -1,9 +1,10 @@
 import os
+import requests
 from functools import wraps
 from flask import request, jsonify
 from jose import jwt
-from auth0.v3.authentication import GetToken
-from auth0.v3.management import Auth0
+from auth0.authentication import GetToken
+from auth0.management import Auth0
 
 # Auth0 Configuration
 AUTH0_DOMAIN = os.getenv('AUTH0_DOMAIN')
