@@ -14,10 +14,11 @@ AUTH0_API_AUDIENCE = os.getenv('AUTH0_API_AUDIENCE')
 AUTH0_ALGORITHMS = ['RS256']
 
 # Auth0 Management API
-auth0 = Auth0(
-    domain=AUTH0_DOMAIN,
-    client_id=AUTH0_CLIENT_ID,
-    client_secret=AUTH0_CLIENT_SECRET
+auth0 = GetToken(AUTH0_DOMAIN, AUTH0_CLIENT_ID)
+token_response = auth0.client_credentials(
+    AUTH0_CLIENT_ID,
+    AUTH0_CLIENT_SECRET,
+    f'https://{AUTH0_DOMAIN}/api/v2/'
 )
 
 def get_token_auth_header():

@@ -22,17 +22,6 @@ services:
       - "127.0.0.1:3101:5000"
     volumes:
       - ./backend-python:/app
-    environment:
-      - FLASK_APP=app.py
-      - FLASK_ENV=development
-      - DB_USER=root
-      - DB_PASSWORD=rootpassword
-      - DB_HOST=db
-      - DB_NAME=cookbook_db
-      - AUTH0_DOMAIN=dev-42ovpq2mja2h0nqq.us.auth0.com
-      - AUTH0_CLIENT_ID=osfej91vbYVhyiJaI8bLqYSdwnBbAWvQ
-      - AUTH0_CLIENT_SECRET=your-client-secret
-      - AUTH0_API_AUDIENCE=https://dev-42ovpq2mja2h0nqq.us.auth0.com/api/v2/
     depends_on:
       - db
     networks:
