@@ -26,6 +26,7 @@
     "migrate-mongo-status": "migrate-mongo status",
     "migrate-mongo-up": "migrate-mongo up",
     "migrate-mongo-down": "migrate-mongo down",
+    "seed-recipes": "docker exec -it cookbook-backend npx ts-node --files -r tsconfig-paths/register ./src/scripts/seedRecipes.ts",
     "rm:public": "rm -rf ./public",
     "copy:files": "cp .env ./public/.env && cp -R ./src/templates ./public",
     "lint": "eslint --debug ./src",
