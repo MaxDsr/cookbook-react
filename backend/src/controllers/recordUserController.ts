@@ -1,5 +1,5 @@
 import {Request, Response} from "express";
-import {User} from "@/models/user";
+import {User} from "@/models";
 import {StatusCodes} from "http-status-codes";
 
 
@@ -15,13 +15,13 @@ export const recordUserController = {
     });
 
     try {
-      const findResult = await User.findOne({auth0Id});
+      const findResult = await User.findById(auth0Id);
 
       if (!!findResult) {
         return sendOkResponse(findResult.id);
       }
 
-      user = new User({email, name, nickname, picture, auth0Id});
+      user = new User({_id: auth0Id, email, name, nickname, picture});
       await user.save();
 
       return sendOkResponse(user.id);

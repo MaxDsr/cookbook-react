@@ -6,8 +6,7 @@ const schema = new Schema<IUser, UserModel, unknown>(
     email: String,
     name: String,
     nickname: String,
-    picture: String,
-    auth0Id: String
+    picture: String
   }, {strict: "throw"}
 )
 
