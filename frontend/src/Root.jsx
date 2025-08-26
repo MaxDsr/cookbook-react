@@ -43,8 +43,7 @@ function Root() {
       const recordUserToken = async () => {
         const token = await getAccessTokenSilently();
         ApiAxiosService.setTokenCustom(token);
-        const userId = await recordUser();
-        ApiAxiosService.setUserIdHeader(userId);
+        await recordUser();
         setTokenIsSet(true);
       }
 
