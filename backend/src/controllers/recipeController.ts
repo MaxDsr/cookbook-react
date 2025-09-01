@@ -158,5 +158,16 @@ export const recipeController = {
       message: "not found",
       status: StatusCodes.NOT_FOUND
     });
+  },
+
+  
+  uploadImage: async (
+    req: Request,
+    res: Response
+  ) => {
+    return res.status(StatusCodes.OK).json({
+      message: "Ok",
+      status: StatusCodes.OK
+    });
   }
 }

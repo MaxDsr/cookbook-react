@@ -19,5 +19,9 @@ export const recipes = (router: Router): void => {
   router.delete(
     '/recipes/delete/:id',
     recipeController.delete
+  ),
+  router.post(
+    '/recipes/upload-image',
+    recipeController.uploadImage
   )
 }
