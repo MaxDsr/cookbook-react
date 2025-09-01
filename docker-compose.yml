@@ -7,6 +7,21 @@ services:
     container_name: "cookbook-mongo"
     networks:
       - cookbook-app
+  minio:
+    image: minio/minio:latest
+    restart: always
+    ports:
+      - "127.0.0.1:3003:9000"
+      - "127.0.0.1:3004:9001"
+    container_name: "cookbook-minio"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    networks:
+      - cookbook-app
+    command: server /data --console-address ":9001"
   frontend:
     build:
       context: ./frontend
@@ -39,3 +54,5 @@ services:
 networks:
   cookbook-app:
     driver: bridge
+volumes:
+  minio_data:
