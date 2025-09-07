@@ -3,6 +3,8 @@ import {StatusCodes} from "http-status-codes";
 import {Recipe} from "@/models";
 import {IRecipe} from "@/contracts/recipe";
 import {Types} from "mongoose";
+import {minio} from "@/dataSources";
+import {createCryptoString} from "@/utils/cryptoString";
 
 
 export const recipeController = {
@@ -165,9 +167,77 @@ export const recipeController = {
     req: Request,
     res: Response
   ) => {
-    return res.status(StatusCodes.OK).json({
-      message: "Ok",
-      status: StatusCodes.OK
-    });
+    try {
+      // Check if user is authenticated
+      if (!req.userId) {
+        return res.status(StatusCodes.UNAUTHORIZED).json({
+          message: "User not authenticated",
+          status: StatusCodes.UNAUTHORIZED
+        });
+      }
+
+      // Check if file was uploaded
+      if (!req.file) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: "No image file provided",
+          status: StatusCodes.BAD_REQUEST
+        });
+      }
+
+      console.log('get here');
+
+      const file = req.file;
+      
+      // Generate unique filename
+      const fileExtension = file.originalname.split('.').pop();
+      const uniqueFilename = `recipe-${Date.now()}-${createCryptoString({ length: 8 })}.${fileExtension}`;
+      
+      // Ensure bucket exists
+      const bucketName = 'recipe-pictures';
+      const bucketExists = await minio.client.bucketExists(bucketName);
+      
+      if (!bucketExists) {
+        await minio.client.makeBucket(bucketName, 'us-east-1');
+      }
+
+      // Upload file to MinIO
+      await minio.client.putObject(
+        bucketName,
+        uniqueFilename,
+        file.buffer,
+        file.size,
+        {
+          'Content-Type': file.mimetype,
+        }
+      );
+
+      console.log('File uploaded to MinIO');
+
+      // Generate presigned URL for accessing the file
+      const presignedUrl = await minio.client.presignedGetObject(
+        bucketName,
+        uniqueFilename,
+        24 * 60 * 60 // 24 hours expiration
+      );
+
+      return res.status(StatusCodes.OK).json({
+        message: "Image uploaded successfully",
+        status: StatusCodes.OK,
+        data: {
+          filename: uniqueFilename,
+          originalName: file.originalname,
+          size: file.size,
+          mimetype: file.mimetype,
+          url: presignedUrl
+        }
+      });
+
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Failed to upload image",
+        status: StatusCodes.INTERNAL_SERVER_ERROR
+      });
+    }
   }
 }

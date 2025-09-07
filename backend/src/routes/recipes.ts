@@ -1,6 +1,7 @@
 import {Router} from "express";
 import {recipeController} from "@/controllers";
 import {checkJwtAuth} from "@/middlewares/checkJwtAuth";
+import {uploadSingleImage, handleUploadError} from "@/middlewares/uploadMiddleware";
 
 export const recipes = (router: Router): void => {
   router.get(
@@ -22,6 +23,9 @@ export const recipes = (router: Router): void => {
   ),
   router.post(
     '/recipes/upload-image',
+    checkJwtAuth,
+    uploadSingleImage,
+    handleUploadError,
     recipeController.uploadImage
   )
 }
