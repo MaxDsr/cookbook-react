@@ -30,6 +30,7 @@ export const uploadSingleImage = upload.single('image')
 
 // Error handling middleware for multer
 export const handleUploadError = (err: any, req: Request, res: any, next: any) => {
+  debugger;
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(StatusCodes.BAD_REQUEST).json({

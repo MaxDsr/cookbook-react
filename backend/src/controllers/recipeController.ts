@@ -184,8 +184,6 @@ export const recipeController = {
         });
       }
 
-      console.log('get here');
-
       const file = req.file;
       
       // Generate unique filename
@@ -194,11 +192,6 @@ export const recipeController = {
       
       // Ensure bucket exists
       const bucketName = 'recipe-pictures';
-      const bucketExists = await minio.client.bucketExists(bucketName);
-      
-      if (!bucketExists) {
-        await minio.client.makeBucket(bucketName, 'us-east-1');
-      }
 
       // Upload file to MinIO
       await minio.client.putObject(
@@ -210,8 +203,6 @@ export const recipeController = {
           'Content-Type': file.mimetype,
         }
       );
-
-      console.log('File uploaded to MinIO');
 
       // Generate presigned URL for accessing the file
       const presignedUrl = await minio.client.presignedGetObject(
@@ -233,7 +224,6 @@ export const recipeController = {
       });
 
     } catch (error: any) {
-      console.error('Upload error:', error);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: "Failed to upload image",
         status: StatusCodes.INTERNAL_SERVER_ERROR
