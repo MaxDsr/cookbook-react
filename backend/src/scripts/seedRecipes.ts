@@ -2,11 +2,13 @@ import 'dotenv/config'
 import { connect, connection } from 'mongoose'
 import { Recipe } from '../models/recipe'
 import { Types } from 'mongoose'
+import imageMappings from './image-mappings.json'
+
 
 const recipes = [
   {
     name: 'Baker soup',
-    image: { filename: 'recipe-6a66d9f7-6110-42b4-8932-f5da8a96220a.jpg', etag: 'cf362a48384a892e81cc3d8eb8873649' },
+    image: { filename: imageMappings['baker-soup'].bucketFileName, etag: imageMappings['baker-soup'].etag },
     ingredients: [
       'potato',
       'tomato',
@@ -20,7 +22,7 @@ const recipes = [
   },
   {
     name: 'Bolognese pasta',
-    image: { filename: 'recipe-f6ee1ea3-00a2-4b43-a88c-3b1b76e27c36.jpg', etag: 'b622ea303a5b843f8482c3aea10c5133' },
+    image: { filename: imageMappings['bolognese-pasta'].bucketFileName, etag: imageMappings['bolognese-pasta'].etag },
     ingredients: [
       'potato',
       'tomato',
@@ -34,7 +36,7 @@ const recipes = [
   },
   {
     name: 'French fries',
-    image: { filename: 'recipe-d06f5de0-9851-4c76-b4fb-06c11247e8f0.jpg', etag: '1aa52fafcc2680a61aecb2fc6299c630' },
+    image: { filename: imageMappings['french-fries'].bucketFileName, etag: imageMappings['french-fries'].etag },
     ingredients: [
       'potato',
       'tomato',
@@ -48,7 +50,7 @@ const recipes = [
   },
   {
     name: 'Home burger',
-    image: { etag: '7bfc9e1c8b8efbb9f515224f89a15f3d', filename: 'recipe-f6c28a48-0b6b-41e4-9b68-d3ac4719f2c5.jpg' },
+    image: { etag: imageMappings['home-burger'].etag, filename: imageMappings['home-burger'].bucketFileName },
     ingredients: [
       'potato',
       'tomato',
