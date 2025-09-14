@@ -4,7 +4,7 @@ import {IUser} from "@/contracts/user";
 
 export interface IRecipe extends Entity {
   name: string
-  imageUrl: string
+  image: { filename: string, etag: string }
   ingredients: Array<string>
   time: string,
   servings: number

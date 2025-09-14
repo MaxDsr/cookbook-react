@@ -5,8 +5,11 @@ import {IRecipe} from "@/contracts/recipe";
 import {Types} from "mongoose";
 import {minio} from "@/dataSources";
 import {createCryptoString} from "@/utils/cryptoString";
+import { v4 as uuidv4 } from "uuid";
 
 
+// make a seeder script to seed the recipes with the new image structure
+// keep in mind the etags and filenames
 export const recipeController = {
   create: async(
     req: Request,
@@ -21,7 +24,45 @@ export const recipeController = {
     }
 
     const body: IRecipe = {...req.body, userId: req.userId};
-    const recipe = new Recipe({...body});
+
+    const image = req.file;
+    let imageBucketData = null;
+
+    if (image) {
+      // Generate unique filename
+      const fileExtension = image.originalname.split('.').pop();
+      const uniqueFilename = `recipe-${uuidv4()}.${fileExtension}`;
+      
+      // Ensure bucket exists
+      const bucketName = 'recipe-pictures';
+
+      // Upload file to MinIO
+      imageBucketData = await minio.client.putObject(
+        bucketName,
+        uniqueFilename,
+        image.buffer,
+        image.size,
+        {
+          'Content-Type': image.mimetype,
+        }
+      );
+
+      imageBucketData = { etag: imageBucketData.etag, filename: uniqueFilename };
+
+      const presignedUrl = await minio.client.presignedGetObject(
+        bucketName,
+        uniqueFilename,
+        5 * 60 // 5 minutes expiration
+      );
+
+      imageBucketData = { etag: imageBucketData.etag, filename: uniqueFilename, url: presignedUrl };
+    }
+    const recipe = new Recipe({
+      ...body,
+      ...(imageBucketData
+        ? { image: { etag: imageBucketData.etag, filename: imageBucketData.filename } }
+        : { image: { filename: "recipe-default.jpg", etag: "409f33f747a2671563173c30a042f778" }})
+    });
 
 
     try {
@@ -52,8 +93,22 @@ export const recipeController = {
 
       const userId = new Types.ObjectId(req.userId);
       const allRecipes = await Recipe.find({userId});
+
+      const allRecipesWithImageUrl = await Promise.all(allRecipes.map(async (recipe) => {
+        const {userId, image, ...recipeObject} = recipe.toObject();
+        
+        return {
+          ...recipeObject,
+          imageUrl: await minio.client.presignedGetObject(
+            'recipe-pictures',
+            recipe.image.filename,
+            5 * 60
+          )
+        }
+      }));
+
       return res.status(StatusCodes.OK).json({
-        data: allRecipes,
+        data: allRecipesWithImageUrl,
         status: StatusCodes.OK
       })
     } catch (error) {
@@ -96,7 +151,7 @@ export const recipeController = {
     }
 
     recipeDoc.name = body.name;
-    recipeDoc.imageUrl = body.imageUrl;
+    recipeDoc.image = body.image;
     recipeDoc.ingredients = body.ingredients;
     recipeDoc.time = body.time;
     recipeDoc.servings = body.servings;

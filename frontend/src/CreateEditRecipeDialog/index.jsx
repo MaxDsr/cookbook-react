@@ -29,7 +29,7 @@ function CreateEditRecipeDialog ({onClose, recipeData, open}) {
 
   const submitData = (data) => {
     const recipeDataToSubmit = {
-      imageUrl: selectedImage || DEFAULT_IMAGE,
+      imageUrl: selectedImage || null,
       ...data,
       [INGREDIENTS]: data[INGREDIENTS]?.map(({[INGREDIENT_NAME]: ingredientName}) => ingredientName)
     };

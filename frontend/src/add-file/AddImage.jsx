@@ -12,9 +12,9 @@ function AddImage(props) {
   const onImageSelectChange = (ev) => {
     const file = ev.target.files[0];
     const reader = new FileReader();
-    reader.onloadend = () => {
+    reader.onloadend = () => {ß
       setNewImage(reader.result);
-      props.onImageLoaded(reader.result);
+      props.onImageLoaded(file);
     };
     if (file) {
       reader.readAsDataURL(file);

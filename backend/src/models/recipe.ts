@@ -1,12 +1,11 @@
 import {Schema, model, Types} from 'mongoose'
 import {IRecipe, RecipeModel} from "@/contracts/recipe";
-import ObjectId = Types.ObjectId;
 
 
 const schema = new Schema<IRecipe, RecipeModel>(
   {
     name: String,
-    imageUrl: String,
+    image: { filename: String, etag: String },
     ingredients: [{type: String}],
     time: String,
     servings: Number,

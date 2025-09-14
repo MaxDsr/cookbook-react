@@ -11,6 +11,9 @@ export const recipes = (router: Router): void => {
   ),
   router.post(
     '/recipes/create',
+    checkJwtAuth,
+    uploadSingleImage,
+    handleUploadError,
     recipeController.create
   ),
   router.put(
