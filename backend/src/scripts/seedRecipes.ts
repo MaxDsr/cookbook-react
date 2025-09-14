@@ -6,7 +6,7 @@ import { Types } from 'mongoose'
 const recipes = [
   {
     name: 'Baker soup',
-    imageUrl: 'https://pbs.twimg.com/media/Cs30RK-UkAAvl3V.jpg',
+    image: { filename: 'recipe-6a66d9f7-6110-42b4-8932-f5da8a96220a.jpg', etag: 'cf362a48384a892e81cc3d8eb8873649' },
     ingredients: [
       'potato',
       'tomato',
@@ -20,7 +20,7 @@ const recipes = [
   },
   {
     name: 'Bolognese pasta',
-    imageUrl: 'https://tmbidigitalassetsazure.blob.core.windows.net/rms3-prod/attachments/37/1200x1200/Beef-Bolognese-with-Linguine_EXPS_FT21_130403_F_0423_1.jpg',
+    image: { filename: 'recipe-f6ee1ea3-00a2-4b43-a88c-3b1b76e27c36.jpg', etag: 'b622ea303a5b843f8482c3aea10c5133' },
     ingredients: [
       'potato',
       'tomato',
@@ -34,7 +34,7 @@ const recipes = [
   },
   {
     name: 'French fries',
-    imageUrl: 'https://www.thespruceeats.com/thmb/IHKuXcx3uUI1IWkM_cnnQdFH-zQ=/3485x2323/filters:fill(auto,1)/how-to-make-homemade-french-fries-2215971-hero-01-02f62a016f3e4aa4b41d0c27539885c3.jpg',
+    image: { filename: 'recipe-d06f5de0-9851-4c76-b4fb-06c11247e8f0.jpg', etag: '1aa52fafcc2680a61aecb2fc6299c630' },
     ingredients: [
       'potato',
       'tomato',
@@ -48,7 +48,7 @@ const recipes = [
   },
   {
     name: 'Home burger',
-    imageUrl: 'https://live.staticflickr.com/5058/5519067595_6fe442ee19_b.jpg',
+    image: { etag: '7bfc9e1c8b8efbb9f515224f89a15f3d', filename: 'recipe-f6c28a48-0b6b-41e4-9b68-d3ac4719f2c5.jpg' },
     ingredients: [
       'potato',
       'tomato',
@@ -65,7 +65,8 @@ const recipes = [
 async function seedRecipes() {
   try {
     // Connect to MongoDB
-    await connect(process.env.MONGODB_URI || 'mongodb://cookbook-mongo/cookbook')
+    // await connect(process.env.MONGODB_URI || 'mongodb://cookbook-mongo/cookbook')
+    await connect('mongodb://localhost:3002/cookbook')
     console.log('Connected to MongoDB')
 
     // Hardcoded userId
