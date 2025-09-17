@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useImperativeHandle, forwardRef } from 'react';
 import { Plus } from 'lucide-react';
 import RecipeCard from '../components/RecipeCard';
 import RecipeDialog from '../components/RecipeDialog';
 import { mockRecipes } from '../data/recipes';
 import './CookbookPage.css';
 
-function CookbookPage() {
+const CookbookPage = forwardRef((props, ref) => {
   const [recipes, setRecipes] = useState(mockRecipes);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [dialogMode, setDialogMode] = useState('view'); // 'view', 'edit', 'create'
@@ -36,6 +36,10 @@ function CookbookPage() {
     setIsDialogOpen(true);
   };
 
+  useImperativeHandle(ref, () => ({
+    handleCreateNewRecipe
+  }));
+
   const handleSaveRecipe = (recipeData) => {
     if (dialogMode === 'create') {
       // Add new recipe
@@ -63,16 +67,6 @@ function CookbookPage() {
   return (
     <div className="cookbook-page">
       <div className="cookbook-content">
-        <div className="cookbook-header">
-          <button 
-            className="create-recipe-btn"
-            onClick={handleCreateNewRecipe}
-          >
-            <Plus size={20} />
-            Create New Recipe
-          </button>
-        </div>
-
         <main className="recipes-grid">
           {recipes.map(recipe => (
             <RecipeCard
@@ -110,6 +104,8 @@ function CookbookPage() {
       />
     </div>
   );
-}
+});
+
+CookbookPage.displayName = 'CookbookPage';
 
 export default CookbookPage;

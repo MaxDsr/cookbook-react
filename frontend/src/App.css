@@ -24,6 +24,33 @@
   color: #1f2937;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.create-recipe-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.create-recipe-btn:hover {
+  background: #2563eb;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
 .loading-screen {
   min-height: 100vh;
   display: flex;
@@ -62,10 +89,35 @@
   .app-header h1 {
     font-size: 1.5rem;
   }
+  
+  .header-actions {
+    gap: 12px;
+  }
+  
+  .create-recipe-btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .create-recipe-btn span {
+    display: none;
+  }
+  
+  .create-recipe-btn {
+    padding: 8px;
+    min-width: 36px;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 480px) {
   .app-header h1 {
     font-size: 1.25rem;
+  }
+  
+  .header-actions {
+    gap: 8px;
   }
 }
