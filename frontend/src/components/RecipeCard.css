@@ -1,0 +1,158 @@
+.recipe-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.recipe-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  opacity: 0.95;
+}
+
+.recipe-card-image {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.recipe-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.recipe-card:hover .recipe-card-image img {
+  transform: scale(1.05);
+}
+
+.recipe-card-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.recipe-card:hover .recipe-card-actions {
+  opacity: 1;
+}
+
+.action-button {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.action-button:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
+}
+
+.edit-button:hover {
+  color: #3b82f6;
+}
+
+.delete-button:hover {
+  color: #ef4444;
+}
+
+.recipe-card-content {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.recipe-card-title {
+  margin: 0 0 12px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.3;
+}
+
+.recipe-card-ingredients {
+  flex: 1;
+  margin-bottom: 12px;
+}
+
+.recipe-card-ingredients ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recipe-card-ingredients li {
+  padding: 2px 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+  position: relative;
+  padding-left: 12px;
+}
+
+.recipe-card-ingredients li:before {
+  content: "•";
+  color: #d1d5db;
+  position: absolute;
+  left: 0;
+}
+
+.recipe-card-ingredients .more-ingredients {
+  font-style: italic;
+  color: #9ca3af;
+}
+
+.recipe-card-ingredients .more-ingredients:before {
+  content: "...";
+  color: #d1d5db;
+}
+
+.recipe-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  margin-top: auto;
+  gap: 16px;
+}
+
+.recipe-card-servings,
+.recipe-card-cooking-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.servings-label,
+.cooking-time-label {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.servings-value,
+.cooking-time-value {
+  color: #1f2937;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
