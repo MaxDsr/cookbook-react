@@ -3,13 +3,32 @@ import { Plus } from 'lucide-react';
 import RecipeCard from '../components/RecipeCard';
 import RecipeDialog from '../components/RecipeDialog';
 import { mockRecipes } from '../data/recipes';
+import { 
+  useGetRecipesQuery, 
+  useCreateRecipeMutation, 
+  useEditRecipeMutation, 
+  useDeleteRecipeMutation 
+} from '../store/api/recipesApi';
+import { useApiState, useMutationState } from '../hooks/useApiState';
 import './CookbookPage.css';
 
 const CookbookPage = forwardRef((props, ref) => {
-  const [recipes, setRecipes] = useState(mockRecipes);
+  // RTK Query hooks
+  const recipesQuery = useGetRecipesQuery();
+  const [createRecipe] = useCreateRecipeMutation();
+  const [editRecipe] = useEditRecipeMutation();
+  const [deleteRecipe] = useDeleteRecipeMutation();
+
+  // API state management
+  const recipesState = useApiState(recipesQuery);
+
+  // Local state for UI
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [dialogMode, setDialogMode] = useState('view'); // 'view', 'edit', 'create'
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Fallback to mock data if API fails or during development
+  const recipes = recipesState.isSuccess ? recipesState.data : mockRecipes;
 
   const handleCardClick = (recipe) => {
     setSelectedRecipe(recipe);
@@ -40,22 +59,36 @@ const CookbookPage = forwardRef((props, ref) => {
     handleCreateNewRecipe
   }));
 
-  const handleSaveRecipe = (recipeData) => {
-    if (dialogMode === 'create') {
-      // Add new recipe
-      setRecipes(prev => [...prev, { ...recipeData, id: Date.now() }]);
-    } else {
-      // Update existing recipe
-      setRecipes(prev => 
-        prev.map(recipe => 
-          recipe.id === recipeData.id ? recipeData : recipe
-        )
-      );
+  const handleSaveRecipe = async (recipeData) => {
+    try {
+      if (dialogMode === 'create') {
+        // Create new recipe via API
+        await createRecipe(recipeData).unwrap();
+      } else {
+        // Update existing recipe via API
+        await editRecipe({ 
+          recipeId: recipeData.id, 
+          ...recipeData 
+        }).unwrap();
+      }
+      // Close dialog on success
+      closeDialog();
+    } catch (error) {
+      // Error handling - you can add toast notifications here
+      console.error('Failed to save recipe:', error);
     }
   };
 
-  const handleDeleteConfirm = (recipe) => {
-    setRecipes(prev => prev.filter(r => r.id !== recipe.id));
+  const handleDeleteConfirm = async (recipe) => {
+    try {
+      // Delete recipe via API
+      await deleteRecipe(recipe.id).unwrap();
+      // Close dialog on success
+      closeDialog();
+    } catch (error) {
+      // Error handling - you can add toast notifications here
+      console.error('Failed to delete recipe:', error);
+    }
   };
 
   const closeDialog = () => {
@@ -63,6 +96,40 @@ const CookbookPage = forwardRef((props, ref) => {
     setSelectedRecipe(null);
     setDialogMode('view');
   };
+
+  // Show loading state
+  if (recipesState.isLoading) {
+    return (
+      <div className="cookbook-page">
+        <div className="cookbook-content">
+          <div className="empty-state">
+            <div className="loading-spinner"></div>
+            <p>Loading recipes...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (recipesState.isError) {
+    return (
+      <div className="cookbook-page">
+        <div className="cookbook-content">
+          <div className="empty-state">
+            <h2>Error loading recipes</h2>
+            <p>{recipesState.error}</p>
+            <button 
+              className="create-recipe-btn primary"
+              onClick={() => recipesQuery.refetch()}
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="cookbook-page">
