@@ -28,7 +28,7 @@ const RecipeDialog = ({
         servings: 1,
         cookingTime: '00:30',
         ingredients: [''],
-        preparationSteps: ''
+        steps: ''
       });
       setImagePreview(null);
     }
@@ -292,7 +292,7 @@ const ViewTab = ({ recipe }) => {
       <div className="preparation-section">
         <h3>Preparation steps</h3>
         <div className="preparation-steps">
-          {recipe.preparationSteps.split('\n').map((step, index) => (
+          {recipe.steps.split('\n').map((step, index) => (
             <p key={index}>{step}</p>
           ))}
         </div>
@@ -418,8 +418,8 @@ const EditTab = ({
     <div className="form-group">
       <label>Preparation steps</label>
       <textarea 
-        value={recipe.preparationSteps}
-        onChange={(e) => onInputChange('preparationSteps', e.target.value)}
+        value={recipe.steps}
+        onChange={(e) => onInputChange('steps', e.target.value)}
         placeholder="Enter preparation steps..."
         rows="8"
       />
