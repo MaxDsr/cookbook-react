@@ -2,7 +2,6 @@ import React, { useState, useImperativeHandle, forwardRef } from 'react';
 import { Plus } from 'lucide-react';
 import RecipeCard from '../components/RecipeCard';
 import RecipeDialog from '../components/RecipeDialog';
-import { mockRecipes } from '../data/recipes';
 import { 
   useGetRecipesQuery, 
   useCreateRecipeMutation, 
@@ -27,8 +26,7 @@ const CookbookPage = forwardRef((props, ref) => {
   const [dialogMode, setDialogMode] = useState('view'); // 'view', 'edit', 'create'
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Fallback to mock data if API fails or during development
-  const recipes = recipesState.isSuccess ? recipesState.data : mockRecipes;
+	const recipes = recipesState.data;
 
   const handleCardClick = (recipe) => {
     setSelectedRecipe(recipe);
@@ -135,7 +133,7 @@ const CookbookPage = forwardRef((props, ref) => {
     <div className="cookbook-page">
       <div className="cookbook-content">
         <main className="recipes-grid">
-          {recipes.map(recipe => (
+          {recipesState.isSuccess && recipes?.length && recipes.map(recipe => (
             <RecipeCard
               key={recipe.id}
               recipe={recipe}
@@ -146,7 +144,7 @@ const CookbookPage = forwardRef((props, ref) => {
           ))}
         </main>
 
-        {recipes.length === 0 && (
+        {recipesState.isSuccess && recipes?.length === 0 && (
           <div className="empty-state">
             <h2>No recipes yet</h2>
             <p>Create your first recipe to get started!</p>

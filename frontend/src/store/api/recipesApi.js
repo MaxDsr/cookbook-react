@@ -12,6 +12,13 @@ export const recipesApi = createApi({
       // if (token) {
       //   headers.set('authorization', `Bearer ${token}`);
       // }
+
+
+			// not there yet...
+			if (getState().auth.token) {
+				headers.set('authorization', `Bearer ${getState().auth.token}`);
+			}
+
       headers.set('Content-Type', 'application/json');
       return headers;
     },
@@ -22,8 +29,8 @@ export const recipesApi = createApi({
     getRecipes: builder.query({
       query: () => 'recipes',
       providesTags: ['Recipe'],
-      // Transform response if needed
-      transformResponse: (response) => response,
+      // Set default initial data
+      transformResponse: (response) => response.data,
       // Handle errors
       transformErrorResponse: (response) => ({
         status: response.status,

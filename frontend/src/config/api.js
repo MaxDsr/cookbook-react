@@ -1,7 +1,7 @@
 // API Configuration
 export const API_CONFIG = {
   // Update this to match your backend URL
-  BASE_URL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000',
+  BASE_URL: 'http://localhost:3001',
   
   // API endpoints
   ENDPOINTS: {
