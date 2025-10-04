@@ -22,7 +22,7 @@ const RecipeDialog = ({
     } else if (mode === 'create') {
       // Initialize empty recipe for creation
       setEditedRecipe({
-        id: Date.now(),
+        _id: Date.now(),
         title: '',
         image: '',
         servings: 1,

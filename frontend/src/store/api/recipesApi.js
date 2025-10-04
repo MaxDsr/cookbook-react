@@ -29,8 +29,8 @@ export const recipesApi = createApi({
     getRecipes: builder.query({
       query: () => 'recipes',
       providesTags: ['Recipe'],
-      // Set default initial data
-      transformResponse: (response) => response.data,
+      // Return response data directly (MongoDB uses _id)
+      transformResponse: (response) => response.data || response,
       // Handle errors
       transformErrorResponse: (response) => ({
         status: response.status,
@@ -46,8 +46,8 @@ export const recipesApi = createApi({
         body: payload,
       }),
       invalidatesTags: ['Recipe'],
-      // Transform response if needed
-      transformResponse: (response) => response,
+      // Return response data directly (MongoDB uses _id)
+      transformResponse: (response) => response.data || response,
       // Handle errors
       transformErrorResponse: (response) => ({
         status: response.status,
@@ -63,8 +63,8 @@ export const recipesApi = createApi({
         body: payload,
       }),
       invalidatesTags: ['Recipe'],
-      // Transform response if needed
-      transformResponse: (response) => response,
+      // Return response data directly (MongoDB uses _id)
+      transformResponse: (response) => response.data || response,
       // Handle errors
       transformErrorResponse: (response) => ({
         status: response.status,
@@ -79,8 +79,8 @@ export const recipesApi = createApi({
         method: 'DELETE',
       }),
       invalidatesTags: ['Recipe'],
-      // Transform response if needed
-      transformResponse: (response) => response,
+      // Return response data directly (MongoDB uses _id)
+      transformResponse: (response) => response.data || response,
       // Handle errors
       transformErrorResponse: (response) => ({
         status: response.status,

@@ -29,7 +29,7 @@ const RecipeCard = ({ recipe, onCardClick, onEdit, onDelete }) => {
     <div className="recipe-card" onClick={handleCardClick}>
       <div className="recipe-card-image">
         <img 
-          src={recipe.image} 
+          src={recipe.imageUrl} 
           alt={recipe.title}
           onError={(e) => {
             e.target.src = 'https://via.placeholder.com/400x300/e5e7eb/6b7280?text=Recipe+Image';
@@ -74,7 +74,7 @@ const RecipeCard = ({ recipe, onCardClick, onEdit, onDelete }) => {
           </div>
           <div className="recipe-card-cooking-time">
             <span className="cooking-time-label">Cooking time:</span>
-            <span className="cooking-time-value">{recipe.cookingTime}</span>
+            <span className="cooking-time-value">{recipe.time}</span>
           </div>
         </div>
       </div>

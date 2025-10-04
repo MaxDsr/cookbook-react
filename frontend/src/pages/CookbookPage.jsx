@@ -65,7 +65,7 @@ const CookbookPage = forwardRef((props, ref) => {
       } else {
         // Update existing recipe via API
         await editRecipe({ 
-          recipeId: recipeData.id, 
+          recipeId: recipeData._id, 
           ...recipeData 
         }).unwrap();
       }
@@ -80,7 +80,7 @@ const CookbookPage = forwardRef((props, ref) => {
   const handleDeleteConfirm = async (recipe) => {
     try {
       // Delete recipe via API
-      await deleteRecipe(recipe.id).unwrap();
+      await deleteRecipe(recipe._id).unwrap();
       // Close dialog on success
       closeDialog();
     } catch (error) {
@@ -135,7 +135,7 @@ const CookbookPage = forwardRef((props, ref) => {
         <main className="recipes-grid">
           {recipesState.isSuccess && recipes?.length && recipes.map(recipe => (
             <RecipeCard
-              key={recipe.id}
+              key={recipe._id}
               recipe={recipe}
               onCardClick={handleCardClick}
               onEdit={handleEditRecipe}
