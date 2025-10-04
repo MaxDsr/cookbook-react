@@ -26,7 +26,7 @@ const RecipeDialog = ({
         title: '',
         imageUrl: '',
         servings: 1,
-        cookingTime: '00:30',
+        time: '00:30',
         ingredients: [''],
         steps: ''
       });
@@ -276,7 +276,7 @@ const ViewTab = ({ recipe }) => {
         </div>
         <div className="meta-item">
           <span className="meta-label">Cooking time:</span>
-          <span className="meta-value">{recipe.cookingTime}</span>
+          <span className="meta-value">{recipe.time}</span>
         </div>
       </div>
 
@@ -375,8 +375,8 @@ const EditTab = ({
         <label>Cooking time (HH:MM)</label>
         <input 
           type="time" 
-          value={recipe.cookingTime}
-          onChange={(e) => onInputChange('cookingTime', e.target.value)}
+          value={recipe.time}
+          onChange={(e) => onInputChange('time', e.target.value)}
         />
       </div>
     </div>

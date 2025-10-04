@@ -5,7 +5,7 @@ export const mockRecipes = [
     title: "Classic Margherita Pizza",
     imageUrl: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&h=300&fit=crop&auto=format",
     servings: 4,
-    cookingTime: "01:30", // 1 hour 30 minutes
+    time: "01:30", // 1 hour 30 minutes
     ingredients: [
       "Pizza dough",
       "Tomato sauce",
@@ -22,7 +22,7 @@ export const mockRecipes = [
     title: "Chicken Alfredo Pasta",
     imageUrl: "https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=400&h=300&fit=crop&auto=format",
     servings: 6,
-    cookingTime: "00:45",
+    time: "00:45",
     ingredients: [
       "Fettuccine pasta",
       "Chicken breast",
@@ -41,7 +41,7 @@ export const mockRecipes = [
     title: "Chocolate Chip Cookies",
     imageUrl: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=300&fit=crop&auto=format",
     servings: 24,
-    cookingTime: "00:25",
+    time: "00:25",
     ingredients: [
       "All-purpose flour",
       "Butter",
@@ -60,7 +60,7 @@ export const mockRecipes = [
     title: "Caesar Salad",
     imageUrl: "https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400&h=300&fit=crop&auto=format",
     servings: 4,
-    cookingTime: "00:15",
+    time: "00:15",
     ingredients: [
       "Romaine lettuce",
       "Caesar dressing",
@@ -78,7 +78,7 @@ export const mockRecipes = [
     title: "Beef Stir Fry",
     imageUrl: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=300&fit=crop&auto=format",
     servings: 4,
-    cookingTime: "00:30",
+    time: "00:30",
     ingredients: [
       "Beef sirloin",
       "Bell peppers",
