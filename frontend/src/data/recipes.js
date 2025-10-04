@@ -3,7 +3,7 @@ export const mockRecipes = [
   {
     _id: 1,
     title: "Classic Margherita Pizza",
-    image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&h=300&fit=crop&auto=format",
+    imageUrl: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&h=300&fit=crop&auto=format",
     servings: 4,
     cookingTime: "01:30", // 1 hour 30 minutes
     ingredients: [
@@ -20,7 +20,7 @@ export const mockRecipes = [
   {
     _id: 2,
     title: "Chicken Alfredo Pasta",
-    image: "https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=400&h=300&fit=crop&auto=format",
+    imageUrl: "https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=400&h=300&fit=crop&auto=format",
     servings: 6,
     cookingTime: "00:45",
     ingredients: [
@@ -39,7 +39,7 @@ export const mockRecipes = [
   {
     _id: 3,
     title: "Chocolate Chip Cookies",
-    image: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=300&fit=crop&auto=format",
+    imageUrl: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=300&fit=crop&auto=format",
     servings: 24,
     cookingTime: "00:25",
     ingredients: [
@@ -58,7 +58,7 @@ export const mockRecipes = [
   {
     _id: 4,
     title: "Caesar Salad",
-    image: "https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400&h=300&fit=crop&auto=format",
+    imageUrl: "https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400&h=300&fit=crop&auto=format",
     servings: 4,
     cookingTime: "00:15",
     ingredients: [
@@ -76,7 +76,7 @@ export const mockRecipes = [
   {
     _id: 5,
     title: "Beef Stir Fry",
-    image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=300&fit=crop&auto=format",
+    imageUrl: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=300&fit=crop&auto=format",
     servings: 4,
     cookingTime: "00:30",
     ingredients: [

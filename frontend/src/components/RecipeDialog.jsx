@@ -18,13 +18,13 @@ const RecipeDialog = ({
   useEffect(() => {
     if (recipe) {
       setEditedRecipe({ ...recipe });
-      setImagePreview(recipe.image);
+      setImagePreview(recipe.imageUrl);
     } else if (mode === 'create') {
       // Initialize empty recipe for creation
       setEditedRecipe({
         _id: Date.now(),
         title: '',
-        image: '',
+        imageUrl: '',
         servings: 1,
         cookingTime: '00:30',
         ingredients: [''],
@@ -129,7 +129,7 @@ const RecipeDialog = ({
         setImagePreview(imageUrl);
         setEditedRecipe(prev => ({
           ...prev,
-          image: imageUrl
+          imageUrl: imageUrl
         }));
       };
       reader.readAsDataURL(file);
@@ -260,7 +260,7 @@ const ViewTab = ({ recipe }) => {
     <div className="view-tab">
       <div className="recipe-image">
         <img 
-          src={recipe.image} 
+          src={recipe.imageUrl} 
           alt={recipe.title}
           onError={(e) => {
             e.target.src = 'https://via.placeholder.com/600x250/e5e7eb/6b7280?text=Recipe+Image';
