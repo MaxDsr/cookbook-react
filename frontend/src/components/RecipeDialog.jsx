@@ -23,7 +23,7 @@ const RecipeDialog = ({
       // Initialize empty recipe for creation
       setEditedRecipe({
         _id: Date.now(),
-        title: '',
+        name: '',
         imageUrl: '',
         servings: 1,
         time: '00:30',
@@ -137,7 +137,7 @@ const RecipeDialog = ({
   };
 
   const handleSave = () => {
-    if (editedRecipe.title.trim() && editedRecipe.ingredients.some(ing => ing.trim())) {
+    if (editedRecipe.name?.trim() && editedRecipe.ingredients.some(ing => ing.trim())) {
       // Filter out empty ingredients
       const cleanedRecipe = {
         ...editedRecipe,
@@ -261,13 +261,13 @@ const ViewTab = ({ recipe }) => {
       <div className="recipe-image">
         <img 
           src={recipe.imageUrl} 
-          alt={recipe.title}
+          alt={recipe.name}
           onError={(e) => {
             e.target.src = '/placeholder-image.svg';
           }}
         />
       </div>
-      <h2 className="recipe-title">{recipe.title}</h2>
+      <h2 className="recipe-title">{recipe.name}</h2>
       
       <div className="recipe-meta">
         <div className="meta-item">
@@ -355,8 +355,8 @@ const EditTab = ({
       <label>Recipe Title</label>
       <input 
         type="text" 
-        value={recipe.title}
-        onChange={(e) => onInputChange('title', e.target.value)}
+        value={recipe.name}
+        onChange={(e) => onInputChange('name', e.target.value)}
         placeholder="Enter recipe title"
       />
     </div>

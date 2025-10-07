@@ -30,7 +30,7 @@ const RecipeCard = ({ recipe, onCardClick, onEdit, onDelete }) => {
       <div className="recipe-card-image">
         <img 
           src={recipe.imageUrl} 
-          alt={recipe.title}
+          alt={recipe.name}
           onError={(e) => {
             e.target.src = '/placeholder-image.svg';
           }}
@@ -57,7 +57,7 @@ const RecipeCard = ({ recipe, onCardClick, onEdit, onDelete }) => {
       </div>
       
       <div className="recipe-card-content">
-        <h3 className="recipe-card-title">{recipe.title}</h3>
+        <h3 className="recipe-card-title">{recipe.name}</h3>
         
         <div className="recipe-card-ingredients">
           <ul>
