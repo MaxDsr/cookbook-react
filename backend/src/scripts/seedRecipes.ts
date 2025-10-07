@@ -4,6 +4,13 @@ import { Recipe } from '../models/recipe'
 import { Types } from 'mongoose'
 import imageMappings from './image-mappings.json'
 
+// Helper function to generate random time up to 5 hours in HH:MM format
+function getRandomTime(): string {
+  const hours = Math.floor(Math.random() * 6) // 0-5 hours
+  const minutes = Math.floor(Math.random() * 60) // 0-59 minutes
+  
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
+}
 
 const recipes = [
   {
@@ -16,7 +23,7 @@ const recipes = [
       'brocoli',
       'onion'
     ],
-    time: '1h 30min',
+    time: getRandomTime(),
     servings: 2,
     steps: 'Maecenas culpa elit rhoncus sagittis hymenaeos consequatur facere ipsum dignissimos! Sollicitudin, suspendisse, asperiores inventore quos, commodo repellat veniam! Alias dictum! Curabitur taciti ipsa! Nostrud.'
   },
@@ -30,7 +37,7 @@ const recipes = [
       'brocoli',
       'onion'
     ],
-    time: '1h 30min',
+    time: getRandomTime(),
     servings: 4,
     steps: 'Maecenas culpa elit rhoncus sagittis hymenaeos consequatur facere ipsum dignissimos! Sollicitudin, suspendisse, asperiores inventore quos, commodo repellat veniam! Alias dictum! Curabitur taciti ipsa! Nostrud.'
   },
@@ -44,7 +51,7 @@ const recipes = [
       'brocoli',
       'onion'
     ],
-    time: '1h 30min',
+    time: getRandomTime(),
     servings: 4,
     steps: 'Maecenas culpa elit rhoncus sagittis hymenaeos consequatur facere ipsum dignissimos! Sollicitudin, suspendisse, asperiores inventore quos, commodo repellat veniam! Alias dictum! Curabitur taciti ipsa! Nostrud.'
   },
@@ -58,7 +65,7 @@ const recipes = [
       'brocoli',
       'onion'
     ],
-    time: '1h 30min',
+    time: getRandomTime(),
     servings: 2,
     steps: 'Maecenas culpa elit rhoncus sagittis hymenaeos consequatur facere ipsum dignissimos! Sollicitudin, suspendisse, asperiores inventore quos, commodo repellat veniam! Alias dictum! Curabitur taciti ipsa! Nostrud.'
   }
