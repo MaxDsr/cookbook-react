@@ -32,7 +32,7 @@ const RecipeCard = ({ recipe, onCardClick, onEdit, onDelete }) => {
           src={recipe.imageUrl} 
           alt={recipe.title}
           onError={(e) => {
-            e.target.src = 'https://via.placeholder.com/400x300/e5e7eb/6b7280?text=Recipe+Image';
+            e.target.src = '/placeholder-image.svg';
           }}
         />
         <div className="recipe-card-image-overlay">

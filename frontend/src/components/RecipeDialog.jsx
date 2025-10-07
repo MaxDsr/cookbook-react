@@ -263,7 +263,7 @@ const ViewTab = ({ recipe }) => {
           src={recipe.imageUrl} 
           alt={recipe.title}
           onError={(e) => {
-            e.target.src = 'https://via.placeholder.com/600x250/e5e7eb/6b7280?text=Recipe+Image';
+            e.target.src = '/placeholder-image.svg';
           }}
         />
       </div>
@@ -344,7 +344,7 @@ const EditTab = ({
             src={imagePreview} 
             alt="Recipe preview"
             onError={(e) => {
-              e.target.src = 'https://via.placeholder.com/600x200/e5e7eb/6b7280?text=Recipe+Image';
+              e.target.src = '/placeholder-image.svg';
             }}
           />
         </div>
