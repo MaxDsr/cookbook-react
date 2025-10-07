@@ -35,6 +35,9 @@ const RecipeCard = ({ recipe, onCardClick, onEdit, onDelete }) => {
             e.target.src = 'https://via.placeholder.com/400x300/e5e7eb/6b7280?text=Recipe+Image';
           }}
         />
+        <div className="recipe-card-image-overlay">
+          <h3 className="recipe-card-image-title">{recipe.name}</h3>
+        </div>
         <div className="recipe-card-actions">
           <button 
             className="action-button edit-button" 
