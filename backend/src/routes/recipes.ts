@@ -18,6 +18,9 @@ export const recipes = (router: Router): void => {
   ),
   router.put(
     '/recipes/edit/:id',
+    checkJwtAuth,
+    uploadSingleImage,
+    handleUploadError,
     recipeController.edit
   ),
   router.delete(

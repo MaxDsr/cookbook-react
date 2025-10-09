@@ -23,7 +23,16 @@ export const recipeController = {
       });
     }
 
-    const body: IRecipe = {...req.body, userId: req.userId};
+    const recipeData: Pick<IRecipe, 'name' | 'ingredients' | 'time' | 'servings' | 'steps' | 'userId'> = {
+      name: req.body.name,
+      ingredients: typeof req.body.ingredients === 'string' 
+        ? JSON.parse(req.body.ingredients) 
+        : req.body.ingredients,
+      time: req.body.time,
+      servings: req.body.servings,
+      steps: req.body.steps,
+      userId: req.userId
+    };
 
     const image = req.file;
     let imageBucketData = null;
@@ -58,7 +67,7 @@ export const recipeController = {
       imageBucketData = { etag: imageBucketData.etag, filename: uniqueFilename, url: presignedUrl };
     }
     const recipe = new Recipe({
-      ...body,
+      ...recipeData,
       ...(imageBucketData
         ? { image: { etag: imageBucketData.etag, filename: imageBucketData.filename } }
         : { image: { filename: "recipe-default.jpg", etag: "409f33f747a2671563173c30a042f778" }})
@@ -130,10 +139,6 @@ export const recipeController = {
     }
 
     const recipeId: IRecipe['_id'] = req.params.id;
-    const body: IRecipe = req.body;
-    delete body._id;
-
-    // const result = await Recipe.updateOne({_id: recipeId}, {$set: body});
     const recipeDoc = await Recipe.findById(recipeId);
 
     if (!recipeDoc) {
@@ -150,12 +155,42 @@ export const recipeController = {
       });
     }
 
-    recipeDoc.name = body.name;
-    recipeDoc.image = body.image;
-    recipeDoc.ingredients = body.ingredients;
-    recipeDoc.time = body.time;
-    recipeDoc.servings = body.servings;
-    recipeDoc.steps = body.steps;
+    // Update basic fields
+    recipeDoc.name = req.body.name;
+    recipeDoc.ingredients = typeof req.body.ingredients === 'string' 
+      ? JSON.parse(req.body.ingredients) 
+      : req.body.ingredients;
+    recipeDoc.time = req.body.time;
+    recipeDoc.servings = req.body.servings;
+    recipeDoc.steps = req.body.steps;
+
+    // Handle image upload if a new file is provided
+    const image = req.file;
+    if (image) {
+      // Generate unique filename
+      const fileExtension = image.originalname.split('.').pop();
+      const uniqueFilename = `recipe-${uuidv4()}.${fileExtension}`;
+      
+      // Ensure bucket exists
+      const bucketName = 'recipe-pictures';
+
+      // Upload file to MinIO
+      const imageBucketData = await minio.client.putObject(
+        bucketName,
+        uniqueFilename,
+        image.buffer,
+        image.size,
+        {
+          'Content-Type': image.mimetype,
+        }
+      );
+
+      // Update recipe with new image
+      recipeDoc.image = { 
+        etag: imageBucketData.etag, 
+        filename: uniqueFilename 
+      };
+    }
 
     try {
       await recipeDoc.save();

@@ -46,3 +46,9 @@
 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"level":"error","port":6379,"syscall":"connect","timestamp":"2025-10-07 18:21:57"}
 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"level":"error","port":6379,"syscall":"connect","timestamp":"2025-10-07 18:22:36"}
 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"level":"error","port":6379,"syscall":"connect","timestamp":"2025-10-07 18:22:39"}
+{"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"level":"error","port":6379,"syscall":"connect","timestamp":"2025-10-09 03:55:01"}
+{"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"level":"error","port":6379,"syscall":"connect","timestamp":"2025-10-09 04:23:05"}
+{"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"level":"error","port":6379,"syscall":"connect","timestamp":"2025-10-09 04:23:21"}
+{"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"level":"error","port":6379,"syscall":"connect","timestamp":"2025-10-09 04:23:27"}
+{"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"level":"error","port":6379,"syscall":"connect","timestamp":"2025-10-09 04:23:48"}
+{"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"level":"error","port":6379,"syscall":"connect","timestamp":"2025-10-09 04:23:50"}

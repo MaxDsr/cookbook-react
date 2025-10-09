@@ -57,16 +57,17 @@ const CookbookPage = forwardRef((props, ref) => {
     handleCreateNewRecipe
   }));
 
-  const handleSaveRecipe = async (recipeData) => {
+  const handleSaveRecipe = async (recipeData, imageFile) => {
     try {
       if (dialogMode === 'create') {
         // Create new recipe via API
-        await createRecipe(recipeData).unwrap();
+        await createRecipe({ recipeData, imageFile }).unwrap();
       } else {
         // Update existing recipe via API
         await editRecipe({ 
-          recipeId: recipeData._id, 
-          ...recipeData 
+          recipeId: recipeData._id,
+          recipeData,
+          imageFile
         }).unwrap();
       }
       // Close dialog on success

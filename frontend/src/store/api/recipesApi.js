@@ -40,11 +40,34 @@ export const recipesApi = createApi({
 
     // POST /recipes/create - Create a new recipe
     createRecipe: builder.mutation({
-      query: (payload) => ({
-        url: '/recipes/create',
-        method: 'POST',
-        body: payload,
-      }),
+      query: ({ recipeData, imageFile }) => {
+        const formData = new FormData();
+        
+        // Add the image file if it exists
+        if (imageFile) {
+          formData.append('image', imageFile);
+        }
+        
+        // Add other recipe fields
+        formData.append('name', recipeData.name);
+        formData.append('servings', recipeData.servings);
+        formData.append('time', recipeData.time);
+        formData.append('steps', recipeData.steps);
+        
+        // Add ingredients as JSON string
+        formData.append('ingredients', JSON.stringify(recipeData.ingredients));
+        
+        return {
+          url: '/recipes/create',
+          method: 'POST',
+          body: formData,
+          // Don't set Content-Type, let browser set it with boundary
+          prepareHeaders: (headers) => {
+            headers.delete('Content-Type');
+            return headers;
+          },
+        };
+      },
       invalidatesTags: ['Recipe'],
       // Return response data directly (MongoDB uses _id)
       transformResponse: (response) => response.data || response,
@@ -57,11 +80,42 @@ export const recipesApi = createApi({
 
     // PUT /recipes/edit/{recipeId} - Edit an existing recipe
     editRecipe: builder.mutation({
-      query: ({ recipeId, ...payload }) => ({
-        url: `/recipes/edit/${recipeId}`,
-        method: 'PUT',
-        body: payload,
-      }),
+      query: ({ recipeId, recipeData, imageFile }) => {
+        // If there's an image file, send as FormData
+        if (imageFile) {
+          const formData = new FormData();
+          
+          // Add the image file
+          formData.append('image', imageFile);
+          
+          // Add other recipe fields
+          formData.append('name', recipeData.name);
+          formData.append('servings', recipeData.servings);
+          formData.append('time', recipeData.time);
+          formData.append('steps', recipeData.steps);
+          
+          // Add ingredients as JSON string
+          formData.append('ingredients', JSON.stringify(recipeData.ingredients));
+          
+          return {
+            url: `/recipes/edit/${recipeId}`,
+            method: 'PUT',
+            body: formData,
+            // Don't set Content-Type, let browser set it with boundary
+            prepareHeaders: (headers) => {
+              headers.delete('Content-Type');
+              return headers;
+            },
+          };
+        }
+        
+        // Otherwise, send as JSON (no image update)
+        return {
+          url: `/recipes/edit/${recipeId}`,
+          method: 'PUT',
+          body: recipeData,
+        };
+      },
       invalidatesTags: ['Recipe'],
       // Return response data directly (MongoDB uses _id)
       transformResponse: (response) => response.data || response,

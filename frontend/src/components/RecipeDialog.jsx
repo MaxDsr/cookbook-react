@@ -14,11 +14,13 @@ const RecipeDialog = ({
   const [editedRecipe, setEditedRecipe] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
 
   useEffect(() => {
     if (recipe) {
       setEditedRecipe({ ...recipe });
       setImagePreview(recipe.imageUrl);
+      setImageFile(null); // Reset file when opening existing recipe
     } else if (mode === 'create') {
       // Initialize empty recipe for creation
       setEditedRecipe({
@@ -31,6 +33,7 @@ const RecipeDialog = ({
         steps: ''
       });
       setImagePreview(null);
+      setImageFile(null); // Reset file when creating new recipe
     }
     setActiveTab(mode === 'create' ? 'edit' : 'view');
   }, [recipe, mode]);
@@ -121,6 +124,10 @@ const RecipeDialog = ({
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Store the actual File object
+      setImageFile(file);
+      
+      // Create preview URL for display
       const reader = new FileReader();
       reader.onload = (e) => {
         const imageUrl = e.target.result;
@@ -141,7 +148,8 @@ const RecipeDialog = ({
         ...editedRecipe,
         ingredients: editedRecipe.ingredients.filter(ing => ing.trim())
       };
-      onSave(cleanedRecipe);
+      // Pass both the recipe data and the file object
+      onSave(cleanedRecipe, imageFile);
       onClose();
     }
   };
