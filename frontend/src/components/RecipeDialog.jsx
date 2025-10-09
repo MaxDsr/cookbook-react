@@ -310,11 +310,7 @@ const EditTab = ({
   onImageUpload 
 }) => {
   const ingredientRefs = useRef([]);
-
-  if (!recipe) {
-    return <div className="edit-tab">Loading...</div>;
-  }
-
+	
   // Update refs array when ingredients change
   useEffect(() => {
     ingredientRefs.current = ingredientRefs.current.slice(0, recipe.ingredients.length);
