@@ -159,6 +159,7 @@ const CookbookPage = forwardRef((props, ref) => {
         )}
       </div>
 
+			{isDialogOpen && (
       <RecipeDialog
         recipe={selectedRecipe}
         isOpen={isDialogOpen}
@@ -167,6 +168,7 @@ const CookbookPage = forwardRef((props, ref) => {
         onDelete={handleDeleteConfirm}
         mode={dialogMode}
       />
+			)}
     </div>
   );
 });

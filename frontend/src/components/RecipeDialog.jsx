@@ -64,8 +64,6 @@ const RecipeDialog = ({
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -188,7 +186,7 @@ const RecipeDialog = ({
           {activeTab === 'view' && displayRecipe ? (
             <ViewTab recipe={displayRecipe} />
           ) : (
-            <EditTab 
+            !!editedRecipe && <EditTab 
               recipe={editedRecipe}
               imagePreview={imagePreview}
               onInputChange={handleInputChange}
