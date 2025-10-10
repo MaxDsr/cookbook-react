@@ -34,7 +34,6 @@ function App() {
           const token = await getAccessTokenSilently();
           const idTokenClaims = await getIdTokenClaims();
           
-					console.log("will set auth data");
           dispatch(setAuthData({
             isAuthenticated,
             isLoading,

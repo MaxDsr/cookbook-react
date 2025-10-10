@@ -6,21 +6,25 @@ export const recipesApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: API_CONFIG.BASE_URL,
     timeout: API_CONFIG.TIMEOUT,
-    prepareHeaders: (headers, { getState }) => {
-      // Add authentication headers if needed
-      // const token = getState().auth.token;
-      // if (token) {
-      //   headers.set('authorization', `Bearer ${token}`);
-      // }
-
-
-			// not there yet...
+    prepareHeaders: (headers, { getState, endpoint }) => {
 			if (getState().auth.token) {
 				headers.set('authorization', `Bearer ${getState().auth.token}`);
 			}
 
-      headers.set('Content-Type', 'application/json');
-      return headers;
+      // Only set Content-Type for non-FormData endpoints
+			// Skip for createRecipe and editRecipe which use FormData
+			const formDataEndpoints = ['createRecipe', 'editRecipe'];
+			
+			if (!formDataEndpoints.includes(endpoint)) {
+				if (!headers.has('Content-Type')) {
+					headers.set('Content-Type', 'application/json');
+				}
+			} else {
+				// Explicitly delete Content-Type if it exists, to let browser set it with boundary
+				headers.delete('Content-Type');
+			}
+			
+    	return headers;
     },
   }),
   tagTypes: ['Recipe'],
@@ -42,7 +46,7 @@ export const recipesApi = createApi({
     createRecipe: builder.mutation({
       query: ({ recipeData, imageFile }) => {
         const formData = new FormData();
-        
+
         // Add the image file if it exists
         if (imageFile) {
           formData.append('image', imageFile);
@@ -61,11 +65,6 @@ export const recipesApi = createApi({
           url: '/recipes/create',
           method: 'POST',
           body: formData,
-          // Don't set Content-Type, let browser set it with boundary
-          prepareHeaders: (headers) => {
-            headers.delete('Content-Type');
-            return headers;
-          },
         };
       },
       invalidatesTags: ['Recipe'],
@@ -101,11 +100,6 @@ export const recipesApi = createApi({
             url: `/recipes/edit/${recipeId}`,
             method: 'PUT',
             body: formData,
-            // Don't set Content-Type, let browser set it with boundary
-            prepareHeaders: (headers) => {
-              headers.delete('Content-Type');
-              return headers;
-            },
           };
         }
         

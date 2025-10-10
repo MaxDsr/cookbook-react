@@ -148,6 +148,7 @@ const RecipeDialog = ({
         ...editedRecipe,
         ingredients: editedRecipe.ingredients.filter(ing => ing.trim())
       };
+			delete cleanedRecipe.imageUrl;
       // Pass both the recipe data and the file object
       onSave(cleanedRecipe, imageFile);
       onClose();
