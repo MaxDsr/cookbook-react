@@ -35,6 +35,22 @@ services:
     networks:
       - cookbook-app
     command: npm run dev
+  backend:
+  build:
+    context: ./backend
+    dockerfile: ./docker/Dockerfile
+    args:
+      uid: ${BE_USER_ID}
+      user: ${BE_USERNAME}
+  container_name: "${BACKEND_CONTAINER_NAME}"
+  volumes:
+    - ./backend:/backend
+    - /backend/node_modules
+  ports:
+    - "127.0.0.1:${BACKEND_PORT}:3001"
+  networks:
+    - cookbook-app
+  command: npm run watch
 networks:
   cookbook-app:
     driver: bridge
