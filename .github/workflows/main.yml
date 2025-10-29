@@ -1,0 +1,66 @@
+name: Test Workflow
+
+on:
+  push:
+    branches: [ current-work ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: List files
+        run: ls -a
+        
+      - name: Echo hello world
+        run: echo "hello world"
+
+      - name: Write vars into env file
+        run: echo "${{ secrets.VM_HOST }}" > key.txt
+
+      - name: Verify key.txt was created
+        run: |
+          echo "Checking if key.txt exists:"
+          ls -la key.txt
+          cat key.txt
+
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            # echo current path
+
+            echo "Current path: $(pwd)"
+      
+      # - name: Copy files to VM
+      #   uses: appleboy/scp-action@v0.1.4
+      #   with:
+      #     host: ${{ secrets.VM_HOST }}
+      #     username: ${{ secrets.VM_USERNAME }}
+      #     key: ${{ secrets.VM_SSH_KEY }}
+      #     source: "build/*"
+      #     target: "/var/www/html/"
+          
+      # - name: Start web server
+      #   uses: appleboy/ssh-action@v0.1.5
+      #   with:
+      #     host: ${{ secrets.VM_HOST }}
+      #     username: ${{ secrets.VM_USERNAME }}
+      #     key: ${{ secrets.VM_SSH_KEY }}
+      #     script: |
+      #       # Set proper permissions
+      #       sudo chown -R www-data:www-data /var/www/html
+      #       sudo chmod -R 755 /var/www/html
+            
+      #       # Start nginx
+      #       sudo systemctl start nginx
+      #       sudo systemctl enable nginx
