@@ -1,4 +1,4 @@
-FROM node:18.16.0-slim
+FROM node:24.11.0-slim
 
 # Arguments defined in docker-compose.yml
 ARG user

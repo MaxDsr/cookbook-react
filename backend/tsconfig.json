@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "ES2022",
     "module": "CommonJS",
+    "lib": ["ES2022"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "emitDecoratorMetadata": true,
@@ -21,7 +22,6 @@
     "baseUrl": "./src",
     "rootDir": "./src",
     "outDir": "./public",
-    "lib": ["ESNext"],
     "types": ["node"],
     "typeRoots": ["./node_modules/@types"]
   },
