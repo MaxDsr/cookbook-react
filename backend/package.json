@@ -1,5 +1,6 @@
 {
   "version": "1.0.3",
+  "type": "module",
   "description": "A boilerplate for Node.js apps / Rest API / Authentication from scratch - express, mongodb (mongoose).",
   "main": "./src",
   "nodeVersion": "24.11.0",
@@ -26,9 +27,9 @@
     "migrate-mongo-status": "migrate-mongo status",
     "migrate-mongo-up": "migrate-mongo up",
     "migrate-mongo-down": "migrate-mongo down",
-    "seed-recipes": "docker exec -it cookbook-backend npx ts-node --files -r tsconfig-paths/register ./src/scripts/seedRecipes.ts",
-    "seed-recipes-local": "npx ts-node --files -r tsconfig-paths/register ./src/scripts/seedRecipes.ts",
-    "upload-recipe-images": "npx ts-node --files -r tsconfig-paths/register ./src/scripts/uploadRecipeImages.ts",
+    "seed-recipes": "docker exec -it cookbook-backend npx tsx ./src/scripts/seedRecipes.ts",
+    "seed-recipes-local": "npx tsx ./src/scripts/seedRecipes.ts",
+    "upload-recipe-images": "npx tsx ./src/scripts/uploadRecipeImages.ts",
     "lint": "eslint --debug ./src",
     "lint:write": "eslint --debug ./src --fix",
     "prettier": "prettier \"**/*.+(js|jsx|json|css|md|ts)\"",
@@ -54,6 +55,7 @@
     "prettier": "^3.4.2",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.10",
+    "tsx": "^4.19.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.2"
   },

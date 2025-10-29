@@ -1,11 +1,15 @@
 import express, { Express } from 'express'
-import { join } from 'path'
+import { join, dirname } from 'path'
+import { fileURLToPath } from 'url'
 import 'dotenv/config'
 
 import '@/infrastructure/logger'
 import { mongoose, minio } from '@/dataSources'
 import { router } from '@/routes'
 import { corsMiddleware } from '@/middlewares/corsMiddleware'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 mongoose.run()
 minio.testInstance()

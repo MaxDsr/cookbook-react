@@ -1,8 +1,12 @@
 import 'dotenv/config'
 import * as fs from 'fs'
 import * as path from 'path'
+import { fileURLToPath } from 'url'
 import { v4 as uuidv4 } from 'uuid'
 import * as Minio from 'minio'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // Create MinIO client for docker-compose setup
 const minioClient = new Minio.Client({

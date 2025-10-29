@@ -2,7 +2,7 @@
   "watch": ["src"],
   "ext": "ts,json",
   "ignore": ["src/**/*.spec.ts", "node_modules"],
-  "exec": "ts-node -r tsconfig-paths/register ./src/index.ts",
+  "exec": "tsx --tsconfig ./tsconfig.json ./src/index.ts",
   "env": {
     "NODE_ENV": "development"
   }
