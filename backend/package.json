@@ -1,4 +1,5 @@
 {
+  "name": "cookbook-backend",
   "version": "1.0.3",
   "type": "module",
   "description": "A boilerplate for Node.js apps / Rest API / Authentication from scratch - express, mongodb (mongoose).",
