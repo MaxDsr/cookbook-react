@@ -4,14 +4,14 @@ import { fileURLToPath } from 'url'
 import 'dotenv/config'
 
 import '@/infrastructure/logger'
-import { mongoose, minio } from '@/dataSources'
+import { mongooseDataSource, minio } from '@/dataSources'
 import { router } from '@/routes'
 import { corsMiddleware } from '@/middlewares/corsMiddleware'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-mongoose.run()
+mongooseDataSource.run()
 minio.testInstance()
 const app: Express = express()
 

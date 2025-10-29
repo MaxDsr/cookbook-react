@@ -1,10 +1,10 @@
-import { connect, connection } from 'mongoose'
+import mongoose from 'mongoose'
 import winston from 'winston'
 
-export const mongoose = {
+export const mongooseDataSource = {
   run: async () => {
     try {
-      return await connect(process.env.MONGODB_URI)
+      return await mongoose.connect(process.env.MONGODB_URI)
     } catch (error) {
       winston.error(error)
     }
@@ -12,7 +12,7 @@ export const mongoose = {
 
   stop: async () => {
     try {
-      return await connection.destroy()
+      return await mongoose.connection.destroy()
     } catch (error) {
       winston.error(error)
     }

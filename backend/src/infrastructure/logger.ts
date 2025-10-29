@@ -1,9 +1,9 @@
-import { configure, format, transports } from 'winston'
+import winston from 'winston'
 
-configure({
-  format: format.combine(
-    format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    format.json()
+winston.configure({
+  format: winston.format.combine(
+    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    winston.format.json()
   ),
-  transports: [new transports.File({ filename: process.env.API_LOG_FILENAME })]
+  transports: [new winston.transports.File({ filename: process.env.API_LOG_FILENAME })]
 })
