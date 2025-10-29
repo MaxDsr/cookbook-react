@@ -8,7 +8,7 @@ import {
   useEditRecipeMutation, 
   useDeleteRecipeMutation 
 } from '../store/api/recipesApi';
-import { useApiState, useMutationState } from '../hooks/useApiState';
+import { useApiState } from '../hooks/useApiState';
 import './CookbookPage.css';
 
 const CookbookPage = forwardRef((props, ref) => {
