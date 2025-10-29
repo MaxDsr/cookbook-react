@@ -70,7 +70,7 @@
     "migrate-mongo": "^11.0.0",
     "minio": "^8.0.2",
     "mongoose": "^8.8.4",
-    "multer": "^1.4.5-lts.1",
+    "multer": "^2.0.0",
     "uuid": "^11.0.3",
     "winston": "^3.17.0"
   }
