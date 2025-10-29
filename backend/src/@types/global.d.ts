@@ -21,16 +21,10 @@ export declare global {
       APP_URL: string
       CLIENT_URL: string
       MONGODB_URI: string
-      REDIS_URI: string
-      REDIS_TOKEN_EXPIRATION: number
-      JWT_SECRET: string
-      JWT_EXPIRATION: string
-      MAIL_HOST: string
-      MAIL_PORT: number
-      MAIL_USER: string
-      MAIL_PASSWORD: string
-      MAIL_TPL_PATH: string
+      MINIO_ENDPOINT: string
+      MINIO_PORT: string
       STORAGE_PATH: string
+      API_LOG_FILENAME: string
     }
   }
 }

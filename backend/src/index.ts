@@ -3,14 +3,12 @@ import { join } from 'path'
 import 'dotenv/config'
 
 import '@/infrastructure/logger'
-import { mongoose, redis, minio } from '@/dataSources'
+import { mongoose, minio } from '@/dataSources'
 import { router } from '@/routes'
-import { i18next, i18nextHttpMiddleware } from '@/i18n'
-import {corsMiddleware} from "@/middlewares/corsMiddleware";
+import { corsMiddleware } from '@/middlewares/corsMiddleware'
 
 mongoose.run()
-redis.run()
-minio.testInstance();
+minio.testInstance()
 const app: Express = express()
 
 app.use(
@@ -36,8 +34,7 @@ app.use((req, res, next) => {
 
 app.use(
   corsMiddleware,
-  i18nextHttpMiddleware.handle(i18next),
-  router,
+  router
 )
 
 app.listen(process.env.APP_PORT)
