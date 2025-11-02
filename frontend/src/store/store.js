@@ -22,7 +22,7 @@ export const store = configureStore({
       },
     }).concat(recipesApi.middleware),
   // Enable Redux DevTools in development
-  devTools: process.env.NODE_ENV !== 'production',
+  devTools: import.meta.env.MODE !== 'production',
 });
 
 // Optional: export types for TypeScript (if you decide to migrate later)
