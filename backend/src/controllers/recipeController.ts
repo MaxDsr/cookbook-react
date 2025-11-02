@@ -41,13 +41,10 @@ export const recipeController = {
       // Generate unique filename
       const fileExtension = image.originalname.split('.').pop();
       const uniqueFilename = `recipe-${uuidv4()}.${fileExtension}`;
-      
-      // Ensure bucket exists
-      const bucketName = 'recipe-pictures';
 
       // Upload file to MinIO
       imageBucketData = await minio.client.putObject(
-        bucketName,
+        minio.bucketName,
         uniqueFilename,
         image.buffer,
         image.size,
@@ -59,7 +56,7 @@ export const recipeController = {
       imageBucketData = { etag: imageBucketData.etag, filename: uniqueFilename };
 
       const presignedUrl = await minio.client.presignedGetObject(
-        bucketName,
+        minio.bucketName,
         uniqueFilename,
         5 * 60 // 5 minutes expiration
       );
@@ -109,7 +106,7 @@ export const recipeController = {
         return {
           ...recipeObject,
           imageUrl: await minio.client.presignedGetObject(
-            'recipe-pictures',
+            minio.bucketName,
             recipe.image.filename,
             5 * 60
           )
@@ -170,13 +167,10 @@ export const recipeController = {
       // Generate unique filename
       const fileExtension = image.originalname.split('.').pop();
       const uniqueFilename = `recipe-${uuidv4()}.${fileExtension}`;
-      
-      // Ensure bucket exists
-      const bucketName = 'recipe-pictures';
 
       // Upload file to MinIO
       const imageBucketData = await minio.client.putObject(
-        bucketName,
+        minio.bucketName,
         uniqueFilename,
         image.buffer,
         image.size,
@@ -279,13 +273,10 @@ export const recipeController = {
       // Generate unique filename
       const fileExtension = file.originalname.split('.').pop();
       const uniqueFilename = `recipe-${Date.now()}-${createCryptoString({ length: 8 })}.${fileExtension}`;
-      
-      // Ensure bucket exists
-      const bucketName = 'recipe-pictures';
 
       // Upload file to MinIO
       await minio.client.putObject(
-        bucketName,
+        minio.bucketName,
         uniqueFilename,
         file.buffer,
         file.size,
@@ -296,7 +287,7 @@ export const recipeController = {
 
       // Generate presigned URL for accessing the file
       const presignedUrl = await minio.client.presignedGetObject(
-        bucketName,
+        minio.bucketName,
         uniqueFilename,
         24 * 60 * 60 // 24 hours expiration
       );

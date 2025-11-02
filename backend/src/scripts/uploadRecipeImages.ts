@@ -23,7 +23,7 @@ interface ImageMapping {
   etag: string; // etag from minio bucket
 }
 
-const BUCKET_NAME = 'recipe-pictures'
+const BUCKET_NAME = process.env.MINIO_BUCKET_NAME || 'recipe-pictures'
 const IMAGES_DIR = path.join(__dirname, '../../recipe-images')
 const OUTPUT_FILE = path.join(__dirname, './image-mappings.json')
 
