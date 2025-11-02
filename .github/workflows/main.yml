@@ -2,7 +2,7 @@ name: Test Workflow
 
 on:
   push:
-    branches: [ current-work ]
+    branches: [ current-work23 ]
 
 jobs:
   deploy:

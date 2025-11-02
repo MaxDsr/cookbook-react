@@ -22,19 +22,6 @@ services:
     networks:
       - cookbook-app
     command: server /data --console-address ":9001"
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: ./docker/Dockerfile
-    container_name: "${FRONTEND_CONTAINER_NAME}"
-    volumes:
-      - ./frontend:/frontend
-      - /frontend/node_modules
-    ports:
-      - "127.0.0.1:${FRONTEND_PORT}:3000"
-    networks:
-      - cookbook-app
-    command: npm run dev
 networks:
   cookbook-app:
     driver: bridge
