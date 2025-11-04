@@ -8,13 +8,13 @@ import * as Minio from 'minio'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-// Create MinIO client for docker-compose setup
+// Create MinIO client using environment variables
 const minioClient = new Minio.Client({
-  endPoint: 'localhost',
-  port: 3003,
-  useSSL: false,
-  accessKey: 'minioadmin',
-  secretKey: 'minioadmin'
+  endPoint: process.env.MINIO_ENDPOINT as string,
+  port: parseInt(process.env.MINIO_PORT as string),
+  useSSL: process.env.MINIO_USE_SSL === 'true',
+  accessKey: process.env.MINIO_ACCESS_KEY as string,
+  secretKey: process.env.MINIO_SECRET_KEY as string
 })
 
 interface ImageMapping {
