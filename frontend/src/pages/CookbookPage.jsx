@@ -134,7 +134,7 @@ const CookbookPage = forwardRef((props, ref) => {
     <div className="cookbook-page">
       <div className="cookbook-content">
         <main className="recipes-grid">
-          {recipesState.isSuccess && recipes?.length && recipes.map(recipe => (
+          {recipesState.isSuccess && !!recipes?.length && recipes.map(recipe => (
             <RecipeCard
               key={recipe._id}
               recipe={recipe}

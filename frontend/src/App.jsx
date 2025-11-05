@@ -8,6 +8,7 @@ import LoginPage from './pages/LoginPage';
 import CookbookPage from './pages/CookbookPage';
 import UserProfile from './components/UserProfile';
 import { setAuthData, clearAuthData } from './store/authSlice';
+import { API_CONFIG } from './config/api';
 import './App.css';
 
 
@@ -33,6 +34,23 @@ function App() {
           // Get access token and ID token claims if authenticated
           const token = await getAccessTokenSilently();
           const idTokenClaims = await getIdTokenClaims();
+          
+          // Record user in database (fire and forget)
+          const auth0Id = idTokenClaims.sub.split('|')[1];
+          fetch(`${API_CONFIG.BASE_URL}/record-user`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              email: user.email,
+              name: user.name,
+              nickname: user.nickname,
+              picture: user.picture,
+              auth0Id
+            })
+          }).catch(err => console.error('Failed to record user:', err));
           
           dispatch(setAuthData({
             isAuthenticated,
