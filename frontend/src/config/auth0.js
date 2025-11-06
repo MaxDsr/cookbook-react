@@ -5,10 +5,10 @@ const history = createBrowserHistory();
 
 
 export const auth0Config = {
-  "domain": "dev-q2n82wdt7tl0hbnm.eu.auth0.com",
-  "clientId": "Phq0OjvqmLysJi6b2gARzxf7IwMPv57C",
+  domain: import.meta.env.VITE_AUTH0_DOMAIN,
+  clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
   authorizationParams: {
-    "audience": "https://dev-q2n82wdt7tl0hbnm.eu.auth0.com/api/v2/",
+    audience: import.meta.env.VITE_AUTH0_AUDIENCE,
     redirect_uri: window.location.origin,
   },
   onRedirectCallback: (appState) => {
