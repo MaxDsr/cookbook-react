@@ -14,35 +14,31 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-          
-      - name: List files
-        run: ls -a
-        
-      - name: Echo hello world
-        run: echo "hello world"
 
-      - name: Write vars into env file
-        run: echo "${{ secrets.VM_HOST }}" > key.txt
 
-      - name: Verify key.txt was created
+      - name: Create env file
         run: |
-          echo "Checking if key.txt exists:"
-          ls -la key.txt
-          cat key.txt
+          echo "AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }}" >> .env
+          echo "AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }}" >> .env
+          echo "AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }}" >> .env
 
-      - name: Deploy to VM
-        uses: appleboy/ssh-action@v0.1.5
+      - name: Build Frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build
+          cd ..
+
+      - name: Copy build to VM
+        uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USERNAME }}
           key: ${{ secrets.VM_SSH_KEY }}
           port: ${{ secrets.VM_PORT }}
-          script: |
-            # echo current path
-
-            echo "Current path: $(pwd)"
-            # create a test.txt file in the /var/www/caddy directory. file will have value "hello world"
-            echo "hello world" > /var/www/caddy/test.txt
+          source: "frontend/dist/*"
+          target: ${{ secrets.WEB_APP_WEB_SERVER_FOLDER }}
+          strip_components: 2
       
       # - name: Copy files to VM
       #   uses: appleboy/scp-action@v0.1.4
