@@ -2,7 +2,7 @@ name: Test Workflow
 
 on:
   push:
-    branches: [ current-work23 ]
+    branches: [ current-work ]
 
 jobs:
   deploy:
@@ -13,7 +13,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '20'
           
       - name: List files
         run: ls -a
@@ -41,6 +41,8 @@ jobs:
             # echo current path
 
             echo "Current path: $(pwd)"
+            # create a test.txt file in the /var/www/caddy directory. file will have value "hello world"
+            echo "hello world" > /var/www/caddy/test.txt
       
       # - name: Copy files to VM
       #   uses: appleboy/scp-action@v0.1.4
