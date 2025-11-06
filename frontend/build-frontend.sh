@@ -13,7 +13,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ENV_FILE="$SCRIPT_DIR/../prod.env"
+ENV_FILE="$SCRIPT_DIR/../.env"
 DOCKERFILE="$SCRIPT_DIR/docker-prod/Dockerfile"
 IMAGE_TAG="cookbook-frontend-build:temp"
 CONTAINER_NAME="cookbook-frontend-build-temp"

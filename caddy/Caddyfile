@@ -1,0 +1,25 @@
+# Caddyfile for local development
+# Serves static files from /srv on port 80 (HTTP only, no SSL)
+
+:80 {
+    # Handle API requests first - proxy to backend
+    handle /api/* {
+        reverse_proxy host.docker.internal:{$BACKEND_PORT}
+    }
+    
+    # Handle everything else - serve static files
+    handle {
+        root * /srv
+        try_files {path} /index.html
+        file_server
+    }
+
+    # Apply globally
+    encode gzip
+    
+    log {
+        output stdout
+        format console
+    }
+}
+
