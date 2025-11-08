@@ -1,6 +1,6 @@
 import 'dotenv/config'
-import { connect, connection } from 'mongoose'
-import { Recipe } from '../models/recipe'
+import mongoose from 'mongoose'
+import { Recipe } from '../src/models/recipe'
 import { Types } from 'mongoose'
 import imageMappings from './image-mappings.json'
 
@@ -74,8 +74,7 @@ const recipes = [
 async function seedRecipes() {
   try {
     // Connect to MongoDB
-    // await connect(process.env.MONGODB_URI || 'mongodb://cookbook-mongo/cookbook')
-    await connect('mongodb://localhost:3002/cookbook')
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://cookbook-mongo/cookbook')
     console.log('Connected to MongoDB')
 
     // Hardcoded userId
@@ -104,10 +103,11 @@ async function seedRecipes() {
     process.exit(1)
   } finally {
     // Close database connection
-    await connection.close()
+    await mongoose.connection.close()
     console.log('Database connection closed')
   }
 }
 
 // Run the seed function
 seedRecipes()
+

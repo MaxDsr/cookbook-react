@@ -24,7 +24,7 @@ interface ImageMapping {
 }
 
 const BUCKET_NAME = process.env.MINIO_BUCKET_NAME || 'recipe-pictures'
-const IMAGES_DIR = path.join(__dirname, '../../recipe-images')
+const IMAGES_DIR = path.join(__dirname, '../recipe-images')
 const OUTPUT_FILE = path.join(__dirname, './image-mappings.json')
 
 async function ensureBucketExists(): Promise<void> {
@@ -149,3 +149,4 @@ async function uploadRecipeImages(): Promise<void> {
 
 // Run the upload function
 uploadRecipeImages()
+
