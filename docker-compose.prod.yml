@@ -5,6 +5,12 @@ services:
     ports:
       - "127.0.0.1:${MONGODB_PORT}:27017"
     container_name: "${MONGODB_CONTAINER_NAME}"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE}
+    volumes:
+      - mongodb_data:/data/db
     networks:
       - cookbook-app
   minio:
@@ -43,3 +49,4 @@ networks:
     driver: bridge
 volumes:
   minio_data:
+  mongodb_data:
