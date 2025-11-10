@@ -1,10 +1,10 @@
 import {Request, Response} from "express";
 import {StatusCodes} from "http-status-codes";
-import {Recipe} from "@/models";
-import {IRecipe} from "@/contracts/recipe";
+import {Recipe} from "../models";
+import {IRecipe} from "../contracts/recipe";
 import {Types} from "mongoose";
-import {minio} from "@/dataSources";
-import {createCryptoString} from "@/utils/cryptoString";
+import {minio} from "../dataSources";
+import {createCryptoString} from "../utils/cryptoString";
 import { v4 as uuidv4 } from "uuid";
 
 

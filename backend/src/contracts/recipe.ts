@@ -1,6 +1,6 @@
 import {Model, Types} from "mongoose";
-import {Entity} from "@/contracts/entity";
-import {IUser} from "@/contracts/user";
+import {Entity} from "./entity";
+import {IUser} from "./user";
 
 export interface IRecipe extends Entity {
   name: string

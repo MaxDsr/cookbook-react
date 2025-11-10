@@ -1,6 +1,6 @@
 import {Router} from "express";
-import {checkJwtAuth} from "@/middlewares/checkJwtAuth";
-import {recordUserController} from "@/controllers/recordUserController";
+import {checkJwtAuth} from "../middlewares/checkJwtAuth";
+import {recordUserController} from "../controllers/recordUserController";
 
 
 export const recordUser = (router: Router): void => {

@@ -1,7 +1,7 @@
 import {Response} from "express";
 import {ReasonPhrases, StatusCodes} from "http-status-codes";
 import winston from "winston";
-import {Recipe} from "@/models";
+import {Recipe} from "../models";
 
 export const testController = {
   test: async (

@@ -1,4 +1,4 @@
-import {Entity} from "@/contracts/entity";
+import {Entity} from "./entity";
 import {Model} from "mongoose";
 
 export interface IUser extends Entity {

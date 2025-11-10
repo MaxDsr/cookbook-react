@@ -1,7 +1,7 @@
 import {Router} from "express";
-import {recipeController} from "@/controllers";
-import {checkJwtAuth} from "@/middlewares/checkJwtAuth";
-import {uploadSingleImage, handleUploadError} from "@/middlewares/uploadMiddleware";
+import {recipeController} from "../controllers";
+import {checkJwtAuth} from "../middlewares/checkJwtAuth";
+import {uploadSingleImage, handleUploadError} from "../middlewares/uploadMiddleware";
 
 export const recipes = (router: Router): void => {
   router.get(

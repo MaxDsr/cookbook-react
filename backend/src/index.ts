@@ -3,10 +3,10 @@ import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import 'dotenv/config'
 
-import '@/infrastructure/logger'
-import { mongooseDataSource, minio } from '@/dataSources'
-import { router } from '@/routes'
-import { corsMiddleware } from '@/middlewares/corsMiddleware'
+import './infrastructure/logger'
+import { mongooseDataSource, minio } from './dataSources'
+import { router } from './routes'
+import { corsMiddleware } from './middlewares/corsMiddleware'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)

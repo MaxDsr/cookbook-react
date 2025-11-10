@@ -1,5 +1,5 @@
 import {Router} from "express";
-import {testController} from "@/controllers/testController";
+import {testController} from "../controllers/testController";
 
 
 export const test = (router: Router): void => {
