@@ -3,7 +3,7 @@ services:
     image: mongo
     restart: always
     ports:
-      - "127.0.0.1:${MONGODB_PORT}:27017"
+      - "${MONGODB_PORT}:27017"
     container_name: "${MONGODB_CONTAINER_NAME}"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_USERNAME}
@@ -17,8 +17,8 @@ services:
     image: minio/minio:latest
     restart: always
     ports:
-      - "127.0.0.1:${MINIO_API_PORT}:9000"
-      - "127.0.0.1:${MINIO_CONSOLE_PORT}:9001"
+      - "${MINIO_API_PORT}:9000"
+      - "${MINIO_CONSOLE_PORT}:9001"
     container_name: "${MINIO_CONTAINER_NAME}"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
@@ -29,21 +29,20 @@ services:
       - cookbook-app
     command: server /data --console-address ":9001"
   backend:
-  build:
-    context: ./backend
-    dockerfile: ./docker/Dockerfile
-    args:
-      uid: ${BE_USER_ID}
-      user: ${BE_USERNAME}
-  container_name: "${BACKEND_CONTAINER_NAME}"
-  volumes:
-    - ./backend:/backend
-    - /backend/node_modules
-  ports:
-    - "127.0.0.1:${BACKEND_PORT}:3001"
-  networks:
-    - cookbook-app
-  command: npm run watch
+    build:
+      context: ./backend
+      dockerfile: ./docker/Dockerfile
+    container_name: "${BACKEND_CONTAINER_NAME}"
+    restart: always
+    env_file:
+      - ./backend/.env
+    ports:
+      - "${BACKEND_PORT}:3001"
+    networks:
+      - cookbook-app
+    depends_on:
+      - mongoDB
+      - minio
 networks:
   cookbook-app:
     driver: bridge
