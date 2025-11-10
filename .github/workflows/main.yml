@@ -16,11 +16,50 @@ jobs:
           node-version: '20'
 
 
-      - name: Create env file
+      - name: Create root env file
         run: |
-          echo "AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }}" >> .env
-          echo "AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }}" >> .env
-          echo "AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }}" >> .env
+          echo "# Container Names" > .env
+          echo "MONGODB_CONTAINER_NAME=${{ secrets.ROOT_ENV_MONGODB_CONTAINER_NAME }}" >> .env
+          echo "MINIO_CONTAINER_NAME=${{ secrets.ROOT_ENV_MINIO_CONTAINER_NAME }}" >> .env
+          echo "BACKEND_CONTAINER_NAME=${{ secrets.ROOT_ENV_BACKEND_CONTAINER_NAME }}" >> .env
+          echo "" >> .env
+          echo "# MongoDB Credentials" >> .env
+          echo "MONGODB_ROOT_USERNAME=${{ secrets.MONGODB_ROOT_USERNAME }}" >> .env
+          echo "MONGODB_ROOT_PASSWORD=${{ secrets.MONGODB_ROOT_PASSWORD }}" >> .env
+          echo "MONGODB_DATABASE=${{ secrets.MONGODB_DATABASE }}" >> .env
+          echo "" >> .env
+          echo "# MinIO Credentials" >> .env
+          echo "MINIO_ROOT_USER=${{ secrets.MINIO_ROOT_USER }}" >> .env
+          echo "MINIO_ROOT_PASSWORD=${{ secrets.MINIO_ROOT_PASSWORD }}" >> .env
+          echo "" >> .env
+          echo "# External Ports" >> .env
+          echo "BACKEND_PORT=${{ secrets.ROOT_ENV_BACKEND_PORT }}" >> .env
+          echo "MONGODB_PORT=${{ secrets.ROOT_ENV_MONGODB_PORT }}" >> .env
+          echo "MINIO_API_PORT=${{ secrets.ROOT_ENV_MINIO_API_PORT }}" >> .env
+          echo "MINIO_CONSOLE_PORT=${{ secrets.ROOT_ENV_MINIO_CONSOLE_PORT }}" >> .env
+
+      - name: Create backend env file
+        run: |
+          echo "# Application" > backend/.env
+          echo "APP_PORT=${{ secrets.ROOT_ENV_BACKEND_PORT }}" >> backend/.env
+          echo "APP_URL=http://localhost:${{ secrets.ROOT_ENV_BACKEND_PORT }}" >> backend/.env
+          echo "CLIENT_URL=https://cookbook.maxim-dicusari.com" >> backend/.env
+          echo "" >> backend/.env
+          echo "# MongoDB Connection" >> backend/.env
+          echo "MONGODB_URI=mongodb://${{ secrets.MONGODB_ROOT_USERNAME }}:${{ secrets.MONGODB_ROOT_PASSWORD }}@${{ secrets.ROOT_ENV_MONGODB_CONTAINER_NAME }}:27017/${{ secrets.MONGODB_DATABASE }}?authSource=admin" >> backend/.env
+          echo "" >> backend/.env
+          echo "# MinIO S3 Storage" >> backend/.env
+          echo "MINIO_ENDPOINT=${{ secrets.ROOT_ENV_MINIO_CONTAINER_NAME }}" >> backend/.env
+          echo "MINIO_PORT=9000" >> backend/.env
+          echo "MINIO_USE_SSL=false" >> backend/.env
+          echo "MINIO_ACCESS_KEY=${{ secrets.MINIO_ROOT_USER }}" >> backend/.env
+          echo "MINIO_SECRET_KEY=${{ secrets.MINIO_ROOT_PASSWORD }}" >> backend/.env
+          echo "MINIO_BUCKET_NAME=${{ secrets.BE_ENV_MINIO_BUCKET_NAME }}" >> backend/.env
+          echo "" >> backend/.env
+          echo "# Auth0 Configuration" >> backend/.env
+          echo "AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }}" >> backend/.env
+          echo "AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }}" >> backend/.env
+          echo "AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }}" >> backend/.env
 
       - name: Build Frontend
         run: |
@@ -29,7 +68,7 @@ jobs:
           npm run build
           cd ..
 
-      - name: Copy build to VM
+      - name: Copy frontend build to VM
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.VM_HOST }}
@@ -39,27 +78,47 @@ jobs:
           source: "frontend/dist/*"
           target: ${{ secrets.WEB_APP_WEB_SERVER_FOLDER }}
           strip_components: 2
-      
-      # - name: Copy files to VM
-      #   uses: appleboy/scp-action@v0.1.4
-      #   with:
-      #     host: ${{ secrets.VM_HOST }}
-      #     username: ${{ secrets.VM_USERNAME }}
-      #     key: ${{ secrets.VM_SSH_KEY }}
-      #     source: "build/*"
-      #     target: "/var/www/html/"
-          
-      # - name: Start web server
-      #   uses: appleboy/ssh-action@v0.1.5
-      #   with:
-      #     host: ${{ secrets.VM_HOST }}
-      #     username: ${{ secrets.VM_USERNAME }}
-      #     key: ${{ secrets.VM_SSH_KEY }}
-      #     script: |
-      #       # Set proper permissions
-      #       sudo chown -R www-data:www-data /var/www/html
-      #       sudo chmod -R 755 /var/www/html
-            
-      #       # Start nginx
-      #       sudo systemctl start nginx
-      #       sudo systemctl enable nginx
+
+      - name: Stop existing containers on VM
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          port: ${{ secrets.VM_PORT }}
+          script: |
+            cd ~/cookbook-react
+            docker-compose -f docker-compose.prod.yml down || true
+
+      - name: Clean up old files on VM
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          port: ${{ secrets.VM_PORT }}
+          script: |
+            rm -rf ~/cookbook-react/*
+            rm -rf ~/cookbook-react/.[!.]* ~/cookbook-react/..?*
+            mkdir -p ~/cookbook-react
+
+      - name: Copy project to VM
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          port: ${{ secrets.VM_PORT }}
+          source: ".env,backend/,docker-compose.prod.yml,caddy/"
+          target: "~/cookbook-react"
+
+      - name: Start services on VM
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          port: ${{ secrets.VM_PORT }}
+          script: |
+            cd ~/cookbook-react
+            docker-compose -f docker-compose.prod.yml up -d --build
