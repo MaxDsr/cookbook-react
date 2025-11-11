@@ -1,5 +1,5 @@
 import express, { Express } from 'express'
-import { join, dirname } from 'path'
+import { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import 'dotenv/config'
 
@@ -13,11 +13,6 @@ const __dirname = dirname(__filename)
 mongooseDataSource.run()
 minio.testInstance()
 const app: Express = express()
-
-app.use(
-  join('/', process.env.STORAGE_PATH),
-  express.static(join(__dirname, process.env.STORAGE_PATH))
-)
 
 
 // Apply body parsers conditionally - skip for multipart/form-data

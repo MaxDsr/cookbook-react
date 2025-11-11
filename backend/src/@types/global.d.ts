@@ -31,8 +31,6 @@ export declare global {
       AUTH0_DOMAIN: string
       AUTH0_CLIENT_ID: string
       AUTH0_AUDIENCE: string
-      STORAGE_PATH: string
-      API_LOG_FILENAME: string
     }
   }
 }
