@@ -3,7 +3,6 @@ import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import 'dotenv/config'
 
-import './infrastructure/logger'
 import { mongooseDataSource, minio } from './dataSources'
 import { router } from './routes'
 import { corsMiddleware } from './middlewares/corsMiddleware'
