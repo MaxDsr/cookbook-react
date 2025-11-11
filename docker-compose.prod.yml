@@ -3,7 +3,7 @@ services:
     image: mongo
     restart: always
     ports:
-      - "0.0.0.0:${MONGODB_PORT}:27017"
+      - "127.0.0.1:${MONGODB_PORT}:27017"
     container_name: "${MONGODB_CONTAINER_NAME}"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_USERNAME}
@@ -17,8 +17,8 @@ services:
     image: minio/minio:latest
     restart: always
     ports:
-      - "0.0.0.0:${MINIO_API_PORT}:9000"
-      - "0.0.0.0:${MINIO_CONSOLE_PORT}:9001"
+      - "127.0.0.1:${MINIO_API_PORT}:9000"
+      - "127.0.0.1:${MINIO_CONSOLE_PORT}:9001"
     container_name: "${MINIO_CONTAINER_NAME}"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
@@ -37,7 +37,7 @@ services:
     env_file:
       - ./backend/.env
     ports:
-      - "0.0.0.0:${BACKEND_PORT}:3001"
+      - "127.0.0.1:${BACKEND_PORT}:{$BACKEND_PORT}"
     networks:
       - cookbook-app
     depends_on:
