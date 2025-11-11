@@ -88,7 +88,7 @@ jobs:
           port: ${{ secrets.VM_PORT }}
           script: |
             cd ~/cookbook-react
-            docker-compose -f docker-compose.prod.yml down || true
+            docker compose -f docker-compose.prod.yml down || true
 
       - name: Clean up old files on VM
         uses: appleboy/ssh-action@v0.1.5
@@ -121,4 +121,4 @@ jobs:
           port: ${{ secrets.VM_PORT }}
           script: |
             cd ~/cookbook-react
-            docker-compose -f docker-compose.prod.yml up -d --build
+            docker compose -f docker-compose.prod.yml up -d --build
