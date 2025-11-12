@@ -6,6 +6,7 @@ import {Types} from "mongoose";
 import {minio} from "../dataSources";
 import {createCryptoString} from "../utils/cryptoString";
 import { v4 as uuidv4 } from "uuid";
+import {getPublicPresignedUrl} from "../utils/minioUrl";
 
 
 // make a seeder script to seed the recipes with the new image structure
@@ -55,8 +56,7 @@ export const recipeController = {
 
       imageBucketData = { etag: imageBucketData.etag, filename: uniqueFilename };
 
-      const presignedUrl = await minio.client.presignedGetObject(
-        minio.bucketName,
+      const presignedUrl = await getPublicPresignedUrl(
         uniqueFilename,
         5 * 60 // 5 minutes expiration
       );
@@ -105,8 +105,7 @@ export const recipeController = {
         
         return {
           ...recipeObject,
-          imageUrl: await minio.client.presignedGetObject(
-            minio.bucketName,
+          imageUrl: await getPublicPresignedUrl(
             recipe.image.filename,
             5 * 60
           )
@@ -286,8 +285,7 @@ export const recipeController = {
       );
 
       // Generate presigned URL for accessing the file
-      const presignedUrl = await minio.client.presignedGetObject(
-        minio.bucketName,
+      const presignedUrl = await getPublicPresignedUrl(
         uniqueFilename,
         24 * 60 * 60 // 24 hours expiration
       );
