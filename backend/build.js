@@ -12,5 +12,21 @@ await esbuild.build({
   minify: false, // Set to true for smaller bundle
 });
 
+// Build scripts
+await esbuild.build({
+  entryPoints: [
+    './scripts/seedRecipes.ts',
+    './scripts/uploadRecipeImages.ts'
+  ],
+  bundle: true,
+  platform: 'node',
+  target: 'node24',
+  format: 'esm',
+  outdir: './dist/scripts',
+  packages: 'external',
+  sourcemap: true,
+  minify: false,
+});
+
 console.log('Build complete!');
 

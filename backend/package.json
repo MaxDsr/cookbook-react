@@ -1,11 +1,10 @@
 {
   "name": "cookbook-backend",
-  "version": "1.0.3",
+  "version": "1.0.0",
   "type": "module",
-  "description": "A boilerplate for Node.js apps / Rest API / Authentication from scratch - express, mongodb (mongoose).",
+  "description": "Cookbook backend",
   "main": "./src",
   "nodeVersion": "24.11.0",
-  "bugs": "https://github.com/watscho/express-mongodb-rest-api-boilerplate/issues",
   "keywords": [
     "express",
     "mongodb",
@@ -13,9 +12,6 @@
     "node",
     "nodejs",
     "authentication",
-    "scratch",
-    "boilerplate",
-    "authorization",
     "docker",
     "api",
     "rest"
@@ -29,14 +25,15 @@
     "migrate-mongo-up": "migrate-mongo up",
     "migrate-mongo-down": "migrate-mongo down",
     "seed-recipes": "npx tsx ./scripts/seedRecipes.ts",
+    "seed-recipes:prod": "node ./dist/scripts/seedRecipes.js",
     "upload-recipe-images": "npx tsx ./scripts/uploadRecipeImages.ts",
+    "upload-recipe-images:prod": "node ./dist/scripts/uploadRecipeImages.js",
     "lint": "eslint --debug ./src",
     "lint:write": "eslint --debug ./src --fix",
     "prettier": "prettier \"**/*.+(js|jsx|json|css|md|ts)\"",
     "prettier:write": "prettier --write \"**/*.+(js|jsx|json|css|md|ts)\""
   },
-  "author": "Watscho Aiwasov",
-  "license": "MIT",
+  "author": "Maxim Dicusari",
   "devDependencies": {
     "@eslint/js": "^9.17.0",
     "@types/cors": "^2.8.17",
