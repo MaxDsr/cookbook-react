@@ -49,6 +49,7 @@ jobs:
           echo "APP_PORT=${{ secrets.ROOT_ENV_BACKEND_PORT }}" >> backend/.env
           echo "APP_URL=http://localhost:${{ secrets.ROOT_ENV_BACKEND_PORT }}" >> backend/.env
           echo "CLIENT_URL=https://cookbook.maxim-dicusari.com" >> backend/.env
+          echo "NODE_ENV=production" >> backend/.env
           echo "" >> backend/.env
           echo "# MongoDB Connection" >> backend/.env
           echo "MONGODB_URI=mongodb://${{ secrets.MONGODB_ROOT_USERNAME }}:${{ secrets.MONGODB_ROOT_PASSWORD }}@${{ secrets.ROOT_ENV_MONGODB_CONTAINER_NAME }}:27017/${{ secrets.MONGODB_DATABASE }}?authSource=admin" >> backend/.env
