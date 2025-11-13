@@ -28,6 +28,9 @@ export declare global {
       MINIO_SECRET_KEY: string
       MINIO_USE_SSL: string
       MINIO_BUCKET_NAME: string
+      MINIO_PUBLIC_ENDPOINT?: string
+      MINIO_PUBLIC_PORT?: string
+      MINIO_PUBLIC_USE_SSL?: string
       AUTH0_DOMAIN: string
       AUTH0_CLIENT_ID: string
       AUTH0_AUDIENCE: string

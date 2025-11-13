@@ -1,8 +1,10 @@
-# Caddyfile for local development
-# Serves static files from /srv on port 80 (HTTP only, no SSL)
+# Caddyfile for production
+# Main site serves static files and proxies API requests
+# MinIO subdomain handles object storage requests
 
+# Main application domain
 :80 {
-    # Handle API requests first - proxy to backend
+    # Handle API requests - proxy to backend
     handle /api/* {
         reverse_proxy host.docker.internal:{$BACKEND_PORT}
     }
@@ -14,7 +16,20 @@
         file_server
     }
 
-    # Apply globally
+    encode gzip
+    
+    log {
+        output stdout
+        format console
+    }
+}
+
+# MinIO subdomain for object storage
+# Note: Requires DNS A record: minio.yourdomain.com → your-server-ip
+# In production, configure with your actual domain instead of :80
+minio.yourdomain.com {
+    reverse_proxy minio:9000
+    
     encode gzip
     
     log {
