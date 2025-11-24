@@ -1,7 +1,8 @@
 # Cookbook react app
 
 Use this app to create, view and edit your favourite cookbook recipes.  
-Currently this app isn't complete, so you can see there only few hardcoded recipes.
+Latest app branch: current-work
+README.md will be updated soon corresponding to the latest changes in `current-work` branch.
 
 # Run
 Clone this repository.  
@@ -28,4 +29,4 @@ Please, take in mind that file input doesn't have any validations by type. So do
 
 # Live Demo
 
-https://maxdsr.github.io/cookbook-app/
+https://cookbook.maxim-dicusari.com
