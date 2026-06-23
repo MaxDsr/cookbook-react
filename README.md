@@ -1,31 +1,26 @@
-# Cookbook react app
+# Cookbook app
 
-Use this app to create, view and edit your favourite cookbook recipes.  
-Currently this app isn't complete, so you can see there only few hardcoded recipes.
+A personal portfolio project: a recipe manager where each user creates, edits,
+and deletes their own recipes (with images), visible only to them. Built to
+demonstrate full-stack skills for technical recruiters and hiring teams.
 
-# Run
-Clone this repository.  
-First use `npm install` from the project directory to install dependencies.
+## Stack
 
-Execute `npm run start` to build and run the project
+- **Frontend**: React 19, Redux Toolkit, React Router, Auth0 (`@auth0/auth0-react`), plain CSS per component
+- **Backend**: Express + TypeScript, Mongoose/MongoDB, MinIO (S3-compatible object storage), Auth0 JWT verification, Multer for uploads
+- **Dev infra**: Docker Compose, Caddy (production reverse proxy)
+- **CI**: GitHub Actions (`.github/`)
 
+## Documentation
 
-# About
+- `PLAN.md` — phased roadmap
+- `DECISIONS.md` — architectural choices
+- `KNOWN_ISSUES.md` — active bugs
+- `SESSION_LOG.md` — work log
 
-This project uses Material UI for styled web components.  
-React Hook Form for managing forms.  
-Redux for managing state.  
-Lodash for a function. It could be better to find a different solution without importing entire library, but I didn't have time to do that.  
+## Status
 
-Projects doesn't work with any real BE. All the data management used in this project happens in memory.
-
-App inits with some default recipes.  
-For this purpose was created a pseudo BE with a pseudo API service which imitates the real BE calls with some promises.  
-  
-This app doesn't use any storage service. Images uploaded in the create new recipe form are stored in the memory.  
-Please, take in mind that file input doesn't have any validations by type. So don't try to upload big size files. It may result in browser crash.  
-
-
-# Live Demo
-
-https://maxdsr.github.io/cookbook-app/
+Backend, Auth0 login, and MinIO-backed image storage are implemented (not yet
+re-verified end-to-end against the current fresh database/storage — see
+`PLAN.md` P7). The local dev workflow and this README are being modernized;
+the previous production deployment is currently offline.

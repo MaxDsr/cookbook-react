@@ -1,1 +1,0 @@
-Something is wrong when you try to copy-paste link while you are in auth. after that you don't get back to the appx
