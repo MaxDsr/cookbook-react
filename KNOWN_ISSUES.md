@@ -67,8 +67,41 @@ forward.
 
 `backend/src/index.ts:26` — `// TODO. chek if this is needed`.
 
-## 2026-06-18 — DB and MinIO are currently empty
+## 2026-06-18 — DB and MinIO are currently empty [RESOLVED 2026-06-23]
 
 User reset both for local dev. Seed scripts (`backend/scripts/seedRecipes.ts`,
 `backend/scripts/uploadRecipeImages.ts`) need verification before other local
 work can be tested against real data — see PLAN.md P7 (current phase).
+
+RESOLVED 2026-06-23: both scripts run successfully against the dev containers.
+MinIO holds 5 objects; Mongo holds 4 recipes correctly associated with the real
+Auth0 user. Data layer verified; app-level display pending a real login.
+
+## 2026-06-23 — Seed script user id is hardcoded (correct but fragile)
+
+`backend/scripts/seedRecipes.ts` hardcodes
+`userId = new Types.ObjectId('689b1b8c4756997569c05972')`. Verified this matches
+the user's current Auth0 account, so it works today. But it's brittle:
+- If the user logs in with a different Auth0 account (or recreates the account),
+  the suffix changes and seeded recipes won't appear for them.
+- Social connections (e.g. `google-oauth2|<numeric>`) produce a non-24-hex `sub`
+  suffix; `getAll` does `new Types.ObjectId(req.userId)`, which would **throw**
+  (500) for such a value rather than returning an empty list. Only Auth0
+  database-connection users (24-hex sub) work with this design.
+
+Possible improvement (needs user sign-off — do not rewrite working code unasked):
+make the seed script take the user id via CLI arg / env var instead of hardcoding.
+
+## 2026-06-23 — Seed scripts: order dependency and orphaned MinIO objects
+
+- Order matters: `upload-recipe-images` must run **before** `seed-recipes`,
+  because the seeder reads `scripts/image-mappings.json`, which the uploader
+  regenerates with fresh bucket filenames. Running them out of order seeds
+  recipes whose `image.filename` points at objects that don't exist.
+- Each upload run generates new UUID filenames and does not delete prior objects,
+  so repeated runs accumulate orphaned images in the bucket. Harmless on a fresh
+  bucket; worth a cleanup step if the scripts are re-run often.
+- The stored `image.etag` is not used on read — `getAll` builds the presigned URL
+  from `image.filename` only. A stale etag is harmless; a stale filename breaks
+  the image. (Also: `recipeController.create` hardcodes the default image's etag
+  `409f33f747a2671563173c30a042f778` as a fallback magic constant.)

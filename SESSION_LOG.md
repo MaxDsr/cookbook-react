@@ -28,3 +28,45 @@ Date-stamped log of work sessions.
 Next: review `backend/scripts/seedRecipes.ts` and
 `backend/scripts/uploadRecipeImages.ts`, confirm per-user (Auth0 user id) wiring
 works against the fresh DB/MinIO, fix if broken.
+
+## 2026-06-23 — P7: Seed scripts verified (data layer)
+
+Traced the full user-id flow and ran both seed scripts against the live
+dev containers (`cookbook-mongo`, `cookbook-minio`, both already up).
+
+Key finding — how the user id works end to end:
+- Auth0 `sub` is `auth0|<24-hex>`. Frontend (`App.jsx`) and backend
+  (`getUserId` middleware) both take the part after `|` as the user id.
+- That 24-hex suffix is used as a Mongo `ObjectId`: `recordUser` stores the
+  `User` with `_id = ObjectId(auth0Id)`; recipes store `userId = ObjectId(...)`;
+  `recipeController.getAll` queries `Recipe.find({ userId: ObjectId(req.userId) })`.
+- `seedRecipes.ts` hardcodes `userId = ObjectId('689b1b8c4756997569c05972')`.
+
+Verified against ground truth (no Auth0 login needed): queried the running
+Mongo — the only `users` doc has `_id: ObjectId('689b1b8c4756997569c05972')`
+(email max101ww+1cbeu@gmail.com). The hardcoded seed id **matches the real,
+current Auth0 account**, so seeding is correct as-is. The id survived the DB
+reset because Auth0 is external; the login after the reset recreated the user doc.
+
+Ran the scripts (order matters — upload first, it regenerates the mappings
+the seeder reads):
+1. `npm run upload-recipe-images` → 5 objects in MinIO bucket `recipe-images`
+   (4 recipes + `recipe-default.jpg`), `image-mappings.json` regenerated.
+2. `npm run seed-recipes` → 4 recipes inserted.
+
+Post-run verification:
+- All 4 recipes carry `userId = ObjectId('689b1b8c4756997569c05972')`. ✓
+- Each recipe `image.filename` matches an object physically present in MinIO. ✓
+  (so `getAll`'s presigned-URL-by-filename will resolve)
+
+Still pending (the one acceptance criterion that needs a real JWT): confirm the
+recipes render in the running app after Auth0 login. Backend + frontend were not
+started this session; only the data layer was exercised. P7 stays [IN PROGRESS].
+
+Note: `backend/scripts/image-mappings.json` shows as modified in git — that's the
+expected, regenerated output of the upload script, not a hand edit.
+
+Next: user runs the app (backend `npm run dev` + frontend `npm run dev`) and
+logs in to confirm the 4 seeded recipes appear with images. Decide whether to
+parameterize the seed script's user id (see KNOWN_ISSUES) — needs user sign-off
+before any rewrite.

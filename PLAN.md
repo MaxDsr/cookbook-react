@@ -72,9 +72,17 @@ Out of scope:
 - Any other phase below
 
 Acceptance:
-- Fresh `docker-compose.dev` Mongo + MinIO seeded successfully via the scripts
-- Recipes visible per-user via the running app (or API), correctly associated
-- Findings documented in SESSION_LOG.md / KNOWN_ISSUES.md as relevant
+- [x] Fresh `docker-compose.dev` Mongo + MinIO seeded successfully via the scripts
+      (2026-06-23: 5 MinIO objects, 4 Mongo recipes)
+- [x] Recipes correctly associated — all 4 carry the real Auth0 user's id, and
+      image filenames match actual MinIO objects (verified directly in Mongo/MinIO)
+- [ ] Recipes visible per-user in the running **app** after Auth0 login
+      (pending — needs a real JWT; backend/frontend not started this session)
+- [x] Findings documented in SESSION_LOG.md / KNOWN_ISSUES.md
+
+Status note (2026-06-23): data layer fully verified; the hardcoded seed user id
+was confirmed correct against the live Mongo. Remaining work is the app-level
+display check (user-run) and a decision on whether to parameterize the seed id.
 
 ---
 
