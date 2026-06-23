@@ -22,8 +22,8 @@ app.use((req, res, next) => {
     // Skip body parsing for multipart - let multer handle it
     return next();
   }
-  // Apply JSON and URL-encoded parsers for other requests.
-	// TODO. chek if this is needed
+  // Apply JSON and URL-encoded parsers for other requests. The multipart guard above
+  // keeps these off file uploads so multer owns that stream.
   express.json({ limit: '10mb' })(req, res, (err) => {
     if (err) return next(err);
     express.urlencoded({ limit: '10mb', extended: true })(req, res, next);

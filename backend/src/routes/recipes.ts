@@ -25,6 +25,7 @@ export const recipes = (router: Router): void => {
   ),
   router.delete(
     '/recipes/delete/:id',
+    checkJwtAuth,
     recipeController.delete
   ),
   router.post(

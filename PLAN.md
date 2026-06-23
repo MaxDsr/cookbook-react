@@ -90,6 +90,39 @@ JWT error handler lets unauthenticated requests fall through to controllers
 
 ---
 
+## P7.5: Backend hardening — DoS test route + DELETE auth bypass + TODO [DONE 2026-06-23]
+
+Dedicated fix for three issues found during P7 but deliberately left unfixed then.
+Grouped into one chat by the delivery manager (security/dead-code hardening unit).
+
+Requirements:
+- Remove the unauthenticated `GET /api/test` route that crashed the backend (unawaited
+  `recipe.save()` with no `userId` → unhandled rejection → process down; trivial DoS)
+- Close the `DELETE /recipes/delete/:id` auth bypass (route had no `checkJwtAuth`, so a
+  forged/unsigned JWT decoded by `getUserId` passed the ownership check)
+- Make `handleJwtAuthError` fail closed (it fell through to controllers on non-401
+  errors, so unauthenticated requests hit the controller guard instead of 401)
+- Resolve the inline TODO at `backend/src/index.ts:26`
+
+Scope decisions (approved):
+- Test route: deleted entirely (dead scaffolding, no caller anywhere in repo)
+- Auth: targeted fix (add `checkJwtAuth` to DELETE + fail-closed handler). NOT the
+  deeper `getUserId` refactor — after these changes every route reading `req.userId`
+  runs `auth()` first, so the unverified decode is fully shadowed.
+- TODO: kept the working body-parser behavior, replaced the stale comment only.
+
+Acceptance:
+- [x] `GET /api/test` → 404 and backend stays up (was: single hit crashed it)
+- [x] Forged unsigned JWT (victim `sub`) DELETE → 401, target recipe survives
+      (was: 200 + deletion). Verified via curl against live backend.
+- [x] No-token and forged-token `GET /api/recipes` → 401 (was: 404 fall-through)
+- [x] Legit authenticated flows still work — verified via Playwright as the real
+      Auth0 user: 4 recipes render with MinIO images (GET 200), create a recipe
+      (POST 200), delete it (DELETE 200); Mongo restored to original 4
+- [x] `tsc --noEmit` clean
+
+---
+
 ## P8: Local dev parity for MinIO presigned URLs [TBD — confirm with user]
 
 - `docker-compose.dev` should run only MongoDB + MinIO; frontend and backend run

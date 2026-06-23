@@ -103,3 +103,38 @@ by Playwright — remove if not wanted.
 Next: confirm P7 sign-off, then pick the next phase. Strong candidates given the
 findings: P12 (testing + the `/api/test` crash) or P10 (Auth0 / the JWT
 fall-through). Each is a fresh chat per topic discipline.
+
+## 2026-06-23 — P7.5: Backend hardening (DoS test route + DELETE auth bypass + TODO) (DONE)
+
+Fixed three issues found-but-deferred during P7, grouped into one chat by the user.
+
+Code changes (backend):
+- Deleted `/api/test`: removed `controllers/testController.ts`, `routes/test.ts`, and
+  its import/registration in `routes/index.ts`. Repo-wide grep first confirmed nothing
+  else (frontend, compose, CI, Caddy) referenced it.
+- `routes/recipes.ts`: added `checkJwtAuth` to `DELETE /recipes/delete/:id` (the only
+  recipe route that lacked signature verification).
+- `middlewares/checkJwtAuth.ts`: rewrote `handleJwtAuthError` to fail closed — always
+  responds, never `next()`s into the controller; normalizes to 401 (403 for scope).
+  Also removed a stale embedded expired JWT from a comment.
+- `index.ts`: replaced the `// TODO. chek if this is needed` comment with an
+  explanatory one; body-parser behavior unchanged (chose not to simplify, to avoid
+  touching the P7-verified upload path).
+
+Verification (live, dev containers up):
+- `tsc --noEmit` clean.
+- curl: `GET /api/test` → 404, backend stays up; forged unsigned JWT with victim
+  `sub` DELETE → 401 and "Baker soup" survived (Mongo count unchanged); no-token and
+  forged-token `GET /api/recipes` → 401.
+- Playwright as the real Auth0 user (max101ww+1cbeu@gmail.com): 4 seeded recipes
+  render with MinIO images (GET 200); created a throwaway recipe (POST 200); deleted
+  it via the UI (DELETE 200). Mongo restored to the original 4. Backend never crashed
+  (nodemon restarted once on the edit; MinIO reconnected both times). Screenshot
+  `verify-after-fixes.png` captured then removed.
+
+Decision: targeted auth fix, not the deeper `getUserId` rederive-from-verified-payload
+refactor — the vuln is fully closed because every route reading `req.userId` now runs
+`auth()` first. The deeper hardening is logged as defense-in-depth for P10.
+
+Next: P7.5 complete. Remaining phases unchanged (P8 dev parity, P9 README, P10 Auth0
+incl. the optional getUserId hardening, P11 deps, P12 tests/lint). Each a fresh chat.

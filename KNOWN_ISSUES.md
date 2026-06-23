@@ -63,7 +63,7 @@ credentials. User confirmed these are dummy/dev-only values, not live secrets �
 no rotation needed, but worth keeping real env files out of version control going
 forward.
 
-## 2026-06-23 — `/api/test` route crashes the entire backend (unauthenticated)
+## 2026-06-23 — `/api/test` route crashes the entire backend (unauthenticated) [RESOLVED 2026-06-23]
 
 `backend/src/controllers/testController.ts` builds `new Recipe({...})` with **no
 `userId`** and calls `recipe.save()` **without `await` and without `.catch()`**.
@@ -80,9 +80,21 @@ It's leftover debug scaffolding (creates a junk "Super soup" recipe). Fix is sma
 scope — flagged here for a dedicated fix. The frontend never calls `/api/test`, so
 normal app flows are unaffected.
 
-## 2026-06-18 — Inline TODO
+RESOLVED 2026-06-23 (P7.5): deleted the route entirely — removed
+`controllers/testController.ts`, `routes/test.ts`, and the `test` import/registration
+in `routes/index.ts` (repo-wide grep confirmed no other caller). `GET /api/test` now
+returns 404 and the backend stays up under repeated hits.
+
+## 2026-06-18 — Inline TODO [RESOLVED 2026-06-23]
 
 `backend/src/index.ts:26` — `// TODO. chek if this is needed`.
+
+RESOLVED 2026-06-23 (P7.5): the TODO sat on the manual `express.json`/`urlencoded`
+body-parser block (the surrounding middleware skips parsing for `multipart/form-data`
+so multer owns that stream). `express.json`/`urlencoded` already no-op on multipart,
+so the explicit skip is redundant but harmless, and uploads were verified working in
+P7. Kept the behavior unchanged; replaced the stale comment with one explaining why
+the block exists.
 
 ## 2026-06-18 — DB and MinIO are currently empty [RESOLVED 2026-06-23]
 
@@ -108,7 +120,7 @@ non-24-hex Auth0 `sub` (e.g. social `google-oauth2|<numeric>`) would **throw**
 (24-hex sub) are supported by the current app design — a separate concern from
 the seeder, relevant to P10 (Auth0 work).
 
-## 2026-06-23 — Auth bypass on DELETE + JWT error handler falls through (HIGH)
+## 2026-06-23 — Auth bypass on DELETE + JWT error handler falls through (HIGH) [RESOLVED 2026-06-23]
 
 Two related auth weaknesses, both relevant to P10:
 
@@ -133,6 +145,24 @@ Two related auth weaknesses, both relevant to P10:
 Root cause for both: identity is derived by decoding the token without verifying
 it, and not every route runs `auth()`. Fix belongs in P10 (Auth0 work), in a
 fresh chat — not touched during P7.
+
+RESOLVED 2026-06-23 (P7.5), targeted fix:
+1. Added `checkJwtAuth` to `DELETE /recipes/delete/:id`, so `auth()` now verifies the
+   token signature before the controller runs. Forged unsigned JWT → 401, target
+   recipe survives (verified via curl); a legit user can still delete their own
+   recipe → 200 (verified via Playwright).
+2. Rewrote `handleJwtAuthError` to fail closed: it always responds and never calls
+   `next()` into the controller. Normalizes auth failures to 401 (preserving 403 for
+   insufficient scope); the old `err.status === 401`-only check missed the library's
+   400 `invalid_request` for a missing token, which is why no-token `GET /api/recipes`
+   used to fall through to a 404. Now → 401.
+
+Residual (defense-in-depth, NOT done — see DECISIONS 2026-06-23): `getUserId` still
+derives `req.userId` from an unverified `jwt-decode`. It is now harmless because every
+remaining route that reads `req.userId` runs `checkJwtAuth`/`auth()` first, so the
+decode is shadowed by signature verification. A future route added without
+`checkJwtAuth` could reintroduce the class of bug; deriving `req.userId` from the
+verified `req.auth.payload.sub` would remove that footgun (candidate for P10).
 
 ## 2026-06-23 — Seed scripts: order dependency and orphaned MinIO objects
 

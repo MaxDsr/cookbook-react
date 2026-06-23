@@ -73,3 +73,22 @@ any DB connection.
   values, not live secrets, so not a current priority.
 - Reviving the dead production VM — investigation of the MinIO/Caddy presigned-URL
   fix should happen from code/config, not by restoring the old VM.
+
+## 2026-06-23 — Backend auth hardening (P7.5), targeted over root-cause
+
+Closed the DELETE auth bypass and the JWT-handler fall-through (see KNOWN_ISSUES):
+- Every mutating/reading recipe route now runs `checkJwtAuth` (added it to
+  `DELETE /recipes/delete/:id`, which previously had none).
+- `handleJwtAuthError` now fails closed — always responds, never `next()`s into the
+  controller — and normalizes auth failures to 401 (403 preserved for insufficient
+  scope).
+- Deleted the leftover `/api/test` debug route (also removed an embedded expired
+  sample JWT from a comment in `checkJwtAuth.ts`).
+
+- Why targeted, not root-cause: `getUserId` still derives `req.userId` from an
+  unverified `jwt-decode`, but after this change every route that reads `req.userId`
+  runs `auth()` first, so the unverified decode is fully shadowed by signature
+  verification — the vulnerability is closed. The deeper fix (derive `req.userId`
+  from the verified `req.auth.payload.sub`) is defense-in-depth against a future
+  un-gated route and was deferred to P10 to keep this change minimal. Approved by
+  user during P7.5.

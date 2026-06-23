@@ -2,22 +2,24 @@ import {auth} from "express-oauth2-jwt-bearer";
 import {auth0Config} from "../constants/auth0Config";
 import {StatusCodes} from "http-status-codes";
 
-
-/*
-some expired tokens for max101ww+secondtest@gmail.com:
-
-eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InhKcUhvYWhJbUpqRmZLMWR6bVlJWSJ9.eyJpc3MiOiJodHRwczovL2Rldi00Mm92cHEybWphMmgwbnFxLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw2NWQ1YzY4MjAxNzc0MTBiMDlhMGI0MjgiLCJhdWQiOlsiaHR0cHM6Ly9kZXYtNDJvdnBxMm1qYTJoMG5xcS51cy5hdXRoMC5jb20vYXBpL3YyLyIsImh0dHBzOi8vZGV2LTQyb3ZwcTJtamEyaDBucXEudXMuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcwODUwODgxNiwiZXhwIjoxNzA4NTk1MjE2LCJhenAiOiJvc2ZlajkxdmJZVmh5aUphSThiTHFZU2R3bkJiQVd2USIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwifQ.ZxBKXsLC5IH2N3rpuXNwQ2pAWufAsTzCNOIqd4SDLUbMoX3ZEjMvdd88VCOabgsGrDxoO62O3t9t0K91pco4WlwlvyeHSZ62mf8dM_ApuU5FWEaKaNMKNPGWTl092C8lq8n5RnG5ls5oAAHW2q1yngbLc-KcV8t5PBRweAwDSoTwdDfqXq2vttdEPzst3qRRa9t6rmCcaz2fxCq8SKQCOAVPCJfMVTs4HJTejh-ez0ELa7Ea0KrY1aYYaDeHVBjGN04vhIjVol6YmokDV8M1EishDCm8oIB7tPzncAOcfXYrWkQ4hfi8GEJQzBtFgpyW3Juse6b25N5ENMAEF-qMIg
- */
-
+// Error handler for the auth() middleware. Fails closed: any error reaching here
+// means the bearer token was missing, malformed, or failed signature/audience
+// verification. We always respond and never call next() — calling next() would hand
+// an unauthenticated request to the controller (the old fall-through bug). The library
+// returns 400 (invalid_request) for a missing token; normalize all auth failures to
+// 401, preserving an explicit 403 for insufficient scope.
+// NOTE: the 4th arg is required — Express only treats a middleware as an error
+// handler when it declares exactly four parameters. We intentionally never call it.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const handleJwtAuthError = (err: any, req: any, res: any, next: any) => {
-  if (err.status && err.status === StatusCodes.UNAUTHORIZED) {
-    return res.status(StatusCodes.UNAUTHORIZED).json({
-      message: "Unauthorized",
-      status: StatusCodes.UNAUTHORIZED
-    });
-  }
-
-  next && next();
+  const code = err?.statusCode || err?.status;
+  const status = code === StatusCodes.FORBIDDEN
+    ? StatusCodes.FORBIDDEN
+    : StatusCodes.UNAUTHORIZED;
+  return res.status(status).json({
+    message: status === StatusCodes.FORBIDDEN ? "Forbidden" : "Unauthorized",
+    status
+  });
 }
 
 export const checkJwtAuth = [
