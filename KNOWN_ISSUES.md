@@ -46,13 +46,34 @@ Carried over from the project's former `known-bugs.md`: copy-pasting a link whil
 in the middle of the Auth0 flow means you don't get redirected back into the app
 correctly afterward.
 
-## 2026-06-18 — MinIO presigned URLs: cross-origin issue in prod (undocumented fix)
+## 2026-06-18 — MinIO presigned URLs: cross-origin issue in prod (undocumented fix) [RESOLVED 2026-06-23]
 
 In production, the frontend couldn't load MinIO presigned URLs because they
 pointed at a different origin/domain than the frontend. This was reportedly
 resolved via the Caddy config, but the exact mechanism was never written down and
 the production VM is no longer live to inspect directly. Needs rediscovery from
 code/config — see PLAN.md P8.
+
+RESOLVED 2026-06-23 (P8): rediscovered the mechanism from code. `minio.ts`
+constructs a separate `publicClient` when `NODE_ENV === 'production'`, pointed at
+`MINIO_PUBLIC_ENDPOINT`/`MINIO_PUBLIC_PORT`/`MINIO_PUBLIC_USE_SSL` instead of the
+internal Docker endpoint used for uploads. `caddy/Caddyfile` has a matching
+`minio.yourdomain.com { reverse_proxy minio:9000 }` block, so a browser hitting the
+public subdomain reaches MinIO via Caddy instead of the unreachable internal
+`minio:9000` hostname. That pairing is the fix.
+
+It is currently **dormant**, not active: `docker-compose.prod.yml` loads
+`env_file: ./backend/.env`, but `NODE_ENV=production` and the `MINIO_PUBLIC_*`
+values only exist in the unused `backend/.env.development` template — so even if
+the prod VM were redeployed today, the internal (Docker-only) endpoint would still
+be baked into presigned URLs. Reactivating this (setting the real vars in
+whichever env file prod actually loads) was deferred — no live prod target exists
+to verify against — and is a candidate for a future phase if prod is redeployed.
+
+Confirmed dev never hits this problem in the first place: `backend/src/index.ts`
+loads `backend/.env` (bare `dotenv/config`, no path override), which sets
+`MINIO_ENDPOINT=localhost`. Backend and browser share `localhost` in dev, so the
+presigned URL is directly browser-reachable regardless of the `publicClient` logic.
 
 ## 2026-06-18 — Env files with credentials are tracked in git
 

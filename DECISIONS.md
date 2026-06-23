@@ -74,6 +74,37 @@ any DB connection.
 - Reviving the dead production VM — investigation of the MinIO/Caddy presigned-URL
   fix should happen from code/config, not by restoring the old VM.
 
+## 2026-06-23 — Removed redundant root `docker-compose.yml`
+
+Deleted the full-container `docker-compose.yml` (dockerized frontend+backend on
+hardcoded ports 3002/3003/3004) in favor of the single dev workflow already in
+active use: `docker-compose.dev.yml` for Mongo+MinIO only, frontend/backend run
+via `npm run dev` directly on the host.
+
+- Why: the two files described conflicting dev workflows. Grep confirmed nothing
+  (README, CI, scripts) referenced the deleted file — it was dead config left over
+  from before the host-`npm run dev` workflow was adopted. Approved by user during
+  P8.
+
+## 2026-06-23 — Dev vs prod MinIO presigned-URL architecture (documented, P8)
+
+Recorded how presigned URLs differ between dev and prod, since this was previously
+undocumented (see KNOWN_ISSUES, resolved 2026-06-23):
+
+- Dev: `backend/src/index.ts` loads only `backend/.env` (bare `dotenv/config`, no
+  path override). `MINIO_ENDPOINT=localhost` there means the single `client` in
+  `minio.ts` is reused for presigned URLs, and it's already browser-reachable
+  because backend and browser share `localhost`.
+- Prod (as designed, not currently active): `minio.ts` swaps to a separate
+  `publicClient` when `NODE_ENV=production`, using `MINIO_PUBLIC_ENDPOINT/PORT/
+  USE_SSL` instead of the internal Docker endpoint, paired with a Caddy
+  `minio.yourdomain.com` reverse-proxy subdomain. This design is sound but dormant
+  — the env vars it needs only exist in the unused `backend/.env.development`
+  template, not in whatever env file prod actually loads.
+- Why: no code change was needed for dev (already worked); the prod path was
+  deliberately left dormant rather than wired live, since there's no live prod
+  target to verify a change against. Approved by user during P8.
+
 ## 2026-06-23 — Backend auth hardening (P7.5), targeted over root-cause
 
 Closed the DELETE auth bypass and the JWT-handler fall-through (see KNOWN_ISSUES):

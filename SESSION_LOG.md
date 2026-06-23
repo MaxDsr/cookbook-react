@@ -138,3 +138,44 @@ refactor — the vuln is fully closed because every route reading `req.userId` n
 
 Next: P7.5 complete. Remaining phases unchanged (P8 dev parity, P9 README, P10 Auth0
 incl. the optional getUserId hardening, P11 deps, P12 tests/lint). Each a fresh chat.
+
+## 2026-06-23 — P8: Local dev MinIO parity — closed, premise was stale (DONE)
+
+Investigated P8's two bullets before doing any implementation work, per CLAUDE.md
+("ask before guessing" / decisions not in DECISIONS.md). Found the premise didn't
+hold:
+
+- Bullet 1 ("compose should run only Mongo+MinIO, frontend/backend via `npm run
+  dev`") was already the current state, and already verified working during P7.
+- Bullet 2 ("recreate the prod cross-origin fix in dev") targets a bug that
+  structurally can't occur in this setup: traced `backend/src/index.ts`'s
+  `import 'dotenv/config'` (no path override) to confirm it only ever loads
+  `backend/.env`, which sets `MINIO_ENDPOINT=localhost` — browser-reachable
+  because backend and browser share `localhost` in dev.
+- Rediscovered the actual prod mechanism instead (`publicClient` +
+  `MINIO_PUBLIC_*` in `minio.ts`, paired with the Caddy `minio.yourdomain.com`
+  subdomain block) — this resolves the long-standing "undocumented fix" entry in
+  KNOWN_ISSUES. Confirmed it's dormant (prod's env file doesn't set the vars it
+  needs) and left it that way — no live prod target to verify a change against.
+
+Asked the user to confirm scope given these findings (AskUserQuestion: document &
+close vs. also clean up the redundant compose file vs. also fix prod env wiring).
+User approved: document & close + remove the redundant root `docker-compose.yml`.
+Reactivating the dormant prod env wiring was explicitly not selected — deferred.
+
+Changes made:
+- Deleted root `docker-compose.yml` (full-container dev setup, hardcoded ports;
+  confirmed unreferenced by README, CI, or any script via grep).
+- `PLAN.md`: P8 marked `[DONE 2026-06-23]` with the corrected findings.
+- `KNOWN_ISSUES.md`: resolved the MinIO cross-origin entry with the rediscovered
+  mechanism and its dormant status.
+- `DECISIONS.md`: appended two entries (compose file removal; dev-vs-prod
+  presigned-URL architecture).
+
+No code/runtime changes were made (doc-only + one file deletion), so no
+typecheck/lint/test run applies this session.
+
+Next: pick the next phase. Strong candidates per earlier findings: P10 (Auth0,
+includes the deferred `getUserId` hardening) or P12 (testing + lint). Each is a
+fresh chat per topic discipline. User has not yet confirmed P8 sign-off or
+committed/pushed these changes.

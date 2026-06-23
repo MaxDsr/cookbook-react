@@ -123,13 +123,34 @@ Acceptance:
 
 ---
 
-## P8: Local dev parity for MinIO presigned URLs [TBD — confirm with user]
+## P8: Local dev parity for MinIO presigned URLs [DONE 2026-06-23]
 
-- `docker-compose.dev` should run only MongoDB + MinIO; frontend and backend run
-  directly in the terminal (`npm run dev`) for easier debugging
-- Recreate, in dev, whatever fix made MinIO presigned URLs work cross-origin in prod
-  (suspected Caddy-based; prod VM no longer available to inspect — rediscover from
-  code/config, not from the dead VM)
+Both original bullets assumed dev was broken in the way prod was. Investigation
+showed the premise was stale:
+
+- `docker-compose.dev.yml` already ran only Mongo+MinIO, with frontend/backend on
+  the host via `npm run dev` — already the case, and already verified working in
+  P7 (Playwright session, real presigned MinIO URLs, images rendered, no console
+  errors).
+- There was nothing to "recreate" in dev: `backend/src/index.ts` does a bare
+  `import 'dotenv/config'`, which only ever loads `backend/.env` (no path override
+  anywhere). With `MINIO_ENDPOINT=localhost` / `MINIO_PORT=3003` in that file,
+  backend and browser share `localhost`, so the presigned URL is directly
+  browser-reachable — the Docker-internal-hostname-unreachable-by-browser problem
+  that prod had structurally can't occur here.
+- The prod mechanism was rediscovered instead: `minio.ts`'s `publicClient`
+  (active when `NODE_ENV=production`, pointed at `MINIO_PUBLIC_*`) paired with the
+  Caddy `minio.yourdomain.com` subdomain block. It's dormant — prod's `env_file`
+  (`backend/.env`) doesn't set `NODE_ENV`/`MINIO_PUBLIC_*`, those only exist in the
+  unused `backend/.env.development` template — documented in KNOWN_ISSUES, not
+  reactivated (no live prod target to verify against; deferred).
+
+Additionally removed the redundant root `docker-compose.yml` (full-container dev
+setup, hardcoded ports) — confirmed unreferenced by README/CI/scripts, leftover
+from before the `docker-compose.dev.yml` + host-`npm run dev` workflow was adopted.
+
+Out of scope (deferred, not done): reactivating the dormant prod env wiring;
+removing the unused `backend/.env.development` template.
 
 ---
 
