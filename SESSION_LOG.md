@@ -70,3 +70,36 @@ Next: user runs the app (backend `npm run dev` + frontend `npm run dev`) and
 logs in to confirm the 4 seeded recipes appear with images. Decide whether to
 parameterize the seed script's user id (see KNOWN_ISSUES) — needs user sign-off
 before any rewrite.
+
+## 2026-06-23 — P7: app-level verification + seed parameterization (DONE)
+
+Closed out P7 end to end. User supplied test creds via root `.env`
+(`TEST_USER_EMAIL` / `TEST_USER_PASSWORD`) and asked me to run the check via
+Playwright.
+
+App-level verification (the criterion that needed a real JWT):
+- Started backend (`npm run dev`, :3001) and frontend (`npm run dev`, :3000).
+- Drove the Auth0 login via Playwright as max101ww+1cbeu@gmail.com.
+- All 4 seeded recipes rendered (names, ingredients, servings, times match the
+  seed data). Confirmed via DOM that each `<img>` actually loaded from MinIO
+  (`localhost:3003`, real `X-Amz-Signature` presigned URLs, naturalWidth 768–3485,
+  none fell back to the placeholder). No console errors. Screenshot captured.
+
+Seed id parameterized (user approved): `seedRecipes.ts` now resolves the user id
+from CLI arg / `SEED_USER_ID` env / default constant, with 24-hex validation.
+Verified all four paths (default, CLI positional, env, invalid→exit 1) and that
+Mongo still holds exactly 4 correctly-associated recipes. typecheck clean.
+
+Two unrelated bugs found and logged (NOT fixed — outside P7 scope):
+- `GET /api/test` crashes the whole backend (unawaited `Recipe.save()` with no
+  userId → unhandled rejection). Unauthenticated, so a trivial DoS.
+- `handleJwtAuthError` falls through to controllers on non-401 errors, so
+  unauthenticated `/api/recipes` returns 404 (controller guard) rather than 401.
+
+Dev servers (backend nodemon + frontend vite) were left running at end of
+session. Stray screenshot `p7-seeded-recipes-verified.png` written to repo root
+by Playwright — remove if not wanted.
+
+Next: confirm P7 sign-off, then pick the next phase. Strong candidates given the
+findings: P12 (testing + the `/api/test` crash) or P10 (Auth0 / the JWT
+fall-through). Each is a fresh chat per topic discipline.

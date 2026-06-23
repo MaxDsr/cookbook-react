@@ -63,6 +63,23 @@ credentials. User confirmed these are dummy/dev-only values, not live secrets �
 no rotation needed, but worth keeping real env files out of version control going
 forward.
 
+## 2026-06-23 — `/api/test` route crashes the entire backend (unauthenticated)
+
+`backend/src/controllers/testController.ts` builds `new Recipe({...})` with **no
+`userId`** and calls `recipe.save()` **without `await` and without `.catch()`**.
+The handler returns 200 immediately; the save then rejects with
+`recipes validation failed: userId required` as an *unhandled promise rejection*,
+which crashes the Node process (nodemon then waits for a file change).
+
+Severity: high. The route (`GET /api/test`) has **no auth**, so any unauthenticated
+request takes the whole backend down (trivial DoS). Discovered by cur/ing it during
+P7 verification — a single hit killed the server.
+
+It's leftover debug scaffolding (creates a junk "Super soup" recipe). Fix is small
+(await + try/catch, or just delete the test route/controller), but it's outside P7
+scope — flagged here for a dedicated fix. The frontend never calls `/api/test`, so
+normal app flows are unaffected.
+
 ## 2026-06-18 — Inline TODO
 
 `backend/src/index.ts:26` — `// TODO. chek if this is needed`.
@@ -77,20 +94,45 @@ RESOLVED 2026-06-23: both scripts run successfully against the dev containers.
 MinIO holds 5 objects; Mongo holds 4 recipes correctly associated with the real
 Auth0 user. Data layer verified; app-level display pending a real login.
 
-## 2026-06-23 — Seed script user id is hardcoded (correct but fragile)
+## 2026-06-23 — Seed script user id [PARAMETERIZED 2026-06-23]
 
-`backend/scripts/seedRecipes.ts` hardcodes
-`userId = new Types.ObjectId('689b1b8c4756997569c05972')`. Verified this matches
-the user's current Auth0 account, so it works today. But it's brittle:
-- If the user logs in with a different Auth0 account (or recreates the account),
-  the suffix changes and seeded recipes won't appear for them.
-- Social connections (e.g. `google-oauth2|<numeric>`) produce a non-24-hex `sub`
-  suffix; `getAll` does `new Types.ObjectId(req.userId)`, which would **throw**
-  (500) for such a value rather than returning an empty list. Only Auth0
-  database-connection users (24-hex sub) work with this design.
+`backend/scripts/seedRecipes.ts` previously hardcoded
+`userId = new Types.ObjectId('689b1b8c4756997569c05972')`. Verified it matches the
+owner's Auth0 account, so it worked — but was brittle for any other account.
 
-Possible improvement (needs user sign-off — do not rewrite working code unasked):
-make the seed script take the user id via CLI arg / env var instead of hardcoding.
+RESOLVED 2026-06-23: parameterized via CLI arg / `SEED_USER_ID` env, default =
+owner's id, with 24-hex validation (see DECISIONS.md). Residual design constraint
+worth keeping in mind: `getAll` does `new Types.ObjectId(req.userId)`, so a
+non-24-hex Auth0 `sub` (e.g. social `google-oauth2|<numeric>`) would **throw**
+(500) rather than return an empty list. Only Auth0 database-connection users
+(24-hex sub) are supported by the current app design — a separate concern from
+the seeder, relevant to P10 (Auth0 work).
+
+## 2026-06-23 — Auth bypass on DELETE + JWT error handler falls through (HIGH)
+
+Two related auth weaknesses, both relevant to P10:
+
+1. **`DELETE /recipes/delete/:id` is forgeable (real auth bypass).** That route
+   has **no `checkJwtAuth`** (no `auth()` signature verification). The only thing
+   identifying the caller is the `getUserId` middleware, which uses
+   `jwt-decode` — that **does not verify the token signature**, it just base64-
+   decodes the payload. So an attacker can hand-craft an unsigned JWT with
+   `sub: "auth0|<victimId>"`; `getUserId` sets `req.userId = <victimId>`, the
+   controller's ownership check (`recipeDoc.userId === req.userId`) passes, and
+   the victim's recipe is deleted. No valid credentials needed.
+
+2. **`handleJwtAuthError` falls through on non-401 errors.** `checkJwtAuth` =
+   `[auth(...), handleJwtAuthError]`; the handler only returns 401 when
+   `err.status === 401`, otherwise it calls `next()` into the controller.
+   Observed: `GET /api/recipes` with **no token** returns `404 "User not found"`
+   (controller guard), not `401`. So on the GET/POST/PUT routes the controllers'
+   `if (!req.userId)` checks — not the JWT middleware — are the real gate. The GET
+   doesn't leak other users' data (404, not someone else's recipes), but auth is
+   weaker/more implicit than it looks.
+
+Root cause for both: identity is derived by decoding the token without verifying
+it, and not every route runs `auth()`. Fix belongs in P10 (Auth0 work), in a
+fresh chat — not touched during P7.
 
 ## 2026-06-23 — Seed scripts: order dependency and orphaned MinIO objects
 

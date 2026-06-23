@@ -54,6 +54,19 @@ Confirmed with user: this is a learning/portfolio project for recruiters and
 hiring teams, not a production product for end users. A recipe manager where each
 user creates/edits/deletes their own recipes with images, scoped per-user via Auth0.
 
+## 2026-06-23 — Seed script user id is parameterized
+
+`backend/scripts/seedRecipes.ts` now resolves the target user id from (in order):
+a CLI arg (`npm run seed-recipes -- <id>` or `-- --userId <id>`), the
+`SEED_USER_ID` env var, then a default constant (the owner's known Auth0 id).
+The id is validated as a 24-char hex string; an invalid id exits non-zero before
+any DB connection.
+
+- Why: the id was previously a bare hardcoded literal. Keeping a default preserves
+  the convenient `npm run seed-recipes` flow for the owner, while the arg/env
+  override removes the rigidity so recipes can be seeded for any account. Approved
+  by user during P7.
+
 ## 2026-06-18 — Anti-decisions (explicitly OUT of scope for now)
 
 - Rotating env credentials in `backend/.env` / `prod.env` — confirmed dummy/dev-only

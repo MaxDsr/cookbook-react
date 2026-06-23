@@ -56,7 +56,7 @@ Exact details of the presigned-URL fix were not documented and need rediscovery 
 
 ---
 
-## P7: Seed script verification [IN PROGRESS]
+## P7: Seed script verification [DONE 2026-06-23]
 
 DB and MinIO are freshly reset. Need to verify the existing seed tooling still works
 end-to-end and assigns recipes to a real user correctly.
@@ -76,13 +76,17 @@ Acceptance:
       (2026-06-23: 5 MinIO objects, 4 Mongo recipes)
 - [x] Recipes correctly associated — all 4 carry the real Auth0 user's id, and
       image filenames match actual MinIO objects (verified directly in Mongo/MinIO)
-- [ ] Recipes visible per-user in the running **app** after Auth0 login
-      (pending — needs a real JWT; backend/frontend not started this session)
+- [x] Recipes visible per-user in the running **app** after Auth0 login
+      (2026-06-23: logged in via Playwright as the seeded user; all 4 recipes
+      rendered with images loaded from MinIO presigned URLs — no console errors)
 - [x] Findings documented in SESSION_LOG.md / KNOWN_ISSUES.md
 
-Status note (2026-06-23): data layer fully verified; the hardcoded seed user id
-was confirmed correct against the live Mongo. Remaining work is the app-level
-display check (user-run) and a decision on whether to parameterize the seed id.
+Done note (2026-06-23): verified end to end — Mongo/MinIO data, per-user
+association, and live app display. Seed user id was parameterized (CLI arg /
+`SEED_USER_ID` env, default = owner's id; see DECISIONS.md). Two unrelated bugs
+were found and logged for later phases: `/api/test` crashes the backend, and the
+JWT error handler lets unauthenticated requests fall through to controllers
+(see KNOWN_ISSUES.md).
 
 ---
 

@@ -71,14 +71,43 @@ const recipes = [
   }
 ]
 
+// Resolve the target user id for seeding. Priority:
+//   1. CLI arg:  npm run seed-recipes -- <userId>   (or -- --userId <userId>)
+//   2. Env var:  SEED_USER_ID=<userId> npm run seed-recipes
+//   3. Default:  the project owner's known Auth0 id (kept for convenience)
+// The id must be a 24-char hex string: it is used directly as a Mongo ObjectId
+// and must match the Auth0 `sub` suffix the app stores on users/recipes, or the
+// seeded recipes won't show up for the logged-in user.
+const DEFAULT_SEED_USER_ID = '689b1b8c4756997569c05972'
+
+function resolveSeedUserId(): string {
+  const args = process.argv.slice(2)
+  const flagIndex = args.findIndex(a => a === '--userId' || a === '--user-id')
+  const fromFlag = flagIndex !== -1 ? args[flagIndex + 1] : undefined
+  const fromPositional = args.find(a => !a.startsWith('-'))
+
+  const id = fromFlag ?? fromPositional ?? process.env.SEED_USER_ID ?? DEFAULT_SEED_USER_ID
+  const source = fromFlag || fromPositional
+    ? 'CLI arg'
+    : process.env.SEED_USER_ID
+      ? 'SEED_USER_ID env'
+      : 'default'
+
+  if (!/^[a-fA-F0-9]{24}$/.test(id)) {
+    console.error(`Invalid seed user id "${id}" (source: ${source}). Expected a 24-char hex Auth0 id, e.g. ${DEFAULT_SEED_USER_ID}.`)
+    process.exit(1)
+  }
+
+  console.log(`Seeding recipes for user ${id} (source: ${source})`)
+  return id
+}
+
 async function seedRecipes() {
+  const userId = new Types.ObjectId(resolveSeedUserId())
   try {
     // Connect to MongoDB
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://cookbook-mongo/cookbook')
     console.log('Connected to MongoDB')
-
-    // Hardcoded userId
-    const userId = new Types.ObjectId('689b1b8c4756997569c05972')
 
     // Clear existing recipes for this user
     await Recipe.deleteMany({ userId })
