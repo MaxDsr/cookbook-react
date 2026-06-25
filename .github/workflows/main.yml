@@ -5,7 +5,33 @@ on:
     branches: [ current-work ]
 
 jobs:
+  backend-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '24'
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Typecheck backend
+        run: |
+          cd backend
+          npx tsc --noEmit
+
+      - name: Build backend
+        run: |
+          cd backend
+          npm run build
+
   deploy:
+    needs: backend-check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
