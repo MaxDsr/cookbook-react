@@ -123,3 +123,70 @@ Closed the DELETE auth bypass and the JWT-handler fall-through (see KNOWN_ISSUES
   from the verified `req.auth.payload.sub`) is defense-in-depth against a future
   un-gated route and was deferred to P10 to keep this change minimal. Approved by
   user during P7.5.
+
+## 2026-06-23 — P11: Dependency removals
+
+Removed, confirmed unused via `npx depcheck` + manual cross-check against
+scripts/configs (to avoid false positives on CLI-invoked tools):
+- Backend devDependencies: `ts-node`, `tsconfig-paths`, `@types/express-serve-static-core`
+- Frontend devDependency: `@types/react-dom`
+
+- Why: dead weight in the dependency tree with no functional benefit; removing them
+  reduces install size/audit surface for no behavior change (verified via `tsc
+  --noEmit` + `npm run build` + live boot for backend, `npm run build` + `npm run
+  lint` for frontend — all clean).
+- `@types/react` was flagged by the user as having the same root cause (frontend has
+  no TypeScript tooling at all — no `tsconfig.json`/`jsconfig.json`, no `.ts`/`.tsx`
+  files, no `typescript` devDependency) but was **not** removed this round — user
+  chose to keep it despite the same justification, deferred rather than declined
+  permanently.
+
+## 2026-06-23 — P11: Deleted two dead files
+
+- `backend/test-minio-upload.js`: broken, untracked-by-any-script debug script
+  (CommonJS `require()` inside an ESM package, missing `form-data`/`node-fetch`
+  dependencies, referenced a nonexistent `./test-image.jpeg`). Confirmed via grep no
+  script/doc/CI referenced it.
+- `frontend/.eslintrc.cjs`: legacy ESLint config superseded by the active flat
+  `eslint.config.js`; ESLint 9 already ignores legacy config format by default, so it
+  was dead weight, not a live fallback.
+
+- Why: found incidentally while auditing dependencies (both files referenced
+  packages that don't exist in `package.json`, which is what surfaced them); user
+  approved deleting both rather than just logging them, since they're unambiguously
+  dead.
+
+## 2026-06-23 — P11: Added backend-check CI job, gated `deploy` on it
+
+`.github/workflows/main.yml` is a deploy-on-push pipeline, not a test suite. Before
+this change, the GitHub-hosted runner only ever built the frontend
+(`npm install && npm run build`) — the backend was exclusively built remotely on the
+VM via SSH + `docker compose -f docker-compose.prod.yml up -d --build`. That means a
+backend-breaking change (e.g. a bad dependency removal) would only surface during a
+live deploy attempt, and currently wouldn't surface at all since the VM is down.
+
+Added a `backend-check` job (checkout, Node 24 — matching `backend/package.json`'s
+`nodeVersion` and the Dockerfile's `node:24.11.0-slim` base, rather than the
+workflow's existing Node 20 used for the frontend step — `npm ci`, `npx tsc
+--noEmit`, `npm run build`) and added `needs: backend-check` to the existing
+`deploy` job.
+
+- Why these specific commands: mirrors `backend/docker/Dockerfile`'s builder stage
+  (`npm ci` → `npm run build`, which is esbuild) almost exactly, plus `tsc --noEmit`
+  as a bonus type-safety check the Dockerfile itself doesn't run (esbuild strips
+  types without checking them, so it wouldn't have caught a type-only dependency
+  regression like the `@types/express-serve-static-core` removal above).
+- Why `npm run lint` was deliberately excluded from this gate: backend lint
+  currently fails with 287 pre-existing problems (see KNOWN_ISSUES.md), which is
+  P12 scope. Including it here would make the new gate red immediately, for reasons
+  unrelated to this phase.
+- Why `needs: backend-check` (a real behavior change): the whole point was
+  fast-failing before deploy rather than only catching backend breakage during the
+  live VM build — user explicitly asked for this over just logging it as a future
+  improvement.
+- Why not validated by an actual CI run: the workflow triggers on push to
+  `current-work`, which is the current branch — pushing to test the YAML would
+  trigger a real deploy attempt against the VM. Validated instead by running the
+  job's exact commands locally (all clean) and by careful review of the YAML diff.
+  User confirmed the VM will be back up soon and the existing deploy flow should be
+  preserved, not removed or restructured — only this fast-fail addition was made.

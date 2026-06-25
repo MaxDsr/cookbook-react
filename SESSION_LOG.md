@@ -179,3 +179,61 @@ Next: pick the next phase. Strong candidates per earlier findings: P10 (Auth0,
 includes the deferred `getUserId` hardening) or P12 (testing + lint). Each is a
 fresh chat per topic discipline. User has not yet confirmed P8 sign-off or
 committed/pushed these changes.
+
+## 2026-06-23 — P11: Dependency audit (DONE)
+
+User chose to jump to P11 next (skipping P9/P10 for now). Gathered info and asked
+clarifying questions before any execution, per CLAUDE.md:
+
+- Ran `npx depcheck` in both `frontend/` and `backend/`, cross-checked findings by
+  hand against npm scripts/configs (to avoid flagging CLI-invoked tools like
+  `migrate-mongo` or config-only refs like `tsx` as "unused").
+- Surfaced a CI scoping issue before defining "done": `.github/workflows/main.yml`
+  is a deploy-on-push pipeline; only the frontend build ran on the GitHub runner,
+  backend was only ever built on the (currently down) VM via SSH. Asked the user
+  how to handle this — they confirmed the VM will be back up soon and the existing
+  deploy flow should be preserved, and asked for a fast-fail backend check job to
+  be added as part of this phase rather than just logged.
+- Asked and got user decisions on: two adjacent dead files found while auditing
+  (delete both, approved), and `@types/react` (same "no TS tooling" justification
+  as the confirmed-unused `@types/react-dom`, but user chose to keep it).
+
+Changes made:
+- Backend: removed devDependencies `ts-node`, `tsconfig-paths`,
+  `@types/express-serve-static-core` (`npm uninstall`, updates lockfile).
+- Frontend: removed devDependency `@types/react-dom`.
+- Deleted `backend/test-minio-upload.js` (broken debug script, missing deps,
+  missing test image, never run by anything) and `frontend/.eslintrc.cjs` (legacy
+  config superseded by the active flat `eslint.config.js`).
+- `.github/workflows/main.yml`: added a `backend-check` job (Node 24, `npm ci`,
+  `npx tsc --noEmit`, `npm run build`) and gated the existing `deploy` job on it
+  (`needs: backend-check`). Deliberately left `npm run lint` out of this gate —
+  backend lint has 287 pre-existing problems (P12 scope), so including it would
+  make the new gate red for unrelated reasons.
+
+Verification (all local — read `backend/docker/Dockerfile` first to make sure the
+new CI job's commands actually mirror the real VM build, rather than guessing):
+- Backend: `npm ci`, `npx tsc --noEmit` (clean — this is the check that actually
+  matters for the `@types/express-serve-static-core` removal, since esbuild strips
+  types without checking them), `npm run build` (clean), live boot via `npm run
+  dev` against the existing dev containers — MinIO connected, no crash,
+  unauthenticated `GET /api/recipes` → 401 as expected (confirms the P7.5 auth fix
+  is unaffected).
+- Frontend: `npm ci`, `npm run build` (clean — this is the literal command the
+  real CI runner executes), `npm run lint` (clean, no regression from removing
+  `.eslintrc.cjs`).
+- Did **not** push to test the new CI job — the workflow triggers a real deploy to
+  the VM on push to `current-work` (the current branch). Validated by local
+  command-equivalence and careful diff review instead; this is documented as a gap
+  in PLAN.md/DECISIONS.md, not silently treated as fully verified.
+
+Incidental finding (not fixed, logged to KNOWN_ISSUES): `backend/dist/` isn't
+gitignored anywhere (unlike `frontend/`, which has its own `.gitignore`); noticed
+because running the build locally left it untracked-but-not-ignored. Cleaned up the
+artifact, left the `.gitignore` gap for a future session.
+
+Not committed/pushed yet — `backend/.env` (modified) and untracked `.env`/
+`.playwright-mcp/` are pre-existing leftovers from earlier sessions, left untouched.
+
+Next: user to confirm P11 sign-off, then decide commit/push and the next phase
+(P9 README, P10 Auth0, or P12 testing/lint — each a fresh chat).

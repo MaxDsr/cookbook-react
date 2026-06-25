@@ -168,10 +168,53 @@ Investigate and fix the redirect-callback handling flagged as "not the best" by 
 
 ---
 
-## P11: Dependency audit [TBD — confirm with user]
+## P11: Dependency audit [DONE 2026-06-23]
 
-Identify and remove unused packages in `frontend/` and `backend/`. Must keep the
-GitHub Actions CI pipeline green (`.github/`).
+Identified and removed unused packages in `frontend/` and `backend/`. Also added a
+backend CI check job so dependency breakage fails fast on the runner instead of only
+surfacing during the live (currently down, expected back soon) VM deploy.
+
+Findings (via `npx depcheck` + manual grep cross-check against scripts/configs):
+- Backend devDependencies removed: `ts-node`, `tsconfig-paths` (no usage anywhere —
+  nodemon/scripts use `tsx`, and `tsconfig.json` defines no `paths`),
+  `@types/express-serve-static-core` (unused; `@types/express` pulls it transitively)
+- Frontend devDependency removed: `@types/react-dom` (confirmed unused by depcheck;
+  `@types/react` left in place per user decision — same root cause but not the
+  confirmed item, deferred rather than removed)
+- Correctly NOT flagged as unused despite no `import`: `migrate-mongo` (CLI-invoked
+  via npm scripts + `migrate-mongo-config.cjs` + `migrations/` dir), `tsx` (used in
+  `nodemon.json`/scripts), eslint/prettier plugins (used via config files)
+
+Adjacent dead-code cleanup (approved by user, same session):
+- Deleted `backend/test-minio-upload.js` — broken debug script (CommonJS `require()`
+  in an ESM package, referenced uninstalled `form-data`/`node-fetch`, looked for a
+  nonexistent `./test-image.jpeg`). Never run by any npm script or CI.
+- Deleted `frontend/.eslintrc.cjs` — legacy ESLint config superseded by the active
+  flat `eslint.config.js`; ESLint 9 already ignored it. Referenced
+  `eslint-plugin-react`, which isn't even installed.
+
+CI scoping decision (see DECISIONS.md): `.github/workflows/main.yml` is a
+deploy-on-push pipeline, not a test suite — only the frontend build step
+(`npm install && npm run build`) ran on the GitHub runner; the backend was only ever
+built remotely on the VM via SSH/`docker compose up --build`. Added a new
+`backend-check` job (checkout, Node 24, `npm ci`, `npx tsc --noEmit`, `npm run build`)
+that the existing `deploy` job now `needs:`, so backend breakage fails fast on the
+runner. Deliberately excluded `npm run lint` from this gate — backend lint currently
+has 287 pre-existing problems (P12 scope), and including it would turn CI red for
+reasons unrelated to this phase.
+
+Out of scope (deferred): fixing backend lint (P12), removing `@types/react` (user
+declined this round), reactivating the dormant prod MinIO env wiring (P8).
+
+Acceptance:
+- [x] Backend: `npm ci`, `npx tsc --noEmit` (clean), `npm run build` (esbuild, clean),
+      live boot via `npm run dev` against dev containers (MinIO connected, no crash,
+      unauthenticated `GET /api/recipes` → 401 as expected) — all green
+- [x] Frontend: `npm ci`, `npm run build` (clean, mirrors the actual CI runner step),
+      `npm run lint` (clean, no regression from removing `.eslintrc.cjs`)
+- [x] New `backend-check` CI job added; validated by local command-equivalence only
+      — **not** validated by an actual push/run, since pushing to `current-work`
+      triggers a real deploy attempt against the VM (currently down)
 
 ---
 

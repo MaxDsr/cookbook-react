@@ -198,3 +198,14 @@ verified `req.auth.payload.sub` would remove that footgun (candidate for P10).
   from `image.filename` only. A stale etag is harmless; a stale filename breaks
   the image. (Also: `recipeController.create` hardcodes the default image's etag
   `409f33f747a2671563173c30a042f778` as a fallback magic constant.)
+
+## 2026-06-23 — `backend/dist/` is not gitignored
+
+Noticed while running `npm run build` locally during P11 CI verification: unlike
+`frontend/` (which has its own `.gitignore` covering `dist`), `backend/` has no
+`.gitignore` of its own, and the root `.gitignore` only covers `/frontend/build`
+(not `backend/dist`). Running the backend build locally leaves `backend/dist/`
+untracked but not ignored — low risk (a careful `git add` won't pick it up
+unintentionally, but a careless `git add -A` could). Not fixed — one-line
+`.gitignore` change, out of scope for P11 (dependency audit), worth a quick fix in
+a future session.
