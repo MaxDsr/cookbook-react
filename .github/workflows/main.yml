@@ -103,16 +103,23 @@ jobs:
           npm run build
           cd ..
 
-      - name: Copy frontend build to VM
-        uses: appleboy/scp-action@v0.1.4
+      - name: Authenticate with Tailscale
+        uses: tailscale/github-action@v2
         with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USERNAME }}
-          key: ${{ secrets.VM_SSH_KEY }}
-          port: ${{ secrets.VM_PORT }}
-          source: "frontend/dist/*"
-          target: ${{ secrets.WEB_APP_WEB_SERVER_FOLDER }}
-          strip_components: 2
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: Setup SSH key for rsync
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      - name: Copy frontend build to VM
+        run: |
+          rsync -rlpt --chmod=D755,F644 --mkpath \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -p ${{ secrets.VM_PORT }}" \
+            frontend/dist/ \
+            ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:${{ secrets.WEB_APP_WEB_SERVER_FOLDER }}/frontend/
 
       - name: Stop existing containers on VM
         uses: appleboy/ssh-action@v0.1.5
@@ -157,3 +164,12 @@ jobs:
           script: |
             cd ~/cookbook-react
             docker compose -f docker-compose.prod.yml up -d --build
+
+      - name: Reload Caddy on VM
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          port: ${{ secrets.VM_PORT }}
+          script: caddy reload --config /etc/caddy/Caddyfile

@@ -3,7 +3,7 @@
 # MinIO subdomain handles object storage requests
 
 # Main application domain
-:80 {
+:3010 {
     # Handle API requests - proxy to backend
     handle /api/* {
         reverse_proxy host.docker.internal:{$BACKEND_PORT}

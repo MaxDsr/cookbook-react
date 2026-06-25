@@ -190,3 +190,23 @@ workflow's existing Node 20 used for the frontend step — `npm ci`, `npx tsc
   job's exact commands locally (all clean) and by careful review of the YAML diff.
   User confirmed the VM will be back up soon and the existing deploy flow should be
   preserved, not removed or restructured — only this fast-fail addition was made.
+
+## 2026-06-26 — Frontend deploy via rsync with explicit chmod
+
+Frontend build artifacts are copied to the VM using `rsync -rlpt --chmod=D755,F644`
+instead of a plain `scp`. The `--chmod=D755,F644` flag is mandatory: without it,
+directories land without execute bits and Caddy (running as the `caddy` system user)
+cannot traverse them, causing the file server to return 403 for all static assets.
+The rsync target is `$WEB_APP_WEB_SERVER_FOLDER/frontend/` (a `/frontend` subdirectory,
+not the web root itself) so other content in the web root is not clobbered on redeploy.
+`--mkpath` ensures the `frontend/` subdirectory is created on first deploy without a
+separate mkdir step.
+
+## 2026-06-26 — Caddy managed directly on VM, not via repo Caddyfile
+
+Caddy runs as a host systemd service on the VM (not in Docker). Its authoritative
+config is `/etc/caddy/Caddyfile` on the server — that file is edited directly via SSH
+when the Caddy config needs to change. The `caddy/Caddyfile` in the repo is kept only
+as a reference/documentation copy and is not deployed or reloaded by CI. The pipeline's
+"Reload Caddy" step runs `caddy reload --config /etc/caddy/Caddyfile` (the system path)
+so it stays in sync with the systemd service and survives server restarts.
