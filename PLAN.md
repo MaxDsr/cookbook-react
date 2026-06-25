@@ -227,3 +227,24 @@ Acceptance:
 Acceptance:
 - `npm run lint` clean in backend and frontend
 - Some baseline test coverage exists for both apps
+
+---
+
+## P13: Reconnect CI/CD via Tailscale [IN PROGRESS]
+
+Restore working automated deploys after server was placed behind Tailscale. The existing
+`VM_HOST` secret already holds the Tailscale IP — no host secret changes needed.
+
+Requirements:
+- Add Tailscale auth step to deploy job using `TAILSCALE_AUTHKEY` secret
+- Update Caddyfile to listen on `:3010` instead of `:80`
+- Add Caddy reload step after deploy (`caddy reload --config`, no sudo required)
+
+Out of scope:
+- Any changes to `VM_HOST`, `VM_USERNAME`, `VM_SSH_KEY`, `VM_PORT` secrets
+
+Acceptance:
+- Push to `current-work` triggers pipeline successfully
+- All SSH/SCP steps connect without timeout
+- App accessible on server port 3010 after deploy
+- `typecheck` passes in `backend-check` job
