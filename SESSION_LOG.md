@@ -237,3 +237,43 @@ Not committed/pushed yet — `backend/.env` (modified) and untracked `.env`/
 
 Next: user to confirm P11 sign-off, then decide commit/push and the next phase
 (P9 README, P10 Auth0, or P12 testing/lint — each a fresh chat).
+
+---
+
+## 2026-06-26 — P13: Reconnect CI/CD via Tailscale (IN PROGRESS)
+
+### What was done
+
+**Workflow changes (`.github/workflows/main.yml`):**
+- Added `tailscale/github-action@v2` step after frontend build, before any SSH/SCP — uses `TAILSCALE_AUTHKEY` secret (must be set in GitHub repo Settings → Secrets → Actions; not set by this session — prerequisite for pipeline to pass)
+- Added SSH key setup step (`~/.ssh/deploy_key`, chmod 600) so rsync can authenticate without a separate action
+- Replaced `appleboy/scp-action` frontend copy with `rsync -rlpt --chmod=D755,F644 --mkpath` targeting `$WEB_APP_WEB_SERVER_FOLDER/frontend/` — the chmod is mandatory for Caddy to traverse directories; without it Caddy returns 403
+- Added "Reload Caddy on VM" step after `docker compose up --build`, running `caddy reload --config /etc/caddy/Caddyfile` (system path, stays in sync with the systemd service across restarts)
+
+**Caddyfile (`caddy/Caddyfile`):**
+- Changed `:80` → `:3010` (documentation copy only; Caddy on VM is managed directly)
+
+**Server (`/etc/caddy/Caddyfile` on 100.109.195.92):**
+- Updated directly via SSH as mx-admin
+- `:3010` block: `/api/*` → `reverse_proxy localhost:3011`; frontend static files from `/var/www/html/frontend` with SPA fallback; gzip; logging
+- `minio-cookbook.maxim-dicusari.com` block: `reverse_proxy localhost:3003`
+- Caddy reloaded via `sudo systemctl reload caddy` — verified active, admin API confirmed `:3010` as live listen address
+
+**`DECISIONS.md`:**
+- Appended two entries: rsync chmod requirement (with rationale) + Caddy-managed-on-VM architecture decision
+
+**Committed and pushed:** `e47d3ad` on `current-work`
+
+### What was decided
+
+- Caddy is managed directly on the VM at `/etc/caddy/Caddyfile` — not deployed from the repo. The repo `caddy/Caddyfile` is documentation only (possible future removal).
+- Pipeline `caddy reload` uses `/etc/caddy/Caddyfile` (system path) so a systemd restart and a pipeline reload stay in sync.
+- rsync `--chmod=D755,F644` is non-negotiable — Caddy runs as the `caddy` system user and cannot traverse directories without execute bits.
+- Backend port confirmed as `3011` (production). MinIO API port `3003`. MinIO public subdomain: `minio-cookbook.maxim-dicusari.com`.
+
+### What's next
+
+- Confirm `TAILSCALE_AUTHKEY` is set as a GitHub Actions secret (not done this session — must be done manually in repo Settings)
+- Watch the pipeline run triggered by commit `e47d3ad` — all steps should be green
+- User to verify: `curl http://100.109.195.92:3010` returns frontend HTML after successful deploy
+- If pipeline passes and app is accessible → mark P13 [DONE] in a follow-up
