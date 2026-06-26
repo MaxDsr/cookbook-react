@@ -255,7 +255,7 @@ Next: user to confirm P11 sign-off, then decide commit/push and the next phase
 
 **Server (`/etc/caddy/Caddyfile` on 100.109.195.92):**
 - Updated directly via SSH as mx-admin
-- `:3010` block: `/api/*` → `reverse_proxy localhost:3011`; frontend static files from `/var/www/html/frontend` with SPA fallback; gzip; logging
+- `:3010` block: `/api/*` → `reverse_proxy localhost:3011`; frontend static files from `/web-server/cookbook-react/frontend` with SPA fallback; gzip; logging
 - `minio-cookbook.maxim-dicusari.com` block: `reverse_proxy localhost:3003`
 - Caddy reloaded via `sudo systemctl reload caddy` — verified active, admin API confirmed `:3010` as live listen address
 
@@ -277,3 +277,42 @@ Next: user to confirm P11 sign-off, then decide commit/push and the next phase
 - Watch the pipeline run triggered by commit `e47d3ad` — all steps should be green
 - User to verify: `curl http://100.109.195.92:3010` returns frontend HTML after successful deploy
 - If pipeline passes and app is accessible → mark P13 [DONE] in a follow-up
+
+## 2026-06-26 — P13: 404 root cause found and fixed (DONE)
+
+### Root cause
+
+The VM's `/etc/caddy/Caddyfile` was manually set during the previous P13 session
+with `root * /var/www/html/frontend` — the **wrong path**. The rsync step in the
+pipeline copies files to `$WEB_APP_WEB_SERVER_FOLDER/frontend/`, which resolves to
+`/web-server/cookbook-react/frontend`. Caddy was looking in the wrong directory,
+so every request returned 404.
+
+### Fix applied
+
+- SSH'd to VM, updated `/etc/caddy/Caddyfile`: `root * /var/www/html/frontend` →
+  `root * /web-server/cookbook-react/frontend`
+- Reloaded Caddy via `sudo caddy reload --config /etc/caddy/Caddyfile`
+- Updated repo's documentation copy `caddy/Caddyfile` to the same correct path
+- Corrected the wrong path recorded in the previous SESSION_LOG entry
+
+### Verification
+
+- Playwright navigated to `https://cookbook.maxim-dicusari.com` (the correct prod
+  URL — Cloudflare provides HTTPS in front of port 3010; Auth0 requires HTTPS so
+  the raw IP is not a valid test)
+- App renders correctly: "Welcome to Cookbook — You are not logged in" with Login
+  button. Zero console errors. Screenshot captured (`p13-verify-domain.png`).
+
+### Architecture note (newly understood)
+
+Access path: `browser → Cloudflare (HTTPS) → 100.109.195.92:3010 (Caddy) → backend:3011`
+The raw IP (`http://100.109.195.92:3010`) is not a valid acceptance check — Auth0
+refuses to initialize on plain HTTP, rendering a blank page. All future prod
+verification should use `https://cookbook.maxim-dicusari.com`.
+
+### P13 acceptance — all criteria met
+
+- [x] Push to `current-work` triggers pipeline successfully
+- [x] All SSH/SCP steps connect without timeout (Tailscale auth working)
+- [x] App accessible after deploy — verified at `https://cookbook.maxim-dicusari.com`

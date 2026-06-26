@@ -230,7 +230,7 @@ Acceptance:
 
 ---
 
-## P13: Reconnect CI/CD via Tailscale [IN PROGRESS]
+## P13: Reconnect CI/CD via Tailscale [DONE 2026-06-26]
 
 Restore working automated deploys after server was placed behind Tailscale. The existing
 `VM_HOST` secret already holds the Tailscale IP — no host secret changes needed.
@@ -244,7 +244,13 @@ Out of scope:
 - Any changes to `VM_HOST`, `VM_USERNAME`, `VM_SSH_KEY`, `VM_PORT` secrets
 
 Acceptance:
-- Push to `current-work` triggers pipeline successfully
-- All SSH/SCP steps connect without timeout
-- App accessible on server port 3010 after deploy
-- `typecheck` passes in `backend-check` job
+- [x] Push to `current-work` triggers pipeline successfully
+- [x] All SSH/SCP steps connect without timeout
+- [x] App accessible after deploy — verified at `https://cookbook.maxim-dicusari.com`
+      (Cloudflare→:3010; raw IP is not a valid check — Auth0 requires HTTPS)
+- [x] `typecheck` passes in `backend-check` job
+
+Done note (2026-06-26): post-pipeline 404 was caused by the VM Caddyfile having
+`root * /var/www/html/frontend` (wrong) instead of `/web-server/cookbook-react/frontend`
+(where rsync actually deposits the build). Fixed directly on the VM; repo `caddy/Caddyfile`
+documentation copy corrected to match.

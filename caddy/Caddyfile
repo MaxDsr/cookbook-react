@@ -11,7 +11,7 @@
     
     # Handle everything else - serve static files
     handle {
-        root * /srv
+        root * /web-server/cookbook-react/frontend
         try_files {path} /index.html
         file_server
     }

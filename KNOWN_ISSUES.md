@@ -209,3 +209,6 @@ untracked but not ignored — low risk (a careful `git add` won't pick it up
 unintentionally, but a careless `git add -A` could). Not fixed — one-line
 `.gitignore` change, out of scope for P11 (dependency audit), worth a quick fix in
 a future session.
+
+
+## 2026-06-26 — on the prod (cookbook.maxim-dicusari.com) the logout button redirects to localhost:3000
