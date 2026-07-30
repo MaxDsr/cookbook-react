@@ -254,3 +254,40 @@ Done note (2026-06-26): post-pipeline 404 was caused by the VM Caddyfile having
 `root * /var/www/html/frontend` (wrong) instead of `/web-server/cookbook-react/frontend`
 (where rsync actually deposits the build). Fixed directly on the VM; repo `caddy/Caddyfile`
 documentation copy corrected to match.
+
+---
+
+## P14: Prod data seeding [IN PROGRESS]
+
+Prod is live and login works, but the `cookbook` database has 1 user and 0 recipes —
+the recipe seeding verified locally in P7 was never run against prod. Run the same
+`upload-recipe-images` → `seed-recipes` pipeline against prod's MinIO bucket and
+MongoDB so the deployed app shows real demo data.
+
+Requirements:
+- Bake `backend/recipe-images/` into the backend Docker image at `dist/recipe-images`
+  (the path the bundled scripts resolve), so no manual `scp`/`docker cp` is needed on
+  this or any future deploy
+- Fix the upload→seed handoff in the built scripts: `seedRecipes` must read
+  `image-mappings.json` at runtime, not have it inlined by esbuild at build time
+- Redeploy via the P13 CI/CD pipeline, then run both scripts inside `cookbook-backend`
+- Seed scoped to the existing prod user id `689b1b8c4756997569c05972`, passed
+  explicitly via `--userId`
+
+Out of scope:
+- `migrate-mongo` tooling (hardcoded dev-only URL, stale migration userId) — logged in
+  KNOWN_ISSUES.md as an open question, not acted on
+- Cleaning up orphaned MinIO objects from earlier local upload runs
+- Any change to Auth0, Caddy, or the pipeline itself
+
+Acceptance:
+- [ ] `docker exec cookbook-backend ls /app/dist/recipe-images` shows all 4 photos
+      plus `default/recipe-default.jpg` after deploy
+- [ ] `uploadRecipeImages.js` uploads 4 UUID-named objects + `recipe-default.jpg`
+- [ ] `seedRecipes.js` inserts 4 recipes for user `689b1b8c4756997569c05972`
+- [ ] Seeded `image.filename` values match the objects just uploaded (not stale
+      build-time UUIDs)
+- [ ] Logged-in browser session at `https://cookbook.maxim-dicusari.com` renders all
+      4 recipes (Baker soup, Bolognese pasta, French fries, Home burger) with images
+      loading from the public MinIO endpoint
+- [ ] `npx tsc --noEmit` and `npm run build` clean; `backend-check` CI job green

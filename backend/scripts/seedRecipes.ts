@@ -1,8 +1,43 @@
 import 'dotenv/config'
+import * as fs from 'fs'
+import * as path from 'path'
+import { fileURLToPath } from 'url'
 import mongoose from 'mongoose'
 import { Recipe } from '../src/models/recipe'
 import { Types } from 'mongoose'
-import imageMappings from './image-mappings.json'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+interface ImageMapping {
+  bucketFileName: string; // recipe-{{uuidv4}}.{{fileExtension}}
+  recipeImage: string; // "burger" | "lasagna" etc.
+  etag: string; // etag from minio bucket
+}
+
+// Read at runtime rather than `import mappings from './image-mappings.json'`: the build
+// bundles this script with esbuild, which inlines a static JSON import at build time and
+// would ignore the file that `upload-recipe-images` writes moments before this script runs.
+const MAPPINGS_FILE = path.join(__dirname, './image-mappings.json')
+
+function loadImageMappings(): Record<string, ImageMapping> {
+  if (!fs.existsSync(MAPPINGS_FILE)) {
+    console.error(`No image mappings at ${MAPPINGS_FILE}. Run upload-recipe-images first — it writes that file.`)
+    process.exit(1)
+  }
+  return JSON.parse(fs.readFileSync(MAPPINGS_FILE, 'utf8')) as Record<string, ImageMapping>
+}
+
+const imageMappings = loadImageMappings()
+
+function imageFor(recipeImage: string): { filename: string; etag: string } {
+  const mapping = imageMappings[recipeImage]
+  if (!mapping) {
+    console.error(`No image mapping for "${recipeImage}" in ${MAPPINGS_FILE}. Re-run upload-recipe-images.`)
+    process.exit(1)
+  }
+  return { filename: mapping.bucketFileName, etag: mapping.etag }
+}
 
 // Helper function to generate random time up to 5 hours in HH:MM format
 function getRandomTime(): string {
@@ -15,7 +50,7 @@ function getRandomTime(): string {
 const recipes = [
   {
     name: 'Baker soup',
-    image: { filename: imageMappings['baker-soup'].bucketFileName, etag: imageMappings['baker-soup'].etag },
+    image: imageFor('baker-soup'),
     ingredients: [
       'potato',
       'tomato',
@@ -29,7 +64,7 @@ const recipes = [
   },
   {
     name: 'Bolognese pasta',
-    image: { filename: imageMappings['bolognese-pasta'].bucketFileName, etag: imageMappings['bolognese-pasta'].etag },
+    image: imageFor('bolognese-pasta'),
     ingredients: [
       'potato',
       'tomato',
@@ -43,7 +78,7 @@ const recipes = [
   },
   {
     name: 'French fries',
-    image: { filename: imageMappings['french-fries'].bucketFileName, etag: imageMappings['french-fries'].etag },
+    image: imageFor('french-fries'),
     ingredients: [
       'potato',
       'tomato',
@@ -57,7 +92,7 @@ const recipes = [
   },
   {
     name: 'Home burger',
-    image: { etag: imageMappings['home-burger'].etag, filename: imageMappings['home-burger'].bucketFileName },
+    image: imageFor('home-burger'),
     ingredients: [
       'potato',
       'tomato',

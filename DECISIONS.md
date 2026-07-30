@@ -210,3 +210,34 @@ when the Caddy config needs to change. The `caddy/Caddyfile` in the repo is kept
 as a reference/documentation copy and is not deployed or reloaded by CI. The pipeline's
 "Reload Caddy" step runs `caddy reload --config /etc/caddy/Caddyfile` (the system path)
 so it stays in sync with the systemd service and survives server restarts.
+
+## 2026-07-30 — Seed images baked into the backend Docker image
+
+`backend/recipe-images/` is now copied into the runtime image at `dist/recipe-images`
+(`COPY --from=builder /app/recipe-images ./dist/recipe-images`, placed before the
+`chown -R node:node /app` so the files are node-owned). Previously the final runtime
+stage copied only `dist` + `node_modules`, so the seed images did not exist in the
+container and seeding prod would have required a manual `scp`/`docker cp` on every run.
+
+The target path is `dist/recipe-images`, not `recipe-images`, because the bundled
+uploader resolves `IMAGES_DIR` as `path.join(__dirname, '../recipe-images')` and its
+`__dirname` at runtime is `/app/dist/scripts`. Baking the folder in keeps the local
+(`tsx` on TS sources) and prod (`node` on the bundle) seeding paths structurally
+identical — same commands, same relative layout, no per-run file shuffling.
+
+## 2026-07-30 — `seedRecipes` reads image-mappings.json at runtime, not as a static import
+
+`seedRecipes.ts` used `import imageMappings from './image-mappings.json'`. That works
+locally under `tsx` (resolved from disk each run) but **not** in prod: `build.js` runs
+esbuild with `bundle: true`, which inlines relative JSON imports at build time. The
+compiled `dist/scripts/seedRecipes.js` therefore carried whatever UUIDs were committed
+in `scripts/image-mappings.json` and silently ignored the fresh file that
+`uploadRecipeImages` writes immediately before it runs — seeding recipes whose
+`image.filename` pointed at bucket objects that were never uploaded under those keys.
+
+Replaced with an explicit `fs.readFileSync` of `path.join(__dirname, './image-mappings.json')`
+— the same path the uploader writes to — restoring the upload→seed contract in both
+environments. It fails loudly (clear message, exit 1, before any Mongo connection) when
+the file is absent. Deliberately **no** fallback to the committed mappings: a fallback
+would reintroduce exactly the silent broken-image failure this fixes. Verified by
+grepping the rebuilt bundle: no inlined JSON literal, `readFileSync(MAPPINGS_FILE)` present.

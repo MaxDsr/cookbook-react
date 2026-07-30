@@ -17,6 +17,8 @@ FROM node:24.11.0-slim
 WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=deps /app/node_modules ./node_modules
+# Seed images, at the path the bundled scripts resolve (dist/scripts/../recipe-images)
+COPY --from=builder /app/recipe-images ./dist/recipe-images
 COPY package*.json ./
 
 # Fix ownership for when you add logging/uploads later

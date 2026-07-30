@@ -191,6 +191,12 @@ verified `req.auth.payload.sub` would remove that footgun (candidate for P10).
   because the seeder reads `scripts/image-mappings.json`, which the uploader
   regenerates with fresh bucket filenames. Running them out of order seeds
   recipes whose `image.filename` points at objects that don't exist.
+  **Correction (2026-07-30):** "the seeder reads the file" was only true of the
+  local `tsx` path. In the built bundle the JSON was inlined by esbuild at build
+  time, so the correct order was not sufficient in prod — the seeder ignored the
+  uploader's output entirely. Fixed in P14 (runtime `readFileSync`); see
+  DECISIONS 2026-07-30. The ordering requirement itself still stands, and the
+  seeder now exits 1 with a clear message if the mappings file is missing.
 - Each upload run generates new UUID filenames and does not delete prior objects,
   so repeated runs accumulate orphaned images in the bucket. Harmless on a fresh
   bucket; worth a cleanup step if the scripts are re-run often.
@@ -212,3 +218,25 @@ a future session.
 
 
 ## 2026-06-26 — on the prod (cookbook.maxim-dicusari.com) the logout button redirects to localhost:3000
+
+## 2026-07-30 — `migrate-mongo` tooling is dev-only and its one migration is dangerous
+
+Noticed while seeding prod (P14). Not acted on — flagged as an open question.
+
+- `backend/migrate-mongo-config.cjs` hardcodes `url: "mongodb://cookbook-mongo/cookbook"`
+  with no credentials and no env-var support. Prod Mongo requires auth
+  (`MONGODB_URI` with root user + `authSource=admin`), so `npm run migrate-mongo-*`
+  cannot work against prod as written.
+- The single migration `migrations/20240520084348-add-user-id-to-recipes.js` runs
+  `db.collection('recipes').updateMany({}, { $set: { userId } })` with a hardcoded
+  `665205865268b4bb72389b9c` — **unscoped**, and a different, older id than the current
+  seed target `689b1b8c4756997569c05972`. Running `up` today would reassign *every*
+  recipe (including the P14 seed data) to a user that does not exist in prod, making
+  them invisible in the app. `down` would strip `userId` from all recipes.
+- Unknown whether this migration was ever applied to prod (would show in the
+  `changelog` collection — not checked; direct credentialed Mongo reads were blocked
+  in the P14 session).
+- Open question for a future session: is `migrate-mongo` still wanted at all? It has
+  one historical migration whose purpose (backfilling `userId`) is now handled by the
+  models and seed scripts. Candidate for deletion, or for being made env-aware and the
+  stale migration retired. Decide before anyone runs a migrate command.
