@@ -219,6 +219,47 @@ a future session.
 
 ## 2026-06-26 — on the prod (cookbook.maxim-dicusari.com) the logout button redirects to localhost:3000
 
+## 2026-07-30 — `MINIO_PUBLIC_ENDPOINT` hostname does not exist → `GET /api/recipes` 500s
+
+**Active, user-visible.** Found in P14 immediately after seeding prod with 4 recipes.
+
+`backend/.env` in prod sets `MINIO_PUBLIC_ENDPOINT=minio-cookbook.maxim-dicusari.com`
+(port 443, SSL). That hostname **does not resolve anywhere** — `NXDOMAIN` both from a
+dev machine and from inside `cookbook-backend`. The Cloudflare tunnel `server-main`
+has exactly two routes, neither of them MinIO:
+
+- `maxim-dicusari.com` → `http://localhost:80`
+- `cookbook.maxim-dicusari.com` → `http://localhost:3010`
+
+Container DNS/egress is fine (`cookbook.maxim-dicusari.com` resolves from inside the
+container), so this is a missing route/DNS record, not a networking fault.
+
+Impact chain, traced through the installed `minio@8` source
+(`node_modules/minio/dist/esm/internal/client.mjs`): `recipeController.getAll` presigns
+a URL per recipe via `minio.publicClient` (`utils/minioUrl.ts`) →
+`presignedGetObject` (:2600) → `presignedUrl` (:2556) → `getBucketRegionAsync` (:2583).
+That method returns early only if `this.region` was set in the constructor or the bucket
+is already in `regionMap` — neither holds, since `dataSources/minio.ts` passes no
+`region` — so it issues a real `GET /?location=` to the public endpoint, which fails
+`ENOTFOUND`. Its catch (:564) only absorbs `AccessDenied` and
+`AuthorizationHeaderMalformed`, so the DNS error is rethrown (:576) and propagates into
+`getAll`'s catch → **500 for the entire recipe list**, not one broken image. Nothing is
+ever cached, so it fails on every request for as long as the hostname is missing.
+
+This was latent until now: with 0 recipes, `Promise.all([])` never presigned anything
+and the endpoint returned 200 with an empty list. Seeding made it observable. Related
+to the "dormant prod MinIO env wiring (P8)" deferred in P11.
+
+Fix (infra, not code): add a tunnel route `minio-cookbook.maxim-dicusari.com` →
+`http://localhost:3013` (MinIO API is bound to `127.0.0.1:3013` on the VM; `3014` is
+the console). Nothing in the seeded data needs to change.
+
+Secondary hardening to consider separately: neither client in `dataSources/minio.ts`
+passes `region`, so every presign costs a network round-trip and hard-fails when the
+endpoint is unreachable. Setting an explicit region would make presigning local — but
+note that alone would only downgrade the 500 to silently broken `<img>` tags, so it is
+not a substitute for the route.
+
 ## 2026-07-30 — `migrate-mongo` tooling is dev-only and its one migration is dangerous
 
 Noticed while seeding prod (P14). Not acted on — flagged as an open question.

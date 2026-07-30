@@ -257,7 +257,7 @@ documentation copy corrected to match.
 
 ---
 
-## P14: Prod data seeding [IN PROGRESS]
+## P14: Prod data seeding [BLOCKED — `minio-cookbook.maxim-dicusari.com` does not exist]
 
 Prod is live and login works, but the `cookbook` database has 1 user and 0 recipes —
 the recipe seeding verified locally in P7 was never run against prod. Run the same
@@ -281,13 +281,27 @@ Out of scope:
 - Any change to Auth0, Caddy, or the pipeline itself
 
 Acceptance:
-- [ ] `docker exec cookbook-backend ls /app/dist/recipe-images` shows all 4 photos
+- [x] `docker exec cookbook-backend ls /app/dist/recipe-images` shows all 4 photos
       plus `default/recipe-default.jpg` after deploy
-- [ ] `uploadRecipeImages.js` uploads 4 UUID-named objects + `recipe-default.jpg`
-- [ ] `seedRecipes.js` inserts 4 recipes for user `689b1b8c4756997569c05972`
-- [ ] Seeded `image.filename` values match the objects just uploaded (not stale
-      build-time UUIDs)
-- [ ] Logged-in browser session at `https://cookbook.maxim-dicusari.com` renders all
-      4 recipes (Baker soup, Bolognese pasta, French fries, Home burger) with images
-      loading from the public MinIO endpoint
-- [ ] `npx tsc --noEmit` and `npm run build` clean; `backend-check` CI job green
+- [x] `uploadRecipeImages.js` uploads 4 UUID-named objects + `recipe-default.jpg`
+      (bucket `recipe-images` now holds exactly 5 objects, no orphans)
+- [x] `seedRecipes.js` inserts 4 recipes for user `689b1b8c4756997569c05972`
+- [x] Seeded `image.filename` values match the objects just uploaded (not stale
+      build-time UUIDs) — verified per recipe against the uploader's output
+- [ ] **BLOCKED** — Logged-in browser session renders all 4 recipes with images.
+      Cannot pass: `MINIO_PUBLIC_ENDPOINT=minio-cookbook.maxim-dicusari.com` is
+      NXDOMAIN (no Cloudflare tunnel route, no DNS record), so presigned-URL
+      generation throws and `GET /api/recipes` returns 500. See KNOWN_ISSUES
+      2026-07-30. Blocker is infra-side and pre-existing, not caused by the code
+      changes in this phase.
+- [x] `npx tsc --noEmit` and `npm run build` clean; `backend-check` CI job green
+      (run 30536457556, both jobs success)
+
+Blocker resolution (needs a Cloudflare change, i.e. the user — not automatable from
+here): add a tunnel route `minio-cookbook.maxim-dicusari.com` → `http://localhost:3013`
+on tunnel `server-main` (MinIO's API port binding on the VM is `127.0.0.1:3013`;
+`3014` is the console). Verified the target is reachable the same way the existing
+routes are: the VM's hostname is `fujitsu-mini-pc` — the same host as the tunnel
+replica — `cloudflared` runs on the host (not in a container), and
+`curl http://localhost:3013/minio/health/live` returns 200. Once that hostname
+resolves, the existing seeded data should render with no further code or data changes.
