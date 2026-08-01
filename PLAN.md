@@ -339,7 +339,21 @@ Out of scope:
 
 Acceptance:
 - [ ] Logout on `https://cookbook.maxim-dicusari.com` returns to that origin, signed out
-- [ ] Deployed bundle contains `logoutParams` (i.e. the deploy actually shipped)
+      — **pending a live click-through.** First attempt (2026-08-01) still landed on
+      `localhost:3000`, but the browser was proven to be running the *previous* bundle
+      from cache (`transferSize: 0`, `scriptsInHtml: index-DrGx-d2n.js`), so the fix was
+      never exercised. See KNOWN_ISSUES 2026-08-01 (cache headers). Re-test needs a fresh
+      login; Claude does not enter credentials, so this is a user step.
+- [x] Deployed bundle contains `logoutParams` (i.e. the deploy actually shipped) —
+      `/assets/index-BhW0tjnh.js`, confirmed both by `curl` and by fetching it from within
+      a cache-busted page load (`hasNewLogoutShape: true`, `hasOldLogoutShape: false`)
 - [ ] Local dev logout still returns to `http://localhost:3000` (vite pins port 3000,
-      `strictPort: true`, and that origin is allowlisted — no regression)
-- [ ] Frontend `npm run lint` and `npm run build` clean; `backend-check` CI job green
+      `strictPort: true`, and that origin is allowlisted — reasoned, not yet exercised)
+- [x] Frontend `npm run lint` and `npm run build` clean; `backend-check` CI job green
+      (run 30716935301, both jobs success)
+
+Discovered during this phase, NOT fixed (see KNOWN_ISSUES 2026-08-01): prod serves
+`index.html` with no `Cache-Control`/`ETag`, and the frontend rsync has no `--delete`, so
+returning users keep running stale JS after every deploy. This is why the first
+verification attempt failed. It is a prod-infra change (`/etc/caddy/Caddyfile` on the VM,
+not the repo copy) and needs its own decision — candidate for P16.

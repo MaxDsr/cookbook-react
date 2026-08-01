@@ -454,3 +454,73 @@ P14 is closed and prod is fully functional end to end. Remaining open items, unc
 P9 (README overhaul), P10 (Auth0 redirect callback), P12 (tests + backend lint, 305
 problems). Still-unaddressed hardening noted in KNOWN_ISSUES: no explicit `region` on the
 MinIO clients (every presign costs a round-trip), and the `migrate-mongo` open question.
+
+---
+
+## 2026-08-01 — P15: Auth0 logout `returnTo` fix
+
+Opened P15 (narrow, logout-path only — deliberately *not* P10, which is the login-side
+redirect callback). Fixed the long-standing KNOWN_ISSUES 2026-06-26 bug where prod logout
+dumped users on `http://localhost:3000`.
+
+### Diagnosis, before touching any code
+
+The user's hypothesis was that the Auth0 console config was at fault. It turned out to be
+half right — the console explains *why the destination is `localhost:3000`*, but the
+console is not misconfigured and needs no change.
+
+1. `UserProfile.jsx:11` called `logout({ returnTo })` — the auth0-react **v1** signature —
+   against the installed **v2.8.0**. Read `_buildLogoutUrl` in the installed SDK: it reads
+   only `options.logoutParams`, so the top-level `returnTo` was silently discarded.
+2. Probed the live tenant with `curl` (no session involved, non-destructive):
+   no `returnTo` → `302 http://localhost:3000`;
+   `returnTo=https://cookbook.maxim-dicusari.com` → `302` to that URL. So the prod URL was
+   **already allowlisted**, and Auth0 was simply applying its fallback: the *first* entry in
+   Allowed Logout URLs.
+3. Pulled the deployed bundle and confirmed prod was running exactly the buggy source.
+4. Read the Auth0 dashboard in Chrome (read-only, **no changes submitted**): Allowed Logout
+   URLs / Callback URLs / Web Origins each hold `localhost:3000`, `localhost:3005`,
+   `https://cookbook.maxim-dicusari.com`; App Type = SPA. All correct.
+
+Rejected the tempting console-side "fix" of reordering the list so prod comes first — that
+would make prod work by accident and send local-dev logouts to production.
+
+### Change
+
+One line, one call site (grep confirmed `UserProfile.jsx:11` is the only `logout(` in the
+codebase): `logout({ logoutParams: { returnTo: window.location.origin } })`. Kept
+`window.location.origin` rather than a `VITE_` var — it mirrors `redirect_uri` in
+`config/auth0.js`, and probe (2) already proved the exact string Auth0 accepts.
+
+Checked the dev-side regression the old bug was masking: once `returnTo` is actually sent,
+dev logout must also point at an allowlisted origin. `vite.config.js` pins
+`port: 3000, strictPort: true`, and `http://localhost:3000` is allowlisted — no regression.
+
+Frontend lint + build clean. Committed e7c9998, pushed, CI run 30716935301 green
+(`backend-check` + `deploy`).
+
+### The verification twist — and a second, bigger finding
+
+The post-deploy logout click **still** landed on `localhost:3000`. The fix was not at fault:
+the browser was running the previous bundle out of cache. Measured in-page:
+`scriptsInHtml: ["/assets/index-DrGx-d2n.js"]` while the server was already serving
+`index-BhW0tjnh.js`, with `transferSize: 0, fromCache: true`. A cache-busted load fetched
+the new bundle and confirmed `hasNewLogoutShape: true`, `hasOldLogoutShape: false`.
+
+Root cause of *that*: prod serves `index.html` with **no `Cache-Control` and no `ETag`**
+(only `Last-Modified`), so browsers heuristically cache it and never revalidate; and the
+frontend rsync has **no `--delete`**, so every old bundle stays on the VM (the old file
+still returns 200), which keeps a stale `index.html` silently working instead of 404ing.
+Every returning user therefore keeps running stale JS after each deploy. Logged in
+KNOWN_ISSUES 2026-08-01 with the suggested Caddy header block; **not applied** — it's a
+change to `/etc/caddy/Caddyfile` on the VM (the repo's `caddy/Caddyfile` is a documentation
+copy; the reload step targets a different path), i.e. prod infra outside P15's scope.
+
+### State / what's next
+
+P15 code is shipped and the deployed bundle is confirmed to contain the fix, but the live
+click-through is **not yet verified** — the first test consumed the test account's session,
+and Claude does not enter credentials. Needs the user to log in once, then a logout click.
+
+Open decision for the user: whether to fix the caching (candidate P16). Until then, the
+logout fix will not reach returning users promptly even though it is deployed.

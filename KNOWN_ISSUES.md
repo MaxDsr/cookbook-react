@@ -217,7 +217,82 @@ unintentionally, but a careless `git add -A` could). Not fixed — one-line
 a future session.
 
 
-## 2026-06-26 — on the prod (cookbook.maxim-dicusari.com) the logout button redirects to localhost:3000
+## 2026-06-26 — on the prod (cookbook.maxim-dicusari.com) the logout button redirects to localhost:3000 [FIXED IN CODE 2026-08-01, live verification pending]
+
+Root cause (P15, 2026-08-01): `frontend/src/components/UserProfile.jsx:11` called
+`logout({ returnTo: window.location.origin })` — the **auth0-react v1** signature — while
+the installed SDK is v2.8.0. Its `_buildLogoutUrl` reads *only* `options.logoutParams`:
+
+```js
+const _a = options.logoutParams || {}, {federated} = _a, logoutOptions = __rest(_a, ["federated"]);
+const url = this._url(`/v2/logout?${createQueryParams(Object.assign({clientId: options.clientId}, logoutOptions))}`);
+```
+
+so the top-level `returnTo` was silently dropped — no error, no warning. `/v2/logout` was
+therefore called with **no `returnTo`**, and Auth0 fell back to the **first** entry in the
+tenant's Allowed Logout URLs, which is `http://localhost:3000`.
+
+Confirmed against the live tenant before changing any code:
+
+| request | result |
+|---|---|
+| no `returnTo` (what the app sent) | `302 → http://localhost:3000` |
+| `returnTo=https://cookbook.maxim-dicusari.com` | `302 →` that URL |
+
+**The Auth0 console is NOT misconfigured** (verified in the dashboard 2026-08-01, read-only):
+Allowed Logout URLs, Allowed Callback URLs and Allowed Web Origins each contain
+`http://localhost:3000`, `http://localhost:3005`, `https://cookbook.maxim-dicusari.com`;
+App Type = Single Page Application, first-party. Nothing to add there.
+
+**Reordering that list is explicitly rejected as a fix.** Putting the prod URL first would
+make prod work by accident and send *local dev* logouts to production.
+
+Fix shipped: `logout({ logoutParams: { returnTo: window.location.origin } })`
+(commit e7c9998, deployed via run 30716935301). Deployed bundle
+`/assets/index-BhW0tjnh.js` confirmed to contain `logoutParams:{returnTo:...}`.
+Live click-through still to be confirmed — see the caching entry below, which
+invalidated the first attempt.
+
+## 2026-08-01 — prod serves `index.html` with no `Cache-Control`, so users keep running stale JS
+
+Found while verifying the P15 logout fix: the first post-deploy logout test **still** landed
+on `localhost:3000`, and the reason was not the fix. The browser was running the previous
+bundle. Measured in the page:
+
+```
+scriptsInHtml: ["/assets/index-DrGx-d2n.js"]   // server was already serving index-BhW0tjnh.js
+assetsLoaded:  transferSize: 0, fromCache: true
+```
+
+Two independent causes, both worth fixing:
+
+1. **No cache headers on `index.html`.** `curl -I https://cookbook.maxim-dicusari.com/`
+   returns only `last-modified` — no `Cache-Control`, no `ETag`. With no explicit directive
+   browsers apply *heuristic* freshness (commonly ~10% of the time since `Last-Modified`),
+   so a returning visitor re-uses a cached `index.html` — and therefore a stale hashed
+   bundle — without ever revalidating. Vite already content-hashes assets, so the correct
+   split is `no-cache` on `index.html` and long `immutable` on `/assets/*`.
+
+2. **Old assets are never deleted from the VM.** The deploy step
+   `rsync -rlpt --chmod=D755,F644 --mkpath frontend/dist/ …` has **no `--delete`**, so every
+   prior bundle stays on disk (`/assets/index-DrGx-d2n.js` still returns 200 today). That is
+   what makes cause 1 silent: a stale `index.html` keeps working perfectly instead of
+   failing loudly with a 404.
+
+Fixing (1) requires editing **`/etc/caddy/Caddyfile` on the VM**, not `caddy/Caddyfile` in
+this repo. The repo copy is documentation only: the workflow scp's `caddy/` to
+`~/cookbook-react/caddy/`, but the reload step runs
+`caddy reload --config /etc/caddy/Caddyfile` — a different path, host-installed Caddy. Same
+split that caused the P13 404 (see PLAN.md P13 done-note).
+
+Suggested Caddyfile change inside the static `handle` block:
+
+```
+header /index.html Cache-Control "no-cache"
+header /assets/*   Cache-Control "public, max-age=31536000, immutable"
+```
+
+Not applied — prod infra change, outside P15's stated scope, user's call.
 
 ## 2026-07-30 — `MINIO_PUBLIC_ENDPOINT` hostname does not exist → `GET /api/recipes` 500s [RESOLVED 2026-08-01]
 
