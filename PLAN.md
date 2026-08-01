@@ -257,7 +257,7 @@ documentation copy corrected to match.
 
 ---
 
-## P14: Prod data seeding [BLOCKED — `minio-cookbook.maxim-dicusari.com` does not exist]
+## P14: Prod data seeding [DONE 2026-08-01]
 
 Prod is live and login works, but the `cookbook` database has 1 user and 0 recipes —
 the recipe seeding verified locally in P7 was never run against prod. Run the same
@@ -288,20 +288,23 @@ Acceptance:
 - [x] `seedRecipes.js` inserts 4 recipes for user `689b1b8c4756997569c05972`
 - [x] Seeded `image.filename` values match the objects just uploaded (not stale
       build-time UUIDs) — verified per recipe against the uploader's output
-- [ ] **BLOCKED** — Logged-in browser session renders all 4 recipes with images.
-      Cannot pass: `MINIO_PUBLIC_ENDPOINT=minio-cookbook.maxim-dicusari.com` is
-      NXDOMAIN (no Cloudflare tunnel route, no DNS record), so presigned-URL
-      generation throws and `GET /api/recipes` returns 500. See KNOWN_ISSUES
-      2026-07-30. Blocker is infra-side and pre-existing, not caused by the code
-      changes in this phase.
+- [x] Logged-in browser session renders all 4 recipes with images (2026-08-01,
+      after the user added the Cloudflare tunnel route). `GET /api/recipes` → 200
+      (was 500), all four presigned MinIO image GETs → 200, no console errors.
+      Was blocked until 2026-08-01 by `MINIO_PUBLIC_ENDPOINT` being NXDOMAIN —
+      infra-side and pre-existing, not caused by this phase's code changes.
 - [x] `npx tsc --noEmit` and `npm run build` clean; `backend-check` CI job green
       (run 30536457556, both jobs success)
 
-Blocker resolution (needs a Cloudflare change, i.e. the user — not automatable from
-here): add a tunnel route `minio-cookbook.maxim-dicusari.com` → `http://localhost:3013`
-on tunnel `server-main` (MinIO's API port binding on the VM is `127.0.0.1:3013`;
-`3014` is the console). Verified the target is reachable the same way the existing
-routes are: the VM's hostname is `fujitsu-mini-pc` — the same host as the tunnel
-replica — `cloudflared` runs on the host (not in a container), and
-`curl http://localhost:3013/minio/health/live` returns 200. Once that hostname
-resolves, the existing seeded data should render with no further code or data changes.
+Blocker resolved 2026-08-01: the user added the tunnel route
+`minio-cookbook.maxim-dicusari.com` → `http://localhost:3013` on tunnel `server-main`.
+The prediction held exactly — the data seeded on 2026-07-30 rendered with **no further
+code or data changes**, and the container picked up the new DNS record without a restart.
+
+Verification (all read-only): DNS resolves to Cloudflare from both the dev machine and
+inside `cookbook-backend`; `/minio/health/live` → 200 with real MinIO headers; prod env
+confirmed as `NODE_ENV=production` + `MINIO_PUBLIC_PORT=443` + `MINIO_PUBLIC_USE_SSL=true`;
+a URL presigned inside the container fetched from outside the VM returned 200 /
+`image/jpeg` / 1.6 MB — which proves the tunnel preserves the `Host` header so SigV4
+signatures validate through it. See KNOWN_ISSUES 2026-07-30 (RESOLVED) for why that
+Host-header detail is the load-bearing fact.

@@ -219,9 +219,9 @@ a future session.
 
 ## 2026-06-26 — on the prod (cookbook.maxim-dicusari.com) the logout button redirects to localhost:3000
 
-## 2026-07-30 — `MINIO_PUBLIC_ENDPOINT` hostname does not exist → `GET /api/recipes` 500s
+## 2026-07-30 — `MINIO_PUBLIC_ENDPOINT` hostname does not exist → `GET /api/recipes` 500s [RESOLVED 2026-08-01]
 
-**Active, user-visible.** Found in P14 immediately after seeding prod with 4 recipes.
+**Was active, user-visible.** Found in P14 immediately after seeding prod with 4 recipes.
 
 `backend/.env` in prod sets `MINIO_PUBLIC_ENDPOINT=minio-cookbook.maxim-dicusari.com`
 (port 443, SSL). That hostname **does not resolve anywhere** — `NXDOMAIN` both from a
@@ -259,6 +259,47 @@ passes `region`, so every presign costs a network round-trip and hard-fails when
 endpoint is unreachable. Setting an explicit region would make presigning local — but
 note that alone would only downgrade the 500 to silently broken `<img>` tags, so it is
 not a substitute for the route.
+
+**RESOLVED 2026-08-01.** The user added the tunnel route on the Cloudflare side. No code
+or data changes were needed — the seeded data from 2026-07-30 rendered as-is. Verified:
+
+- DNS: `minio-cookbook.maxim-dicusari.com` → `188.114.96.0` / `188.114.97.0` (Cloudflare),
+  from the dev machine *and* from inside `cookbook-backend` (the presign no longer throws
+  `ENOTFOUND`, so the container's resolver picked the record up without a restart).
+- `GET /minio/health/live` over HTTPS → 200 with genuine MinIO headers (`x-amz-request-id`),
+  and an unsigned `GET /recipe-images/?location=` returns MinIO's own `AccessDenied` XML —
+  i.e. the tunnel terminates on MinIO, not on something else.
+- Prod container env confirmed: `NODE_ENV=production`,
+  `MINIO_PUBLIC_ENDPOINT=minio-cookbook.maxim-dicusari.com`, `MINIO_PUBLIC_PORT=443`,
+  `MINIO_PUBLIC_USE_SSL=true` (internal client still `cookbook-minio:9000`, no SSL).
+- Live browser session (real Auth0 login): `GET /api/recipes` → **200** (was 500), all four
+  presigned MinIO image GETs → **200**, zero console errors, all 4 recipes rendered.
+
+**The fact worth not re-deriving:** the Cloudflare tunnel **preserves the original `Host`
+header**, so SigV4 presigned signatures validate through it. This was the one remaining
+plausible failure mode — cloudflared rewriting `Host` to `localhost:3013` would have
+produced `SignatureDoesNotMatch` on every image while health checks still passed. Proven
+by presigning inside the container and fetching that exact URL from outside the VM: 200,
+`image/jpeg`, 1,623,584 bytes. Combined with `MINIO_PUBLIC_PORT=443` + `USE_SSL=true`,
+minio-js emits a **portless** `https://minio-cookbook.maxim-dicusari.com/...` URL, which is
+what makes it proxyable — a non-443 port here would emit an explicit `:port` that
+Cloudflare would not proxy.
+
+The `region` hardening above is still unaddressed and still worth doing on its own merits.
+
+## 2026-08-01 — `.server` holds plaintext SSH passwords and is NOT gitignored
+
+Untracked, so not in history — but one `git add -A` / `git commit -a` at the repo root
+would commit it. `.server` contains the VM's Tailscale IP, SSH port, and **plaintext
+passwords** for both the `gavm` deploy account and the `mx-admin` account, plus local
+key paths. `.env` at the repo root is in the same position (untracked, unignored).
+
+Distinct from the 2026-06-18 "env files with credentials are tracked in git" entry —
+that one is about files already committed; this is about files one careless `add` away
+from being committed.
+
+Suggested fix (not applied — outside P14 scope, user's call): add `.server` and `/.env`
+to `.gitignore`. Until then, stage by explicit path in this repo, never `git add -A`.
 
 ## 2026-07-30 — `migrate-mongo` tooling is dev-only and its one migration is dangerous
 

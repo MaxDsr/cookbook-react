@@ -392,3 +392,65 @@ Pre-existing infra gap, not caused by this phase's code. Logged in KNOWN_ISSUES.
 - Then decide P14 done, or roll back the seed if the route isn't wanted.
 - Also logged: `migrate-mongo` tooling is dev-only and its single migration would
   reassign every recipe to a stale userId — open question, untouched.
+
+---
+
+## 2026-08-01 — P14 unblocked: MinIO public endpoint live, phase closed
+
+The user added the Cloudflare tunnel route requested at the end of the 2026-07-30 session
+(`minio-cookbook.maxim-dicusari.com` → `http://localhost:3013`) and asked for verification.
+No code or data changes were made this session — verification only, plus doc updates.
+
+### What was verified, in order
+
+1. **DNS** — now resolves to `188.114.96.0` / `188.114.97.0` (Cloudflare). Was NXDOMAIN.
+2. **Tunnel terminates on MinIO** — `GET /minio/health/live` → 200 with `x-amz-request-id`;
+   unsigned `GET /recipe-images/?location=` returns MinIO's own `AccessDenied` XML.
+3. **Prod backend env** — `NODE_ENV=production`, `MINIO_PUBLIC_ENDPOINT=minio-cookbook…`,
+   `MINIO_PUBLIC_PORT=443`, `MINIO_PUBLIC_USE_SSL=true`; internal client unchanged at
+   `cookbook-minio:9000`. Checked with `docker exec … printenv` on the non-secret keys only.
+4. **Presign from inside the container** — succeeded, no `ENOTFOUND`. Notably the container
+   picked up the new record **without a restart** (`cookbook-backend` had been up 2 days,
+   i.e. started before the record existed), so no negative-DNS-cache remedy was needed.
+   Bucket listing confirmed the same 5 objects seeded on 2026-07-30, no drift.
+5. **The decisive test** — took that presigned URL and fetched it **from the dev machine**,
+   outside the VM: `200`, `content-type: image/jpeg`, `1,623,584` bytes.
+6. **Live browser** — the user logged in themselves via Auth0 (Claude does not enter
+   credentials); all 4 recipes rendered with images. Network log after a reload:
+   `GET /api/recipes` → **200** (was 500) and four presigned MinIO image GETs → **200**,
+   with fresh `X-Amz-Date` values. Zero console errors.
+
+### Why step 5 mattered more than it looks
+
+Steps 1–3 only prove MinIO is reachable and configured. They would all have passed in a
+world where the images were still broken: if cloudflared rewrote the `Host` header to
+`localhost:3013`, MinIO would compute a different SigV4 signature and reject every image
+with `SignatureDoesNotMatch`, while health checks (unsigned, no signature to validate) kept
+returning 200. Fetching a real presigned URL from outside is the only check that closes
+that gap. It passed — the tunnel preserves `Host`. Recorded in DECISIONS + KNOWN_ISSUES so
+a future session doesn't have to re-derive it.
+
+### Docs updated
+
+- `PLAN.md` — P14 `[BLOCKED]` → `[DONE 2026-08-01]`; final acceptance checkbox ticked;
+  "Blocker resolution" rewritten as resolved.
+- `KNOWN_ISSUES.md` — 2026-07-30 MinIO endpoint entry marked `[RESOLVED 2026-08-01]` with
+  the evidence and the Host-header fact.
+- `DECISIONS.md` — new entry recording the tunnel route as the active public path for
+  MinIO (superseding the Caddy `minio.yourdomain.com` block in practice), and why
+  `PORT=443` / `USE_SSL=true` / no `httpHostHeader` are load-bearing.
+
+### New finding, not acted on
+
+`.server` (repo root) holds **plaintext SSH passwords** for the `gavm` and `mx-admin`
+accounts plus the VM IP/port, is untracked, and is **not gitignored** — one `git add -A`
+from entering history. Root `.env` is in the same position. Logged in KNOWN_ISSUES
+2026-08-01; fix left to the user as it's outside P14 scope. Doc commits this session were
+staged by explicit path for this reason.
+
+### What's next
+
+P14 is closed and prod is fully functional end to end. Remaining open items, unchanged:
+P9 (README overhaul), P10 (Auth0 redirect callback), P12 (tests + backend lint, 305
+problems). Still-unaddressed hardening noted in KNOWN_ISSUES: no explicit `region` on the
+MinIO clients (every presign costs a round-trip), and the `migrate-mongo` open question.

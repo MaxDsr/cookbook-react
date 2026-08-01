@@ -241,3 +241,33 @@ environments. It fails loudly (clear message, exit 1, before any Mongo connectio
 the file is absent. Deliberately **no** fallback to the committed mappings: a fallback
 would reintroduce exactly the silent broken-image failure this fixes. Verified by
 grepping the rebuilt bundle: no inlined JSON literal, `readFileSync(MAPPINGS_FILE)` present.
+
+## 2026-08-01 — Prod MinIO is exposed via a Cloudflare tunnel route, not via Caddy
+
+Presigned MinIO URLs are served to browsers through a Cloudflare tunnel route on tunnel
+`server-main`: `minio-cookbook.maxim-dicusari.com` → `http://localhost:3013`. This is the
+third route on that tunnel, alongside `maxim-dicusari.com` → `:80` and
+`cookbook.maxim-dicusari.com` → `:3010`. MinIO's API is bound to `127.0.0.1:3013` on the
+VM; `3014` is the console and is deliberately **not** exposed.
+
+This supersedes, in practice, the `minio.yourdomain.com { reverse_proxy minio:9000 }`
+block in `caddy/Caddyfile` (rediscovered in P8). Caddy on the VM now listens on `:3010`
+behind the tunnel (P13) and is not the public TLS terminator for MinIO — Cloudflare is.
+The Caddyfile block is retained as documentation of the original mechanism but is not the
+active path.
+
+Rationale: the tunnel was already the ingress for everything else on this host after P13,
+so adding a route required no VM-side change, no open inbound port, and no extra TLS
+management. MinIO stays bound to loopback.
+
+The pairing that makes it work, and the reason the env values are what they are:
+
+- `MINIO_PUBLIC_PORT=443` + `MINIO_PUBLIC_USE_SSL=true` → minio-js emits a **portless**
+  `https://minio-cookbook.maxim-dicusari.com/...` URL. Any non-443 value would emit an
+  explicit `:port` that Cloudflare will not proxy, breaking every image while health
+  checks still passed.
+- The tunnel **preserves the original `Host` header**, so SigV4 presigned signatures
+  validate at MinIO. If cloudflared were ever configured with `httpHostHeader` on this
+  route, every image would fail `SignatureDoesNotMatch`. Do not set it.
+- Uploads keep using the internal client (`cookbook-minio:9000`, no SSL) — only presigning
+  goes through the public endpoint, per `dataSources/minio.ts`.
