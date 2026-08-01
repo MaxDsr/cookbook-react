@@ -308,3 +308,38 @@ a URL presigned inside the container fetched from outside the VM returned 200 /
 `image/jpeg` / 1.6 MB — which proves the tunnel preserves the `Host` header so SigV4
 signatures validate through it. See KNOWN_ISSUES 2026-07-30 (RESOLVED) for why that
 Host-header detail is the load-bearing fact.
+
+---
+
+## P15: Auth0 logout `returnTo` fix [IN PROGRESS]
+
+On prod, clicking logout signs the user out but lands them on `http://localhost:3000`
+instead of `https://cookbook.maxim-dicusari.com` (KNOWN_ISSUES 2026-06-26).
+
+Deliberately narrow and **separate from P10** — P10 is the *login* redirect-callback
+weakness (`onRedirectCallback` / copy-paste-link-mid-auth). This phase touches the
+logout path only.
+
+Root cause (diagnosed 2026-08-01, before any code change): `UserProfile.jsx:11` called
+`logout({ returnTo })` — the auth0-react **v1** signature — against the installed v2.8.0
+SDK, whose `_buildLogoutUrl` reads only `options.logoutParams`. The top-level `returnTo`
+was silently dropped, so `/v2/logout` was called with no `returnTo` and Auth0 fell back to
+the **first** entry in Allowed Logout URLs, which is `http://localhost:3000`.
+
+Requirements:
+- Change the single call site to `logout({ logoutParams: { returnTo: window.location.origin } })`
+- Deploy via the P13 CI/CD pipeline and verify on prod with the test account
+
+Out of scope:
+- Any Auth0 console change — the tenant config is already correct and complete
+  (verified 2026-08-01: prod URL present in Allowed Logout URLs / Callback URLs /
+  Web Origins; App Type = SPA). Reordering the list is explicitly **rejected** as a
+  fix: putting prod first would send local-dev logouts to production.
+- P10 login-side redirect work; `getUserId` hardening; MinIO `region` hardening
+
+Acceptance:
+- [ ] Logout on `https://cookbook.maxim-dicusari.com` returns to that origin, signed out
+- [ ] Deployed bundle contains `logoutParams` (i.e. the deploy actually shipped)
+- [ ] Local dev logout still returns to `http://localhost:3000` (vite pins port 3000,
+      `strictPort: true`, and that origin is allowlisted — no regression)
+- [ ] Frontend `npm run lint` and `npm run build` clean; `backend-check` CI job green

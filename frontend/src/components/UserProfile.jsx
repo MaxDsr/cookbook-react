@@ -8,7 +8,7 @@ const UserProfile = () => {
   const { user, logout } = useAuth0();
 
   const handleLogout = () => {
-    logout({ returnTo: window.location.origin });
+    logout({ logoutParams: { returnTo: window.location.origin } });
   };
 
   if (!user) return null;
