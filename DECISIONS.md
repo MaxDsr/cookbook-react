@@ -271,3 +271,43 @@ The pairing that makes it work, and the reason the env values are what they are:
   route, every image would fail `SignatureDoesNotMatch`. Do not set it.
 - Uploads keep using the internal client (`cookbook-minio:9000`, no SSL) — only presigning
   goes through the public endpoint, per `dataSources/minio.ts`.
+
+## 2026-08-01 — Auth0 logout uses the v2 `logoutParams` shape, with `window.location.origin`
+
+`logout({ logoutParams: { returnTo: window.location.origin } })` in
+`frontend/src/components/UserProfile.jsx`. Two sub-decisions worth not re-litigating:
+
+- **`window.location.origin`, not a `VITE_` env var.** It mirrors what `redirect_uri` in
+  `config/auth0.js` already does, needs no new CI secret, and resolves correctly in both
+  environments — dev is pinned to `http://localhost:3000` by `vite.config.js`
+  (`strictPort: true`) and prod is `https://cookbook.maxim-dicusari.com`; both are in the
+  tenant's Allowed Logout URLs.
+- **Rejected: reordering the Auth0 Allowed Logout URLs list.** Auth0 falls back to the
+  *first* entry when a logout request carries no `returnTo`, so moving
+  `https://cookbook.maxim-dicusari.com` to the front would have made prod appear fixed.
+  It would also have sent every local-dev logout to production, and it would have left the
+  actual defect — a v1 API call against the v2 SDK — in place to resurface elsewhere.
+
+The general hazard: `@auth0/auth0-react` v2 **silently ignores** unrecognized top-level
+options. `_buildLogoutUrl` reads only `options.logoutParams`, so a v1-shaped call produces
+no error, no warning, and a plausible-looking wrong redirect. Anything copied from a v1-era
+example should be checked against the installed typings first.
+
+## 2026-08-01 — Verifying a frontend change on prod requires checking the loaded bundle
+
+Prod currently serves `index.html` with no `Cache-Control`/`ETag` (KNOWN_ISSUES 2026-08-01,
+PLAN.md P16), so a browser can run a stale bundle for an unbounded window after a deploy
+while the server serves the new one. This produced a false negative during P15: the fix was
+correct and live, the test still showed the old behavior.
+
+Until P16 lands, any prod verification of a frontend change must confirm which bundle is
+actually running before trusting the result:
+
+```js
+[...document.querySelectorAll('script[src]')].map(s => s.getAttribute('src'))
+// and/or: performance.getEntriesByType('resource') → transferSize === 0 means cache
+```
+
+A cache-busting query string (`/?x=1`) forces a fresh `index.html` because the HTTP cache
+key includes the query. "It still reproduces after deploy" is not evidence of a failed fix
+unless the bundle hash was checked.

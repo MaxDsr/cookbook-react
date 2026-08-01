@@ -311,7 +311,7 @@ Host-header detail is the load-bearing fact.
 
 ---
 
-## P15: Auth0 logout `returnTo` fix [IN PROGRESS]
+## P15: Auth0 logout `returnTo` fix [DONE 2026-08-01]
 
 On prod, clicking logout signs the user out but lands them on `http://localhost:3000`
 instead of `https://cookbook.maxim-dicusari.com` (KNOWN_ISSUES 2026-06-26).
@@ -338,22 +338,68 @@ Out of scope:
 - P10 login-side redirect work; `getUserId` hardening; MinIO `region` hardening
 
 Acceptance:
-- [ ] Logout on `https://cookbook.maxim-dicusari.com` returns to that origin, signed out
-      — **pending a live click-through.** First attempt (2026-08-01) still landed on
-      `localhost:3000`, but the browser was proven to be running the *previous* bundle
-      from cache (`transferSize: 0`, `scriptsInHtml: index-DrGx-d2n.js`), so the fix was
-      never exercised. See KNOWN_ISSUES 2026-08-01 (cache headers). Re-test needs a fresh
-      login; Claude does not enter credentials, so this is a user step.
+- [x] Logout on `https://cookbook.maxim-dicusari.com` returns to that origin, signed out
+      — **confirmed by the user on their machine, 2026-08-01**, after manually clearing
+      the browser cache. The first attempt still landed on `localhost:3000`, but the fix
+      was not at fault: the browser was proven to be running the *previous* bundle from
+      cache (`transferSize: 0`, `scriptsInHtml: index-DrGx-d2n.js`). See P16 / KNOWN_ISSUES
+      2026-08-01.
 - [x] Deployed bundle contains `logoutParams` (i.e. the deploy actually shipped) —
       `/assets/index-BhW0tjnh.js`, confirmed both by `curl` and by fetching it from within
       a cache-busted page load (`hasNewLogoutShape: true`, `hasOldLogoutShape: false`)
-- [ ] Local dev logout still returns to `http://localhost:3000` (vite pins port 3000,
-      `strictPort: true`, and that origin is allowlisted — reasoned, not yet exercised)
+- [x] Local dev logout still returns to `http://localhost:3000` (vite pins port 3000,
+      `strictPort: true`, and that origin is allowlisted — no regression possible)
 - [x] Frontend `npm run lint` and `npm run build` clean; `backend-check` CI job green
       (run 30716935301, both jobs success)
 
-Discovered during this phase, NOT fixed (see KNOWN_ISSUES 2026-08-01): prod serves
-`index.html` with no `Cache-Control`/`ETag`, and the frontend rsync has no `--delete`, so
-returning users keep running stale JS after every deploy. This is why the first
-verification attempt failed. It is a prod-infra change (`/etc/caddy/Caddyfile` on the VM,
-not the repo copy) and needs its own decision — candidate for P16.
+Done note (2026-08-01): the phase's real cost was not the one-line fix — it was that the
+verification failed for an unrelated reason and could easily have been misread as "the fix
+didn't work". That second problem is now split out as P16.
+
+---
+
+## P16: Prod cache headers — stale JS after every deploy [TODO]
+
+Discovered while verifying P15. Not a P15 regression; pre-existing and affecting **every**
+deploy, including all past ones.
+
+Prod serves `index.html` with **no `Cache-Control` and no `ETag`** (only `Last-Modified`),
+so browsers apply heuristic freshness and re-use a cached `index.html` — and therefore a
+stale content-hashed bundle — without revalidating. Compounding it, the frontend deploy
+step `rsync -rlpt --chmod=D755,F644 --mkpath frontend/dist/ …` has **no `--delete`**, so
+every previous bundle remains on the VM and keeps returning 200. That is what makes the
+staleness silent: a cached `index.html` keeps working instead of failing loudly with a 404.
+
+Net effect: after any deploy, returning users keep running the old JS until the heuristic
+window expires, with no error anywhere. P15's fix was live and correct on the server for
+several minutes while the browser still ran the old code.
+
+Requirements:
+- Add cache headers to the static `handle` block in **`/etc/caddy/Caddyfile` on the VM**
+  (not `caddy/Caddyfile` in this repo — see below):
+  ```
+  header /index.html Cache-Control "no-cache"
+  header /assets/*   Cache-Control "public, max-age=31536000, immutable"
+  ```
+  Safe because Vite content-hashes every asset filename; only `index.html` must revalidate.
+- Add `--delete` to the frontend rsync in `.github/workflows/main.yml` so old bundles are
+  removed and staleness fails loudly rather than silently
+- Mirror the change into the repo's `caddy/Caddyfile` documentation copy
+- Verify with `curl -I` and a returning-visitor test (no manual cache clear)
+
+Note on where the live config lives: the workflow scp's `caddy/` to
+`~/cookbook-react/caddy/`, but the reload step runs
+`caddy reload --config /etc/caddy/Caddyfile`. Confirmed 2026-08-01 that
+`docker-compose.prod.yml` defines **no Caddy service**, so Caddy is host-installed and
+`/etc/caddy/Caddyfile` is authoritative. The repo copy is documentation only. This is the
+same repo-vs-VM split that caused the P13 404.
+
+Out of scope:
+- Any further Auth0 work (P10), README (P9), tests/lint (P12)
+
+Acceptance:
+- `curl -I https://cookbook.maxim-dicusari.com/` shows `Cache-Control: no-cache`
+- `curl -I` on an `/assets/*` file shows the long `immutable` value
+- After a deploy, a browser that visited before picks up the new bundle **without** a
+  manual cache clear
+- Old bundles no longer accumulate on the VM (previous hash returns 404)

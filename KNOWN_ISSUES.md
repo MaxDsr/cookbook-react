@@ -217,7 +217,7 @@ unintentionally, but a careless `git add -A` could). Not fixed — one-line
 a future session.
 
 
-## 2026-06-26 — on the prod (cookbook.maxim-dicusari.com) the logout button redirects to localhost:3000 [FIXED IN CODE 2026-08-01, live verification pending]
+## 2026-06-26 — on the prod (cookbook.maxim-dicusari.com) the logout button redirects to localhost:3000 [RESOLVED 2026-08-01]
 
 Root cause (P15, 2026-08-01): `frontend/src/components/UserProfile.jsx:11` called
 `logout({ returnTo: window.location.origin })` — the **auth0-react v1** signature — while
@@ -250,8 +250,21 @@ make prod work by accident and send *local dev* logouts to production.
 Fix shipped: `logout({ logoutParams: { returnTo: window.location.origin } })`
 (commit e7c9998, deployed via run 30716935301). Deployed bundle
 `/assets/index-BhW0tjnh.js` confirmed to contain `logoutParams:{returnTo:...}`.
-Live click-through still to be confirmed — see the caching entry below, which
-invalidated the first attempt.
+
+**RESOLVED 2026-08-01** — user confirmed the live click-through on their own machine after
+manually clearing the browser cache: logout now returns to
+`https://cookbook.maxim-dicusari.com`, signed out.
+
+Trap worth remembering: the *first* post-fix test still landed on `localhost:3000` and
+looked like a failed fix. It wasn't — the browser was running the previous bundle from
+cache. Anyone re-testing a frontend change on this prod should check the loaded bundle
+filename before trusting the result:
+
+```js
+[...document.querySelectorAll('script[src]')].map(s => s.getAttribute('src'))
+```
+
+That is a symptom of the separate, still-open caching problem below (now PLAN.md P16).
 
 ## 2026-08-01 — prod serves `index.html` with no `Cache-Control`, so users keep running stale JS
 
@@ -292,7 +305,18 @@ header /index.html Cache-Control "no-cache"
 header /assets/*   Cache-Control "public, max-age=31536000, immutable"
 ```
 
-Not applied — prod infra change, outside P15's stated scope, user's call.
+Safe because Vite content-hashes every asset filename; only `index.html` needs to
+revalidate. Pair it with `--delete` on the frontend rsync so old bundles stop accumulating
+and staleness fails loudly (404) instead of silently.
+
+Confirmed 2026-08-01 that Caddy is **host-installed, not containerized** —
+`docker-compose.prod.yml` defines no Caddy service — so `/etc/caddy/Caddyfile` really is
+the authoritative config and the repo copy is documentation only.
+
+**Still open.** Not applied — prod infra change, outside P15's stated scope. Promoted to a
+phase of its own: **PLAN.md P16**. Workaround until then: hard-reload (`Cmd+Shift+R`) or
+clear the cache after a deploy — which is exactly what the user had to do to see the P15
+fix land.
 
 ## 2026-07-30 — `MINIO_PUBLIC_ENDPOINT` hostname does not exist → `GET /api/recipes` 500s [RESOLVED 2026-08-01]
 

@@ -524,3 +524,20 @@ and Claude does not enter credentials. Needs the user to log in once, then a log
 
 Open decision for the user: whether to fix the caching (candidate P16). Until then, the
 logout fix will not reach returning users promptly even though it is deployed.
+
+### Resolution (same session)
+
+The user cleared their browser cache manually and confirmed the live click-through: logout
+now returns to `https://cookbook.maxim-dicusari.com`, signed out. P15 acceptance met on the
+user's machine — phase marked `[DONE 2026-08-01]`.
+
+The cache-control findings were promoted from a loose note to **PLAN.md P16** (prod cache
+headers + `--delete` on the frontend rsync), with the mechanism and the exact Caddy header
+block recorded in KNOWN_ISSUES 2026-08-01. Confirmed while writing it up that
+`docker-compose.prod.yml` defines no Caddy service, so Caddy is host-installed and
+`/etc/caddy/Caddyfile` is authoritative — the repo's `caddy/Caddyfile` is documentation
+only, the same repo-vs-VM split that caused the P13 404.
+
+Two entries added to DECISIONS.md: the `logoutParams` shape (and why the console-reorder
+"fix" was rejected), and the rule that verifying any frontend change on prod requires
+checking the loaded bundle hash first, since a stale bundle can fake a failed fix.
